@@ -14,6 +14,5 @@ rule all:
         # Subsequent target rules can be specified below. They should start with all_*.
 
 
+include: "rules/get-raw-genomes.smk"
 include: "rules/accesory-data.smk"
-include: "rules/common.smk"
-include: "rules/other.smk"
