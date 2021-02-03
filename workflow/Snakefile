@@ -16,3 +16,4 @@ rule all:
 
 include: "rules/get-raw-genomes.smk"
 include: "rules/accesory-data.smk"
+include: "rules/qc-analysis.smk"
