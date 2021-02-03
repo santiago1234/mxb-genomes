@@ -13,9 +13,9 @@ rule get_biallelic_snps:
     input:
         "results/data/raw-genomes/mxb-chr{chrn}.vcf.gz"
     output:
-        temp("results/QC/biallelic-chr{chrn}.vcf.gz")
+        temp("results/QC/biallelic-chr{chrn}.vcf")
     shell:
         """
-        bcftools view -m2 -M2 -v snps {input} -O b -o {output}
+        bcftools view -m2 -M2 -v snps {input} > {output}
         """
         
