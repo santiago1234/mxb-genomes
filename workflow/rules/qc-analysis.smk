@@ -23,6 +23,8 @@ rule sequence_depth:
         "results/QC/biallelic-chr{chrn}.vcf"
     output:
         "results/QC/tmp-dir/chr{chrn}-seqdepth.csv"
+    conda:
+        "../envs/renv.yaml"
     params:
         # the fraction of variants to get from each chromosome
         fraction=0.1

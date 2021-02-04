@@ -1,0 +1,13 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+ - r-base =4.0.3 
+ - r-tidyr =1.1.2
+ - r-dplyr =1.0.2
+ - r-purrr =0.3.4
+ - r-readr =1.4.0
+ - r-vcfR =1.12.0
+ - r-ggplot2 =3.3.2
+ - r-ggridges =0.5.2
