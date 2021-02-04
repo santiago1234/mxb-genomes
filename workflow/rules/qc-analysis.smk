@@ -2,14 +2,16 @@
 
 rule all_qc:
     input:
-        "results/QC/biallelic-chr{chrn}.vcf.gz"
+        "results/QC/biallelic-chr{chrn}.vcf.gz",
+        "results/QC/tmp-dir/chr{chrn}-seqdepth.csv",
+        "results/QC/tmp-dir/chr{chrn}-vars-per-sample.txt"
 
 rule get_biallelic_snps:
     # for QC we only analyze biallelic loci
     input:
         "results/data/raw-genomes/mxb-chr{chrn}.vcf.gz"
     output:
-        temp("results/QC/biallelic-chr{chrn}.vcf")
+        "results/QC/biallelic-chr{chrn}.vcf"
     shell:
         """
         bcftools view -m2 -M2 -v snps {input} > {output}
@@ -38,14 +40,11 @@ rule count_variants_per_sample:
     input:
         "results/QC/biallelic-chr{chrn}.vcf",
     output:
-        temp("results/QC/tmp-dir/chr{chrn}-vars-per-sample.txt")
+        "results/QC/tmp-dir/chr{chrn}-vars-per-sample.txt"
     message: "Counting variants in {input}"
     shell:
         """
-        # list the samples from the vcf file
-        # the output format is indvidual-id n_variants chr
         mxb_samples=`bcftools query -l {input}`
-        # create empty output file
         touch {output}
         for sample in $mxb_samples
         do
@@ -54,3 +53,9 @@ rule count_variants_per_sample:
         done
         """
 
+rule aggregate_qc_data:
+    # aggregate the qc data for each chromosome
+    input:
+        seq_deps = expand("results/QC/tmp-dir/chr{chrn}-seqdepth.csv", chrn=[20, 21, 22]),
+        n_vars = expand("results/QC/tmp-dir/chr{chrn}-vars-per-sample.txt", chrn=[20, 21, 22])
+      
