@@ -6,16 +6,18 @@ FRACTION = 0.1
 
 rule all_qc:
     input:
-        "results/QC/biallelic-chr{chrn}.vcf.gz",
-        "results/QC/tmp-dir/chr{chrn}-seqdepth.csv",
-        "results/QC/tmp-dir/chr{chrn}-vars-per-sample.txt"
+        "results/plots/qc/vars_per_genome.png",
+        "results/plots/qc/depth_per_sample.png",
+        "results/plots/qc/depth_in_chr22.png",
+        "results/plots/qc/missing_data_by_ind.png",
+        "results/plots/qc/missing_data_by_var.png"
 
 rule get_biallelic_snps:
     # for QC we only analyze biallelic loci
     input:
         "results/data/raw-genomes/mxb-chr{chrn}.vcf.gz"
     output:
-        "results/QC/biallelic-chr{chrn}.vcf"
+        temp("results/QC/biallelic-chr{chrn}.vcf")
     shell:
         """
         bcftools view -m2 -M2 -v snps {input} > {output}
@@ -28,7 +30,7 @@ rule sequence_depth:
     input:
         "results/QC/biallelic-chr{chrn}.vcf"
     output:
-        "results/QC/tmp-dir/chr{chrn}-seqdepth.csv"
+        temp("results/QC/tmp-dir/chr{chrn}-seqdepth.csv")
     conda:
         "../envs/renv.yaml"
     params:
@@ -44,7 +46,7 @@ rule count_variants_per_sample:
     input:
         "results/QC/biallelic-chr{chrn}.vcf",
     output:
-        "results/QC/tmp-dir/chr{chrn}-vars-per-sample.txt"
+        temp("results/QC/tmp-dir/chr{chrn}-vars-per-sample.txt")
     message: "Counting variants in {input}"
     shell:
         """
