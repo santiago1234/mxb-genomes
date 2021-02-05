@@ -1,0 +1,68 @@
+---
+title: "Quality analysis MX-biobank genomes"
+author:
+    - ""
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+params:
+   rmd: "report.Rmd"
+output:
+  html_document:
+  highlight: tango
+  number_sections: no
+  theme: default
+  toc: yes
+  toc_depth: 3
+  toc_float:
+    collapsed: no
+    smooth_scroll: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, message = F, warning = F, collapse = T)
+```
+
+This analysis only shows chromosomes 20, 21, and 22.
+
+## Number of variant per genome
+
+```{r p1, out.width="100%"}
+knitr::include_graphics("../results/plots/qc/vars_per_genome.png")
+```
+
+
+- Each dot represents a genome. Dots in gray color are outliers.
+- The gray are is the density of the distribution.
+- M stands for millions.
+
+
+## Sequencing depth per sample
+
+For these plots, I selected a random fraction of the variants (10%).
+The variants were selected uniformly at random.
+
+```{r p2}
+knitr::include_graphics("../results/plots/qc/depth_per_sample.png")
+```
+
+
+The next plot shows the sequencing depth in chromosome 22. Chromosome 22 is shown because it is small. Only 10 samples are shown.
+
+```{r p3}
+knitr::include_graphics("../results/plots/qc/depth_in_chr22.png")
+```
+
+
+## Missing data
+
+The amount of missing data is minimum. Probably the data was already filtered for missingness.
+
+```{r p4, out.width="50%"}
+knitr::include_graphics("../results/plots/qc/missing_data_by_ind.png")
+```
+
+
+```{r p5}
+knitr::include_graphics("../results/plots/qc/missing_data_by_var.png")
+```
+
+

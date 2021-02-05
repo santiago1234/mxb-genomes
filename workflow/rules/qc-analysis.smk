@@ -72,7 +72,7 @@ rule aggregate_qc_data:
         "../scripts/qc/aggregate_qc_data.R"
 
 
-rule plots:
+rule qc_plots:
     input:
         vars_per_genome = "results/QC/nvars_per_genome.csv",
         seqs_deps = "results/QC/sequence-depth.csv",
