@@ -8,6 +8,10 @@ dependencies:
  - r-dplyr =1.0.2
  - r-purrr =0.3.4
  - r-readr =1.4.0
- - r-vcfR =1.12.0
+ - r-stringr =1.4.0
  - r-ggplot2 =3.3.2
+ - r-ggrepel =0.8.2
  - r-ggridges =0.5.2
+ - r-ggthemes =4.2.0
+ - r-scales =1.1.1
+ - r-vcfR =1.12.0
