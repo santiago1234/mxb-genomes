@@ -63,8 +63,8 @@ rule count_variants_per_sample:
 rule aggregate_qc_data:
     # aggregate the qc data for each chromosome
     input:
-        seq_deps = expand("results/QC/tmp-dir/chr{chrn}-seqdepth.csv", chrn=[20, 21, 22]),
-        n_vars = expand("results/QC/tmp-dir/chr{chrn}-vars-per-sample.txt", chrn=[20, 21, 22])
+        seq_deps = expand("results/QC/tmp-dir/chr{chrn}-seqdepth.csv", chrn=CHROMS),
+        n_vars = expand("results/QC/tmp-dir/chr{chrn}-vars-per-sample.txt", chrn=CHROMS)
     output:
         vars_per_genome = "results/QC/nvars_per_genome.csv",
         seqs_deps = "results/QC/sequence-depth.csv"
