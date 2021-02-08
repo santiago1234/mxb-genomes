@@ -21,7 +21,7 @@ output:
 knitr::opts_chunk$set(echo = F, message = F, warning = F, collapse = T)
 ```
 
-This analysis only shows chromosomes 20, 21, and 22.
+This analysis only shows autosomal chromosomes.
 
 ## Number of variant per genome
 
