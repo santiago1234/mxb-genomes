@@ -90,3 +90,41 @@ rule qc_plots:
         "../envs/renv.yaml"
     script:
         "../scripts/qc/plots.R"
+
+
+# PCA plot ----------------------------------------------------------------
+# the following rules are used to generate a pca plot
+
+
+rule convert2plink_and_filter:
+    input:
+        expand("results/QC/biallelic-chr{chrn}.vcf", chrn=CHROMS)
+    output:
+        temp(multiext("results/QC/biallelic-ALL", ".fam", ".bed", ".bim"))
+    params:
+        temp_vcf_all_chrn = "results/QC/biallelic-ALL.vcf",
+        plink_out_file = "results/QC/biallelic-ALL",
+        # filters
+        maf = 0.05,
+        hwe = 0.001
+    log: "results/logs/QC/convert2plink.log"
+    shell:
+        """
+        # I use bcftools to concat the chromosomes into a
+        # single vcf, then I use the annotate command
+        # to and id to the variant, see:
+        # https://github.com/samtools/bcftools/issues/178
+        # the reason that id add a variant id is that
+        # it is usefull for plink
+        bcftools concat {input} |\
+            bcftools annotate \
+            --set-id +'%CHROM\_%POS\_%REF\_%FIRST_ALT' \
+            -o {params.temp_vcf_all_chrn} 2>{log}
+
+        plink --vcf {params.temp_vcf_all_chrn} \
+            --keep-allele-order \
+            --maf {params.maf} \
+            --hwe {params.hwe} \
+            --make-bed --out {params.plink_out_file} 2>>{log}
+        rm {params.temp_vcf_all_chrn}  results/QC/biallelic-ALL.log results/QC/biallelic-ALL.nosex
+        """
