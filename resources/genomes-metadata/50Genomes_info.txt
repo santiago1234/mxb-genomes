@@ -1,0 +1,51 @@
+Fam_ID	Sample_ID	Gender	Age	Region	Country	Town	DNA_Source	sample_provider	father_ID	mother_ID	phenotype	language	Zone	Ethnicity_Geography	Indigenous_group_GP	class	Native_American_Ancestry	Indigenous_group_GP(value)
+MXB10544	MXB10544	F	39	America	Mexico	Michoacan,Erongaricuaro,JARACUARO	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Purepecha	Purepecha/Nahua_Jalisco	50Genomes_selection	0.979659	0.594403
+MXB10610	MXB10610	F	39	America	Mexico	Chihuahua,Chihuahua,CHIHUAHUA	blood	MXBiobank	NA	NA	NA	Spanish	urban	Mexican Native American	Tarahumara	50Genomes_selection	0.973276	0.99986
+MXB11339	MXB11339	M	42	America	Mexico	Colima,Tecoman,TECOMAN	blood	MXBiobank	NA	NA	NA	Spanish	urban	Mexican Native American	Purepecha/Nahua_Jalisco	50Genomes_selection	0.95389	0.43423
+MXB11619	MXB11619	F	58	America	Mexico	Sonora,Etchojoa,ETCHOJOA	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Mayo	Tarahumara	50Genomes_selection	0.930082	0.555734
+MXB12529	MXB12529	M	20	America	Mexico	Colima,Manzanillo,MANZANILLO	blood	MXBiobank	NA	NA	NA	Spanish	urban	Mexican Native American	Purepecha/Nahua_Jalisco	50Genomes_selection	0.962635	0.367885
+MXB13075	MXB13075	M	21	America	Mexico	Sonora,Cajeme,CIUDAD OBREGON	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	urban	Mayo	Purepecha/Nahua_Jalisco	50Genomes_selection	0.97229	0.673356
+MXB13175	MXB13175	F	36	America	Mexico	Sonora,Huatabampo,JUPARE	blood	MXBiobank	NA	NA	NA	Spanish	rural	Mayo	Tarahumara	50Genomes_selection	0.921804	0.465671
+MXB15210	MXB15210	F	29	America	Mexico	Campeche,Tenabo,EMILIANO ZAPATA	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Maya	Maya/Tojolabal	50Genomes_selection	0.966359	0.781914
+MXB15727	MXB15727	F	66	America	Mexico	Campeche,Carmen	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Mexican Native American	Totonac	50Genomes_selection	0.994454	0.559862
+MXB15887	MXB15887	F	48	America	Mexico	Campeche,Carmen	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Mexican Native American	Totonac	50Genomes_selection	0.971797	0.373619
+MXB160	MXB160	M	27	America	Mexico	Aguascalientes,Aguascalientes,AGUASCALIENTES	blood	MXBiobank	NA	NA	NA	Spanish	urban	Mexican Native American	Purepecha/Nahua_Jalisco	50Genomes_selection	0.95797	0.720263
+MXB1655	MXB1655	M	27	America	Mexico	Queretaro,Amealco de Bonfil,LA MANZANA	blood	MXBiobank	NA	NA	NA	Spanish	rural	Otomi	Purepecha/Nahua_Jalisco	50Genomes_selection	0.970261	0.722458
+MXB19262	MXB19262	M	45	America	Mexico	Guerrero,Malinaltepec	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Mexican Native American	Zapotec/Mazatec	50Genomes_selection	0.99996	0.99986
+MXB19369	MXB19369	F	34	America	Mexico	Guerrero,Iliatenco,OJO DE AGUA (OJO DE AGUA ILIATENCO)	blood	MXBiobank	NA	NA	NA	Spanish	rural	Tlapanec	Zapotec/Mazatec	50Genomes_selection	0.99996	0.99986
+MXB20305	MXB20305	F	NA	America	Mexico	Yucatan,Tixkokob,HUBILA	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Maya	Maya/Tojolabal	50Genomes_selection	0.952367	0.78524
+MXB20306	MXB20306	F	NA	America	Mexico	Yucatan,Tixkokob,HUBILA	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Maya	Maya/Tojolabal	50Genomes_selection	0.974252	0.76229
+MXB22419	MXB22419	M	27	America	Mexico	Baja California,Tijuana,TIJUANA	blood	MXBiobank	NA	NA	NA	Spanish	urban	Mexican Native American	Maya/Tojolabal	50Genomes_selection	0.985649	0.430823
+MXB22998	MXB22998	F	20	America	Mexico	Baja California,Playas de Rosarito,PLAYAS DE ROSARITO	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	urban	Kumiai	Zapotec/Mazatec (blue)	50Genomes_selection	0.999959	0.665766
+MXB23094	MXB23094	F	60	America	Mexico	Jalisco,Tuxpan	blood	MXBiobank	NA	NA	NA	NA	urban	Mexican Native American	Purepecha/Nahua_Jalisco	50Genomes_selection	0.942383	0.413017
+MXB23097	MXB23097	M	35	America	Mexico	Jalisco,Tuxpan,TUXPAN	blood	MXBiobank	NA	NA	NA	Spanish	urban	Mexican Native American	Purepecha/Nahua_Jalisco	50Genomes_selection	0.981527	0.369535
+MXB24133	MXB24133	F	47	America	Mexico	Quintana Roo,Benito Juarez,CANCUN	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	urban	Maya	Maya/Tojolabal	50Genomes_selection	0.968105	0.727187
+MXB24186	MXB24186	F	23	America	Mexico	Quintana Roo,Bacalar,SAN FERNANDO	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Maya	Maya/Tojolabal	50Genomes_selection	0.960877	0.739858
+MXB24586	MXB24586	M	20	America	Mexico	Nayarit,Tepic,TEPIC	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	urban	Huichol	Huichol	50Genomes_selection	0.998965	0.958306
+MXB2641	MXB2641	F	46	America	Mexico	Guanajuato,Celaya,CELAYA	blood	MXBiobank	NA	NA	NA	Spanish	urban	Mexican Native American	Purepecha/Nahua_Jalisco	50Genomes_selection	0.92513	0.600764
+MXB28337	MXB28337	M	53	America	Mexico	Oaxaca,Asuncion Nochixtlan,LA UNION LIBERTAD IXTALTEPEC	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Mixtec	Zapotec/Mazatec	50Genomes_selection	0.99996	0.975757
+MXB28339	MXB28339	F	60	America	Mexico	Oaxaca,Tamazulapam del Espiritu Santo,TAMAZULAPAM DEL ESPIRITU SANTO	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Mixe	Zapotec/Mazatec (blue)	50Genomes_selection	0.997829	0.99986
+MXB28344	MXB28344	F	37	America	Mexico	Oaxaca,Tamazulapam del Espiritu Santo,TAMAZULAPAM DEL ESPIRITU SANTO	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Mixe	Zapotec/Mazatec (blue)	50Genomes_selection	0.992486	0.99986
+MXB28452	MXB28452	F	29	America	Mexico	Oaxaca,Tamazulapam del Espiritu Santo,LINDA VISTA	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Mixe	Zapotec/Mazatec (blue)	50Genomes_selection	0.996932	0.99986
+MXB28564	MXB28564	F	37	America	Mexico	Baja California Sur,La Paz,LA PAZ	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	urban	Mexican Native American	Zapotec/Mazatec	50Genomes_selection	0.994945	0.445874
+MXB29762	MXB29762	F	37	America	Mexico	Nuevo Leon,Monterrey,CIUDAD MONTERREY	blood	MXBiobank	NA	NA	NA	Spanish	urban	Mexican Native American	Purepecha/Nahua_Jalisco	50Genomes_selection	0.944925	0.641749
+MXB30112	MXB30112	F	22	America	Mexico	Baja California Sur,Los Cabos,CABO SAN LUCAS	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	urban	Mexican Native American	Huichol	50Genomes_selection	0.99996	0.890015
+MXB32325	MXB32325	M	53	America	Mexico	Tabasco,Jalpa de Mendez,MECOACAN 2 DA. SECCION (SAN LORENZO)	blood	MXBiobank	NA	NA	NA	Spanish	rural	Chontal from Tabasco	Maya/Tojolabal	50Genomes_selection	0.99996	0.639478
+MXB33270	MXB33270	M	40	America	Mexico	Durango,Durango,VICTORIA DE DURANGO (DURANGO)	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	urban	Mexican Native American	Purepecha/Nahua_Jalisco	50Genomes_selection	0.94246	0.599762
+MXB35177	MXB35177	M	29	America	Mexico	Tamaulipas,Matamoros,HEROICA MATAMOROS	blood	MXBiobank	NA	NA	NA	Spanish	urban	Mexican Native American	Purepecha/Nahua_Jalisco	50Genomes_selection	0.99996	0.442809
+MXB35474	MXB35474	F	48	America	Mexico	Chiapas,Chamula,TRES CRUCES	blood	MXBiobank	NA	NA	NA	Indigenous language	rural	Tzotzil	Tzotzil	50Genomes_selection	0.986529	0.994128
+MXB35488	MXB35488	F	30	America	Mexico	Chiapas,Chamula,TRES CRUCES	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Tzotzil	Tzotzil	50Genomes_selection	0.996748	0.962821
+MXB3573	MXB3573	M	31	America	Mexico	Morelos,Cuernavaca,CUERNAVACA	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	urban	Mexican Native American	Purepecha/Nahua_Jalisco	50Genomes_selection	0.99996	0.407095
+MXB36131	MXB36131	F	27	America	Mexico	Chiapas,Las Margaritas	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Mexican Native American	Tzotzil	50Genomes_selection	0.990541	0.970965
+MXB37448	MXB37448	F	20	America	Mexico	Sinaloa,Navolato,COLONIA MICHOACANA (LUIS VELEZ)	blood	MXBiobank	NA	NA	NA	Spanish	rural	Mexican Native American	Zapotec/Mazatec	50Genomes_selection	0.961716	0.401016
+MXB39462	MXB39462	F	25	America	Mexico	Hidalgo,Chilcuautla,DADHO	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Otomi	Purepecha/Nahua_Jalisco	50Genomes_selection	0.971266	0.900403
+MXB3990	MXB3990	F	45	America	Mexico	Morelos,Cuautla,CUAUTLA	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	urban	Nahua from Morelos	Purepecha/Nahua_Jalisco	50Genomes_selection	0.999959	0.42387
+MXB40340	MXB40340	F	NA	America	Mexico	Veracruz,Zontecomatlan de Lopez y Fuentes,EL CUAYO	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Nahua from Veracruz	Purepecha/Nahua_Jalisco	50Genomes_selection	0.999071	0.34081
+MXB40376	MXB40376	M	87	America	Mexico	Veracruz,Papantla,EL TAJIN	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Totonac	Totonac	50Genomes_selection	0.971956	0.296105
+MXB40870	MXB40870	F	49	America	Mexico	Mexico city,Iztacalco,IZTACALCO	blood	MXBiobank	NA	NA	NA	Spanish	urban	Mexican Native American	Tzotzil	50Genomes_selection	0.986907	0.839244
+MXB42639	MXB42639	F	23	America	Mexico	Hidalgo,Chilcuautla,LA LOMA	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Otomi	Purepecha/Nahua_Jalisco	50Genomes_selection	0.979477	0.857335
+MXB42990	MXB42990	F	29	America	Mexico	Puebla,Zacatlan,ATZINGO (LA CUMBRE)	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Nahua from Puebla	Totonac	50Genomes_selection	0.998848	0.575046
+MXB42994	MXB42994	F	70	America	Mexico	Puebla,Zacatlan,ATZINGO (LA CUMBRE)	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Nahua from Puebla	Totonac	50Genomes_selection	0.999959	0.403777
+MXB5576	MXB5576	F	30	America	Mexico	San Luis Potosi,Xilitla,IZTACAPA	blood	MXBiobank	NA	NA	NA	Spanish	rural	Nahua from San Luis Potosi	Purepecha/Nahua_Jalisco	50Genomes_selection	0.99996	0.497538
+MXB9395	MXB9395	F	22	America	Mexico	Tlaxcala,San Juan Huactzinco,SAN JUAN HUACTZINCO	blood	MXBiobank	NA	NA	NA	Spanish and Indigenous language	rural	Mexican Native American	Totonac	50Genomes_selection	0.99996	0.475964
+MXB9855	MXB9855	F	26	America	Mexico	State of Mexico,Naucalpan de Juarez,NAUCALPAN DE JUAREZ	blood	MXBiobank	NA	NA	NA	Spanish	urban	Otomi	Zapotec/Mazatec	50Genomes_selection	0.990919	0.605602
