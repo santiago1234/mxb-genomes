@@ -14,4 +14,5 @@ dependencies:
  - r-ggridges =0.5.2
  - r-ggthemes =4.2.0
  - r-scales =1.1.1
+ - r-gghighlight =0.3.0
  - r-vcfR =1.12.0

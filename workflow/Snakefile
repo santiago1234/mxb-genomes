@@ -18,6 +18,7 @@ rule all:
         # Subsequent target rules can be specified below. They should start with all_*.
         # qc analysis
         "results/plots/qc/vars_per_genome.png",
+        "results/plots/qc/pca_comp1_2_3.png",
         # variant annotation
         expand("results/data/variant-annotation/vep-{chrn}.vcf.gz", chrn=CHROMS)
 

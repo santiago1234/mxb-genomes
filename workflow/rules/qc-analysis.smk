@@ -160,3 +160,18 @@ rule qc_pca:
         plink --bfile results/QC/ldpruned_data  --pca 20 --out results/QC/pca_results
         rm -f results/QC/*.log results/QC/*.nosex
         """
+
+
+rule qc_pca_plot:
+    input:
+        multiext("results/QC/pca_results", ".eigenvec", ".eigenval"),
+        "resources/genomes-metadata/50Genomes_info.txt"
+    output:
+        "results/plots/qc/pca_comp1_2_3.png",
+        "results/plots/qc/pca_withEthnicity_Geography.png"
+    conda:
+        "../envs/renv.yaml"
+    script:
+        "../scripts/qc/plot_pca.R"
+
+
