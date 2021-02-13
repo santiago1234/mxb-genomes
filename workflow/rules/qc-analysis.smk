@@ -11,7 +11,18 @@ rule all_qc:
         "results/plots/qc/depth_per_sample.png",
         "results/plots/qc/depth_in_chr22.png",
         "results/plots/qc/missing_data_by_ind.png",
-        "results/plots/qc/missing_data_by_var.png"
+        "results/plots/qc/missing_data_by_var.png",
+        "results/plots/qc/pca_comp1_2_3.png",
+        "results/plots/qc/pca_withEthnicity_Geography.png"
+    output:
+        "results/QC/note.txt"
+    shell:
+        """
+        # the output file is just an indicator for all
+        # the jobs in the pipeline
+        date_today=$(date)
+        echo "QC completed on $(date_today)" >{output}
+        """
 
 rule get_biallelic_snps:
     # for QC we only analyze biallelic loci
