@@ -1,3 +1,4 @@
+#
 # Initial quality analysis in mxb genomes
 
 # workflow parameters
@@ -127,4 +128,35 @@ rule convert2plink_and_filter:
             --hwe {params.hwe} \
             --make-bed --out {params.plink_out_file} 2>>{log}
         rm {params.temp_vcf_all_chrn}  results/QC/biallelic-ALL.log results/QC/biallelic-ALL.nosex
+        """
+
+
+rule snps_in_linkage_eq:
+    input:
+        multiext("results/QC/biallelic-ALL", ".fam", ".bed", ".bim")
+    output:
+        temp(multiext("results/QC/ldpruned_snplist", ".prune.in", ".prune.out")),
+        temp(multiext("results/QC/ldpruned_data", ".fam", ".bed", ".bim"))
+    shell:
+        """
+        plink --bfile results/QC/biallelic-ALL \
+            --indep-pairwise 200kb 1 0.5 \
+            --out results/QC/ldpruned_snplist
+
+        plink --bfile results/QC/biallelic-ALL \
+            --extract results/QC/ldpruned_snplist.prune.in \
+            --make-bed \
+            --out results/QC/ldpruned_data
+        """
+
+
+rule qc_pca:
+    input:
+        multiext("results/QC/ldpruned_data", ".fam", ".bed", ".bim")
+    output:
+        multiext("results/QC/pca_results", ".eigenvec", ".eigenval")
+    shell:
+        """
+        plink --bfile results/QC/ldpruned_data  --pca 20 --out results/QC/pca_results
+        rm -f results/QC/*.log results/QC/*.nosex
         """
