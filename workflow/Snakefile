@@ -23,8 +23,8 @@ rule all:
 
 
 
-include: "rules/get-raw-genomes.smk"
 include: "rules/accesory-data.smk"
 include: "rules/qc-analysis.smk"
 include: "rules/get-raw-genomes.smk"
 include: "rules/vep.smk" # Variant annotation
+include: "rules/lift-over-to-GRCh38.smk"
