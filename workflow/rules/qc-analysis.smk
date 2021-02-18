@@ -17,8 +17,8 @@ rule all_qc:
     output:
         "results/QC/note.txt"
     shell:
+        # indicate succesfull pipeline completition
         """
-        # this file is an indicator for pipeline completion
         date_today=$(date)
         echo "QC completed on $(date_today)" >{output}
         """

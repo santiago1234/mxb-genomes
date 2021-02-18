@@ -31,18 +31,18 @@ rule download_ucsc_chain_hg19ToHg38:
 
 rule lift_over_to_GRCh38:
     input:
-        vcf = "results/data/raw-genomes/mxb-chr{chrn}.vcf.gz",
+        vcf = "results/data/raw-genomes/mxb-chr{chrn}-GRCh37.vcf.gz",
         chain_file = "results/data/lifted_to_GRCh38/hg19ToHg38.over.chain.gz",
         GRCh38_genome = "results/data/lifted_to_GRCh38/GRCh38.primary_assembly.genome.fa"
     output:
-        "results/data/lifted_to_GRCh38/mxb-chr{chrn}-GRCh38.vcf.gz",
-        "results/data/lifted_to_GRCh38/mxb-chr{chrn}-GRCh38.vcf.unmap"
+        "results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.gz",
+        "results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.unmap"
     log: "results/logs/lift-over-to-GRCh38/chr{chrn}.log"
     conda: "../envs/crossmap.yaml"
     params:
         # a temporal file to uncompress the vcf
-        vcf_uncompressed = "results/data/lifted_to_GRCh38/mxb-chr{chrn}.vcf",
-        out_vcf = "results/data/lifted_to_GRCh38/mxb-chr{chrn}-GRCh38.vcf"
+        vcf_uncompressed = "results/data/lifted_to_GRCh38/mxb-chr{chrn}-GRCh37.vcf",
+        out_vcf = "results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf"
     shell:
         """
         bcftools view {input.vcf} >{params.vcf_uncompressed}
