@@ -19,7 +19,9 @@ rule all:
         # qc analysis
         "results/QC/note.txt",
         # variant annotation
-        expand("results/data/variant-annotation/vep-{chrn}.vcf.gz", chrn=CHROMS)
+        expand("results/data/variant-annotation/vep-{chrn}.vcf.gz", chrn=CHROMS),
+        # lift over to GRCh38 genome built
+        expand("results/data/lifted_to_GRCh38/mxb-chr{chrn}-GRCh38.vcf.gz", chrn=CHROMS)
 
 
 
