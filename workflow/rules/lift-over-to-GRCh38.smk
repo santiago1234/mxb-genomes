@@ -47,8 +47,10 @@ rule lift_over_to_GRCh38:
         """
         bcftools view {input.vcf} >{params.vcf_uncompressed}
         CrossMap.py vcf {input.chain_file} {params.vcf_uncompressed} \
-            {input.GRCh38_genome} {params.out_vcf} --compress 2>{log}
+            {input.GRCh38_genome} {params.out_vcf} 2>{log}
         rm -f {params.vcf_uncompressed}
+        bcftools view {params.out_vcf} -O b -o {output[0]}
+        rm -f {params.out_vcf}
         """
 
 
