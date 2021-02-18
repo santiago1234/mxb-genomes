@@ -1,4 +1,4 @@
-#
+# This QC analysis is performed in the 37 genome built
 # Initial quality analysis in mxb genomes
 
 # workflow parameters
@@ -26,9 +26,9 @@ rule all_qc:
 rule get_biallelic_snps:
     # for QC we only analyze biallelic loci
     input:
-        "results/data/raw-genomes/mxb-chr{chrn}.vcf.gz"
+        "results/data/raw-genomes/mxb-chr{chrn}-GRCh37.vcf.gz"
     output:
-        temp("results/QC/biallelic-chr{chrn}.vcf")
+        temp("results/QC/biallelic-chr{chrn}-GRCh37.vcf")
     shell:
         """
         bcftools view -m2 -M2 -v snps {input} > {output}
@@ -39,7 +39,7 @@ rule sequence_depth:
     # generates tables with sequence depth, etc.
     # for qc plots
     input:
-        "results/QC/biallelic-chr{chrn}.vcf"
+        "results/QC/biallelic-chr{chrn}-GRCh37.vcf"
     output:
         temp("results/QC/tmp-dir/chr{chrn}-seqdepth.csv")
     conda:
@@ -55,7 +55,7 @@ rule count_variants_per_sample:
     # count the variants per sample
     # see: https://www.biostars.org/p/336206/
     input:
-        "results/QC/biallelic-chr{chrn}.vcf",
+        "results/QC/biallelic-chr{chrn}-GRCh37.vcf",
     output:
         temp("results/QC/tmp-dir/chr{chrn}-vars-per-sample.txt")
     message: "Counting variants in {input}"
@@ -109,7 +109,7 @@ rule qc_plots:
 
 rule convert2plink_and_filter:
     input:
-        expand("results/QC/biallelic-chr{chrn}.vcf", chrn=CHROMS)
+        expand("results/QC/biallelic-chr{chrn}-GRCh37.vcf", chrn=CHROMS)
     output:
         temp(multiext("results/QC/biallelic-ALL", ".fam", ".bed", ".bim"))
     params:
