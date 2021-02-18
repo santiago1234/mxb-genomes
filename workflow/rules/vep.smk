@@ -28,7 +28,7 @@ rule variant_annotation:
     input:
         "results/data/variant-annotation/mxb-chr{chrn}.vcf"
     output:
-        "results/data/variant-annotation/vep-{chrn}.vcf__summary.html",
+        "results/data/variant-annotation/vep-{chrn}.vcf_summary.html",
         "results/data/variant-annotation/vep-{chrn}.vcf.gz"
     message: "annotating variants ..."
     log: "results/logs/vep/vep-{chrn}.log"
