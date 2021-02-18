@@ -3,49 +3,48 @@
 # I installed vep in my home directory: ~/ensembl-vep/
 # I followed the installation instructions here:
 # http://www.ensembl.org/info/docs/tools/vep/script/vep_tutorial.html
-# I also downloaded the cache data for GRCh37
+# I also downloaded the cache data for GRCh37 and GRCh38
 
-
-rule annotate_vep_all:
+rule sort_vcf:
+    # vep needs the vcf file to be sorted
     input:
-        expand("results/data/variant-annotation/vep-{chrn}.vcf.gz", chrn=CHROMS)
-
-
-rule uncompress_vcf:
-    # this rule only generates an uncompressed vcf
-    # for vep input, the output is a temporal file
-    input:
-        "results/data/raw-genomes/mxb-chr{chrn}.vcf.gz"
+        "results/data/raw-genomes/mxb-chr{chrn}-GRCh{build}.vcf.gz"
     output:
-        temp("results/data/variant-annotation/mxb-chr{chrn}.vcf")
+        temp("results/data/variant-annotation/sorted-chr{chrn}-GRCh{build}.vcf")
     shell:
         """
-        bcftools view {input} >{output} 
+        bcftools view {input} | bcftools sort >{output}
         """
 
 
 rule variant_annotation:
     input:
-        "results/data/variant-annotation/mxb-chr{chrn}.vcf"
+        "results/data/variant-annotation/sorted-chr{chrn}-GRCh{build}.vcf"
     output:
-        "results/data/variant-annotation/vep-{chrn}.vcf_summary.html",
-        "results/data/variant-annotation/vep-{chrn}.vcf.gz"
+        "results/data/variant-annotation/mxb-chr{chrn}-GRCh{build}.vcf_summary.html",
+        temp("results/data/variant-annotation/mxb-chr{chrn}-GRCh{build}.vcf")
     message: "annotating variants ..."
-    log: "results/logs/vep/vep-{chrn}.log"
+    log: "results/logs/vep/mxb-chr{chrn}-GRCh{build}.log"
     params:
-        assembly="GRCh37",
+        assembly="GRCh{build}",
         species="homo_sapiens",
-        # this is the output file by vep
-        uncompressed_vep_vcf="results/data/variant-annotation/vep-{chrn}.vcf"
     shell:
         """
         # NOTE: I am using the path to the vep dir
         ~/ensembl-vep/vep -i {input} \
             --assembly {params.assembly} --cache --vcf \
-             --output_file {params.uncompressed_vep_vcf} 2>{log}
-        # compress vep.vcf to save disk space 
-        bcftools view {params.uncompressed_vep_vcf} -O b -o {output}
-        rm {params.uncompressed_vep_vcf}
+             --output_file {output[1]} 2>{log}
+        """
+
+
+rule compress_annotated_vcf:
+    input:
+        "results/data/variant-annotation/mxb-chr{chrn}-GRCh{build}.vcf"
+    output:
+        "results/data/variant-annotation/mxb-chr{chrn}-GRCh{build}.vcf.gz"
+    shell:
+        """
+        bcftools view {input} -O b -o {output}
         """
   
 

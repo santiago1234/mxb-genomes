@@ -4,6 +4,7 @@
 # Define global variables
 
 CHROMS = list(range(1, 23))
+GENOME_BUILD = [37, 38]
 
 
 report: "report/workflow.rst"
@@ -19,10 +20,7 @@ rule all:
         # qc analysis
         "results/QC/note.txt",
         # variant annotation
-        expand("results/data/variant-annotation/vep-{chrn}.vcf.gz", chrn=CHROMS),
-        # lift over to GRCh38 genome built
-        expand("results/data/lifted_to_GRCh38/mxb-chr{chrn}-GRCh38.vcf.gz", chrn=CHROMS)
-
+        expand("results/data/variant-annotation/mxb-chr{chrn}-GRCh{build}.vcf.gz", chrn=CHROMS, build=GENOME_BUILD),
 
 
 include: "rules/accesory-data.smk"
