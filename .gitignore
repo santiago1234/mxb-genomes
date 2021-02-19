@@ -25,3 +25,10 @@ analysis/*
 
 # file to ignore in resource
 resources/genetic-maps/*
+
+# ingore html and word
+
+analysis-doc/*/README.docx
+analysis-doc/*/README.html
+analysis-doc/*/*.png
+

@@ -1,0 +1,135 @@
+---
+title: "MX Biobank genomes"
+author: ''
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  word_document: default
+  highlight: tango
+  number_sections: no
+  theme: default
+  toc: yes
+  toc_depth: 3
+  toc_float:
+    collapsed: no
+    smooth_scroll: yes
+  html_document: null
+params:
+  rmd: report.Rmd
+---
+
+## Overview
+
+50 high-coverage genomes
+
+- autosomes only in the initial callset
+- 35F, 15M
+- 21 urban, 29 rural, from across the country
+- Native American ancestry
+  - Mean: 0.979, min: 0.922
+  
+
+### Data freeze is located at:
+
+- built 37: TODO (Where should we put the files?)
+- built 38: TODO
+
+# QC analysis
+
+We perform a QC analysis on the data for the autosomal chromosomes 1-22. In this QC analysis we include:
+
+- Number of variants per genome
+- Sequencing depth per sample
+- Missing data
+- PCA
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, message = F, warning = F, collapse = T)
+```
+
+
+## Number of variant per genome
+
+```{r p1, out.width="50%"}
+knitr::include_graphics("../../results/plots/qc/vars_per_genome.png")
+```
+
+
+- Each dot represents a genome. Dots in gray color are outliers.
+- The grey area is the density of the distribution.
+- M stands for millions.
+
+
+## Sequencing depth per sample
+
+For these plots, I selected a random fraction of the variants (10%).
+The variants were selected uniformly at random. The plot shows the histogram of sequencing depth for each sample.
+
+```{r p2, out.width="30%"}
+knitr::include_graphics("../../results/plots/qc/depth_per_sample.png")
+```
+
+
+The next plot shows the sequencing depth in chromosome 22. Only 10 samples are shown.
+
+```{r p3, out.width="50%"}
+knitr::include_graphics("../../results/plots/qc/depth_in_chr22.png")
+```
+
+
+## Missing data
+
+The amount of missing data is minimum. Probably the data was already filtered for missingness.
+
+```{r p4, out.width="30%"}
+knitr::include_graphics("../../results/plots/qc/missing_data_by_ind.png")
+```
+
+
+```{r p5, out.width="50%"}
+knitr::include_graphics("../../results/plots/qc/missing_data_by_var.png")
+```
+
+## PCA
+
+To visualize the samples, a PCA was performed with the 50 genomes.
+
+To generate the PCA we apply the following filters:
+
+- Only biallelic SNPs were used.
+- MAF threshold of 0.05
+- HW threshold 0.001
+- LD pruned with r2 threshold of 0.5
+
+
+```{r p6, out.width="50%"}
+knitr::include_graphics("../../results/plots/qc/pca_comp1_2_3.png")
+```
+
+The next plot is the same PCA (components 1 and 2) with Ethnicity information. For the samples shown as `Mexican Native American`, the Ethnicity has not been determined yet.
+
+```{r p7, out.width="70%"}
+knitr::include_graphics("../../results/plots/qc/pca_withEthnicity_Geography.png")
+```
+
+
+### Summary
+
+- This basic QC analysis did not reveal any major concerns in the data. Besides 3 samples with low
+coverage (mean ~20). This samples cluster together in the PCA plot, the samples have Mayan ethnicity and also cluster together with samples with Mayan ethnicity that do not have low depth.
+- The amount of missing data is minimum.
+
+## Lift Over
+
+We ran the programs [Crossmap](http://crossmap.sourceforge.net/) to convert the genome coordinates to the GRCh38 build. Around 2% of the variants were not mapped to the GRCh38 build. A short summary of these unmapped variants is shown below.
+
+```{r p8, out.width="50%"}
+knitr::include_graphics("summaryUnmmaped.png")
+```
+
+
+
+## Variant annotaion
+
+We ran [Ensembl Variant Effect Predictor](https://www.ensembl.org/info/docs/tools/vep/index.html) to annotate the variants.
+
+Annotated vcf files (GRCh37 and GRCh38) are located at: `/data/users/smedina/pipelines/mxb-genomes/results/data/variant-annotation`.
