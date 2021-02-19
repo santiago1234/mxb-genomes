@@ -1,0 +1,6 @@
+The following programs should be available in the path to run
+this pipeline.
+
+
+- bcftools
+- vep

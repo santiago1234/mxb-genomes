@@ -1,8 +1,12 @@
 .snakemake/
 */.snakemake/
 analysis
+analysis-doc/*/data/*
+analysis-doc/*/results/*
 results
 results/*
+resources
+resources/*
 analysis/*
 !analysis/README.md
 !config
@@ -18,3 +22,6 @@ analysis/*
 !.test
 !LICENSE
 !README.md
+
+# file to ignore in resource
+resources/genetic-maps/*

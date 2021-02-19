@@ -1,0 +1,24 @@
+# Requeriments:
+#   - matplotlib
+#   - bcftools
+
+rule vcf_stats_unmapped_vars:
+    input:
+        "../../results/data/raw-genomes/mxb-unmaped-to-GRCh38.vcf.gz"
+    output:
+        "data/unmaped-vars-stats.txt"
+    shell:
+        """
+        bcftools stats {input} >{output}
+        """
+
+rule plot_stats:
+    input:
+         "data/unmaped-vars-stats.txt"
+    output:
+        directory("results/")
+    shell:
+        """
+        plot-vcfstats {input} -p {output}
+        """
+        
