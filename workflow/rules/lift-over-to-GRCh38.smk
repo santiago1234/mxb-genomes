@@ -36,7 +36,8 @@ rule lift_over_to_GRCh38:
         GRCh38_genome = "results/data/lifted_to_GRCh38/GRCh38.primary_assembly.genome.fa"
     output:
         "results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.gz",
-        "results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.unmap"
+        # I make this file temporal since i will collapse them into one
+        temp("results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.unmap")
     log: "results/logs/lift-over-to-GRCh38/chr{chrn}.log"
     conda: "../envs/crossmap.yaml"
     params:
@@ -54,3 +55,13 @@ rule lift_over_to_GRCh38:
         """
 
 
+rule merge_unmapped:
+    # this rule merges the unmapped variant intp on vcf
+    input:
+        expand("results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.unmap", chrn=CHROMS)
+    output:
+        "results/data/raw-genomes/mxb-unmaped-to-GRCh38.vcf.gz"
+    shell:
+        """
+        bcftools concat {input} -O b -o {output}
+        """

@@ -19,6 +19,8 @@ rule all:
         # Subsequent target rules can be specified below. They should start with all_*.
         # qc analysis
         "results/QC/note.txt",
+        # lift-over to GRCh38
+        "results/data/raw-genomes/mxb-unmaped-to-GRCh38.vcf.gz",
         # variant annotation
         expand("results/data/variant-annotation/mxb-chr{chrn}-GRCh{build}.vcf.gz", chrn=CHROMS, build=GENOME_BUILD),
 
