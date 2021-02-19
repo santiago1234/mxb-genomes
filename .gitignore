@@ -1,5 +1,8 @@
-*
+.snakemake/
+*/.snakemake/
 analysis
+results
+results/*
 analysis/*
 !analysis/README.md
 !config
