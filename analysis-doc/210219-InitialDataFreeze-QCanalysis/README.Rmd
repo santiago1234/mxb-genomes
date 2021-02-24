@@ -3,7 +3,7 @@ title: "MX Biobank genomes"
 author: ''
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  word_document: default
+  html_document: null
   highlight: tango
   number_sections: no
   theme: default
@@ -12,7 +12,7 @@ output:
   toc_float:
     collapsed: no
     smooth_scroll: yes
-  html_document: null
+  word_document: default
 params:
   rmd: report.Rmd
 ---
