@@ -31,37 +31,49 @@ rule download_ucsc_chain_hg19ToHg38:
 
 rule lift_over_to_GRCh38:
     input:
-        vcf = "results/data/raw-genomes/mxb-chr{chrn}-GRCh37.vcf.gz",
+        vcf = config['path_to_raw_genomes'],
         chain_file = "results/data/lifted_to_GRCh38/hg19ToHg38.over.chain.gz",
         GRCh38_genome = "results/data/lifted_to_GRCh38/GRCh38.primary_assembly.genome.fa"
     output:
-        "results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.gz",
-        # I make this file temporal since i will collapse them into one
-        temp("results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.unmap")
-    log: "results/logs/lift-over-to-GRCh38/chr{chrn}.log"
+        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.gz",
+        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.unmap"
+    log: "results/logs/lift-over-to-GRCh38/log.log"
     conda: "../envs/crossmap.yaml"
     params:
         # a temporal file to uncompress the vcf
-        vcf_uncompressed = "results/data/lifted_to_GRCh38/mxb-chr{chrn}-GRCh37.vcf",
-        out_vcf = "results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf"
+        vcf_uncompressed = "results/data/lifted_to_GRCh38/mxb-ALL-GRCh37.vcf",
+        out_vcf = "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf"
     shell:
         """
         bcftools view {input.vcf} >{params.vcf_uncompressed}
         CrossMap.py vcf {input.chain_file} {params.vcf_uncompressed} \
             {input.GRCh38_genome} {params.out_vcf} 2>{log}
         rm -f {params.vcf_uncompressed}
-        bcftools view {params.out_vcf} -O b -o {output[0]}
+        bcftools view {params.out_vcf} | bcftools sort -O b -o {output[0]}
         rm -f {params.out_vcf}
         """
 
 
-rule merge_unmapped:
-    # this rule merges the unmapped variant intp on vcf
+rule index_lifted_vcf:
     input:
-        expand("results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.unmap", chrn=CHROMS)
-    output:
-        "results/data/raw-genomes/mxb-unmaped-to-GRCh38.vcf.gz"
+        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.gz"
+    output: "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.gz.tbi"
     shell:
         """
-        bcftools concat {input} -O b -o {output}
+        bcftools index -t {input}
+        """
+
+
+rule lifted_split_by_chromosome:
+    # this rule merges the unmapped variant intp on vcf
+    input:
+        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.gz",
+        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.gz.tbi"
+    output:
+        "results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.gz"
+    params:
+            chromosome = "{chrn}"
+    shell:
+        """
+        bcftools view -r {params.chromosome} {input[0]} | bcftools sort -O b -o {output}
         """

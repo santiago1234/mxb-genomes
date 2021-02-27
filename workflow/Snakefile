@@ -25,8 +25,8 @@ rule all:
         expand("results/data/variant-annotation/mxb-chr{chrn}-GRCh{build}.vcf.gz", chrn=CHROMS, build=GENOME_BUILD),
 
 
-include: "rules/accesory-data.smk"
 include: "rules/qc-analysis.smk"
+include: "rules/phase.smk"
 include: "rules/get-raw-genomes.smk"
 include: "rules/vep.smk" # Variant annotation
 include: "rules/lift-over-to-GRCh38.smk"
