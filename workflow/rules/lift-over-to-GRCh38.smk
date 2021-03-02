@@ -35,45 +35,47 @@ rule lift_over_to_GRCh38:
         chain_file = "results/data/lifted_to_GRCh38/hg19ToHg38.over.chain.gz",
         GRCh38_genome = "results/data/lifted_to_GRCh38/GRCh38.primary_assembly.genome.fa"
     output:
-        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.gz",
+        temp("results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf"),
         "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.unmap"
     log: "results/logs/lift-over-to-GRCh38/log.log"
     conda: "../envs/crossmap.yaml"
     params:
         # a temporal file to uncompress the vcf
-        vcf_uncompressed = "results/data/lifted_to_GRCh38/mxb-ALL-GRCh37.vcf",
-        out_vcf = "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf"
+        vcf_uncompressed = "results/data/lifted_to_GRCh38/mxb-ALL-GRCh37.vcf"
     shell:
         """
         bcftools view {input.vcf} >{params.vcf_uncompressed}
         CrossMap.py vcf {input.chain_file} {params.vcf_uncompressed} \
-            {input.GRCh38_genome} {params.out_vcf} 2>{log}
+            {input.GRCh38_genome} {output[0]} 2>{log}
         rm -f {params.vcf_uncompressed}
-        bcftools view {params.out_vcf} | bcftools sort -O b -o {output[0]}
-        rm -f {params.out_vcf}
         """
 
 
-rule index_lifted_vcf:
+# should sort compress and index the vcf
+rule sort_lifted_and_index:
     input:
-        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.gz"
-    output: "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.gz.tbi"
+        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf"
+    output:
+        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38-sorted.vcf.gz",
+        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38-sorted.vcf.gz.tbi"
     shell:
         """
-        bcftools index -t {input}
+        bcftools sort {input} -Oz -o {output[0]}
+        bcftools index -t {output[0]}
         """
 
 
 rule lifted_split_by_chromosome:
     # this rule merges the unmapped variant intp on vcf
     input:
-        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.gz",
-        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.gz.tbi"
+        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38-sorted.vcf.gz",
+        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38-sorted.vcf.gz.tbi"
     output:
         "results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.gz"
     params:
             chromosome = "{chrn}"
     shell:
         """
-        bcftools view -r {params.chromosome} {input[0]} | bcftools sort -O b -o {output}
+        bcftools view -r {params.chromosome} {input[0]} -Oz -o {output}
+        bcftools index {output} --tbi
         """
