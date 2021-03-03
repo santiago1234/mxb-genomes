@@ -15,6 +15,6 @@ rule split_by_chromosome:
         chromosome = "{chrn}"
     shell:
         """
-        bcftools view -r {params.chromosome} {input} -O b -o {output.vcf}  2> {log}
+        bcftools view -r {params.chromosome} {input} -Oz -o {output.vcf}  2> {log}
         bcftools index {output.vcf} --tbi 2>>{log}
         """

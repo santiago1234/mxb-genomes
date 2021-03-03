@@ -20,7 +20,8 @@ rule all:
         # qc analysis
         "results/QC/note.txt",
         # lift-over to GRCh38
-        "results/data/raw-genomes/mxb-unmaped-to-GRCh38.vcf.gz",
+        # unmapped variant to GRCh38
+        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.unmap",
         # variant annotation
         expand("results/data/variant-annotation/mxb-chr{chrn}-GRCh{build}.vcf.gz", chrn=CHROMS, build=GENOME_BUILD),
 
