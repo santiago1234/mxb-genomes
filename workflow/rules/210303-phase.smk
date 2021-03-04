@@ -27,7 +27,7 @@ rule biallelic_snps_to_phase:
     input:
         "results/data/raw-genomes/mxb-chr{chrn}-GRCh38.vcf.gz"
     output:
-        temp("results/data/phased/mxb-unphased-chr{chrn}-GRCh38.vcf.gz")
+        temp("results/data/210303-phased/mxb-unphased-chr{chrn}-GRCh38.vcf.gz")
     shell:
         """
         bcftools view -m2 -M2 -v snps {input} |\
@@ -37,15 +37,15 @@ rule biallelic_snps_to_phase:
 
 rule phase:
     input:
-        vcf = "results/data/phased/mxb-unphased-chr{chrn}-GRCh38.vcf.gz",
+        vcf = "results/data/210303-phased/mxb-unphased-chr{chrn}-GRCh38.vcf.gz",
         genetic_map = "resources/genetic-maps/chr{chrn}.b38.gmap"
     output:
-        temp("results/data/phased/mxb-chr{chrn}-GRCh38-phased.sample"),
-        temp("results/data/phased/mxb-chr{chrn}-GRCh38-phased.haps")
+        temp("results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.sample"),
+        temp("results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.haps")
     log:
         "results/logs/phasing/mxb-chrn{chrn}"
     params:
-        out_basename = "results/data/phased/mxb-chr{chrn}-GRCh38-phased"
+        out_basename = "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased"
     threads:
         5
     shell:
@@ -57,16 +57,17 @@ rule phase:
 
 rule convert_haps_to_vcf:
     input:
-        "results/data/phased/mxb-chr{chrn}-GRCh38-phased.sample",
-        "results/data/phased/mxb-chr{chrn}-GRCh38-phased.haps"
+        "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.sample",
+        "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.haps"
     output:
-        "results/data/phased/mxb-chr{chrn}-GRCh38-phased.vcf.gz"
+        "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.vcf.gz"
     params:
-        basename = "results/data/phased/mxb-chr{chrn}-GRCh38-phased",
-        out_vcf = "results/data/phased/mxb-chr{chrn}-GRCh38-phased.vcf"
+        basename = "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased",
+        out_vcf = "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.vcf"
     shell:
         """
         shapeit -convert --input-haps {params.basename} \
             --output-vcf {params.out_vcf}
         bcftools view {params.out_vcf} -Oz -o {output}
+        rm {params.out_vcf}
         """

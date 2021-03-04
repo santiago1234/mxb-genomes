@@ -2,7 +2,7 @@
 # After configuring, running snakemake -n in a clone of this repository should successfully execute a dry-run of the workflow.
 
 # Define global variables
-
+configfile: "config/config.yaml"
 CHROMS = list(range(1, 23))
 GENOME_BUILD = [37, 38]
 
@@ -21,13 +21,13 @@ rule all:
         "results/QC/note.txt",
         # lift-over to GRCh38
         # unmapped variant to GRCh38
-        "results/data/lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.unmap",
+        "results/data/210301-lifted_to_GRCh38/mxb-ALL-GRCh38.vcf.unmap",
         # variant annotation
         expand("results/data/variant-annotation/mxb-chr{chrn}-GRCh{build}.vcf.gz", chrn=CHROMS, build=GENOME_BUILD),
 
 
-include: "rules/qc-analysis.smk"
-include: "rules/phase.smk"
-include: "rules/get-raw-genomes.smk"
+include: "rules/210303-phase.smk"
+include: "rules/210301-lift-over-to-GRCh38.smk"
 include: "rules/vep.smk" # Variant annotation
-include: "rules/lift-over-to-GRCh38.smk"
+include: "rules/qc-analysis.smk"
+include: "rules/get-raw-genomes.smk"
