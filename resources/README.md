@@ -6,4 +6,5 @@ Wherever feasible, they can also be downloaded programmatically via rules define
 
 ## Data sets
 
-**genetic-maps/ |** Genetic maps. See `../workflow/rules/accesory-data.smk`
++ **genetic-maps/ |** Genetic maps. See `../workflow/rules/accesory-data.smk`
++ **1TGP-samples-meta-data/igsr-1000genomes.tsv |** This file contains sample information from the 1TGP high coverage data. I renamed this file (original: igsr-1000\ genomes\ 30x\ on\ grch38.tsv.tss). This file was obtained from [here](https://www.internationalgenome.org/data-portal/data-collection/30x-grch38).

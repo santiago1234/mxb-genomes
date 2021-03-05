@@ -1,5 +1,6 @@
 # PHASING 50 MXB-genomes
 # note: phasing is done in the GRCh38 genome build
+# Only biallelic snps were phased
 
 
 rule download_genetic_maps:
