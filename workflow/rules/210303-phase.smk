@@ -61,7 +61,8 @@ rule convert_haps_to_vcf:
         "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.sample",
         "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.haps"
     output:
-        "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.vcf.gz"
+        "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.vcf.gz",
+        "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.vcf.gz.tbi"
     params:
         basename = "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased",
         out_vcf = "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.vcf"
@@ -69,6 +70,7 @@ rule convert_haps_to_vcf:
         """
         shapeit -convert --input-haps {params.basename} \
             --output-vcf {params.out_vcf}
-        bcftools view {params.out_vcf} -Oz -o {output}
+        bcftools view {params.out_vcf} -Oz -o {output[0]}
+        bcftools index {output[0]} --tbi
         rm {params.out_vcf}
         """
