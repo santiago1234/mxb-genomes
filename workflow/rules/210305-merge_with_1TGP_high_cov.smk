@@ -54,7 +54,25 @@ rule oneTGP_get_biallelic_and_subset_pops:
         bcftools index {output[0]} --tbi
         """
 
-        
-        
 
-    
+rule merge_50G_with_1TG:
+    # merge the 50 genomes with 
+    # the 1TGP samples
+    # i alse set a variant id for variants
+    # with missing id
+    input:
+        vcf_50g = "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.vcf.gz",
+        index_50g = "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.vcf.gz.tbi",
+        vcf_1Tg = "results/data/210305-merged-with-1TGP/1TGP-chr{chrn}-biallelic-subset.vcf.gz",
+        index_1Tg = "results/data/210305-merged-with-1TGP/1TGP-chr{chrn}-biallelic-subset.vcf.gz.tbi"
+    output:
+        "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-GRCh38.vcf.gz"
+    shell:
+        """
+        bcftools merge --missing-to-ref \
+            {input.vcf_1Tg} {input.vcf_50g} |\
+            bcftools annotate --set-id \
+            +'%CHROM\:%POS\:%REF\:%FIRST_ALT' \
+            -Oz -o {output}
+        """
+
