@@ -41,8 +41,8 @@ rule phase:
         vcf = "results/data/210303-phased/mxb-unphased-chr{chrn}-GRCh38.vcf.gz",
         genetic_map = "resources/genetic-maps/chr{chrn}.b38.gmap"
     output:
-        temp("results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.sample"),
-        temp("results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.haps")
+        "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.sample",
+        "results/data/210303-phased/mxb-chr{chrn}-GRCh38-phased.haps"
     log:
         "results/logs/phasing/mxb-chrn{chrn}"
     params:
