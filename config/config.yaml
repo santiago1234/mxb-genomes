@@ -3,4 +3,7 @@
 # one row per sample. It can be parsed easily via pandas.
 path_to_raw_genomes: "/data/projects/MXB_Genomes_Singapore/mexican_50_autosomes.vcf.gz"
 path_to_1TGP: "/data/reference_panels/1000_GENOMES_high_coverage/"
-samples: "config/samples.tsv"
+
+# popultaion from 1TGP to use
+# note that i am using a regular expression
+oneTGP_pops: '(CHB|YRI|IBS|BGR|MXL|PEL|CLM|PUR)'
