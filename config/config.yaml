@@ -6,4 +6,4 @@ path_to_1TGP: "/data/reference_panels/1000_GENOMES_high_coverage/"
 
 # popultaion from 1TGP to use
 # note that i am using a regular expression
-oneTGP_pops: '(CHB|YRI|IBS|BGR|MXL|PEL|CLM|PUR)'
+oneTGP_pops: '(CHB|YRI|IBS|GBR|MXL|PEL|CLM|PUR)'

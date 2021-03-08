@@ -12,10 +12,10 @@ rule download_XGMix:
         """
 
 
-rule make_sample_map_file:
+#rule make_sample_map_file:
     # sample map file matching reference samples
     # to their respective reference populations
-    pass
+#    pass
 
 
 
