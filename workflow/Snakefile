@@ -26,6 +26,7 @@ rule all:
         expand("results/data/variant-annotation/mxb-chr{chrn}-GRCh{build}.vcf.gz", chrn=CHROMS, build=GENOME_BUILD),
 
 
+include: "rules/210308-local-ancestrt-xgmix.smk"
 include: "rules/210305-merge_with_1TGP_high_cov.smk"
 include: "rules/210303-phase.smk"
 include: "rules/210301-lift-over-to-GRCh38.smk"

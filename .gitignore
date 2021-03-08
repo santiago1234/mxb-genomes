@@ -26,6 +26,9 @@ analysis/*
 # file to ignore in resource
 resources/genetic-maps/*
 
+# ignore word documents
+workflow/scripts/XGMix-master/*
+
 # ingore html and word
 
 analysis-doc/*/README.docx
