@@ -85,3 +85,30 @@ rule xgmix_genetic_map:
             grep -v '^chr' >{output} #XGMix does not expect a header
         """
 
+
+rule xgmix_train:
+    input:
+        sample_map_file = "results/data/210308-local-ancestry/input-data/reference_map_file.txt",
+        query_file = "results/data/210308-local-ancestry/input-data/query-chr{chrn}.vcf.gz",
+        reference_file = "results/data/210308-local-ancestry/input-data/reference-chr{chrn}.vcf.gz",
+        genetic_map = "results/data/210308-local-ancestry/input-data/chr{chrn}.b38.gmap.txt"
+    params:
+        phase="False",
+        chr_nr="{chrn}",
+        output_basename="results/data/210308-local-ancestry/mdl-{chrn}"
+    conda: "../envs/xgmix.yaml"
+    log: "results/logs/210308-xgmix/{chrn}-xgmix.log"
+    threads: 30
+    output:
+        "test-{chrn}.txt"
+    shell:
+        """
+        echo "RUNING XGmix !!!!!"
+        python workflow/scripts/XGMix-master/XGMIX.py {input.query_file} \
+            {input.genetic_map} {params.output_basename} \
+            {params.chr_nr} {params.phase} {input.reference_file} \
+            {input.sample_map_file} 2>{log}
+        touch {output}
+        """
+
+

@@ -37,7 +37,7 @@ mxb_meta <- read_tsv(path_mxb_meta) %>%
 populations <- 
   bind_rows(oneTGP_pops, mxb_meta) %>% 
   arrange(Sample, Population, `Population code`) %>%
-  select(Sample, Population, `Population code`)
+  select(Sample, Population)
 
 
 
