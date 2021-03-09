@@ -31,13 +31,13 @@ mxb_meta <- read_tsv(path_mxb_meta) %>%
     Sample = str_replace(Sample_ID, "MXB", "MXB_"),
     Population = "NAT",
     `Population code` = "MXB"
-  ) %>% 
-  select(Sample, Population, `Population code`)
+  )
 
 
 populations <- 
   bind_rows(oneTGP_pops, mxb_meta) %>% 
-  arrange(Sample, Population, `Population code`)
+  arrange(Sample, Population, `Population code`) %>%
+  select(Sample, Population, `Population code`)
 
 
 
