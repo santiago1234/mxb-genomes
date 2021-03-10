@@ -1,0 +1,54 @@
+# PCA and Admixure analysis
+
+
+rule vcf_to_plink:
+    # this rule converts the vcf to plink format
+    # also applies some filters to the data
+    input: "../../results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr22-snps-GRCh38.vcf.gz"
+    output:
+        temp(multiext("data/1TGP_and_50MXB-ALL", ".fam", ".bed", ".bim"))
+    params:
+        # filters
+        maf = 0.05,
+        hwe = 0.001,
+        plink_out_file = "data/1TGP_and_50MXB-ALL"
+    shell:
+        """
+        plink --vcf {input} \
+            --keep-allele-order \
+            --maf {params.maf} \
+            --hwe {params.hwe} \
+            --make-bed --out {params.plink_out_file}
+        """
+
+
+rule snps_in_linkage_eq:
+    input:
+        multiext("data/1TGP_and_50MXB-ALL", ".fam", ".bed", ".bim")
+    output:
+        temp(multiext("data/ldpruned_snplist", ".prune.in", ".prune.out")),
+        temp(multiext("data/1TGP_and_50MXB-ALL-ldpruned_data", ".fam", ".bed", ".bim"))
+    shell:
+        """
+        plink --bfile data/1TGP_and_50MXB-ALL \
+            --indep-pairwise 200kb 1 0.5 \
+            --out data/ldpruned_snplist
+
+        plink --bfile data/1TGP_and_50MXB-ALL \
+            --extract data/ldpruned_snplist.prune.in \
+            --make-bed \
+            --out data/1TGP_and_50MXB-ALL-ldpruned_data
+        """
+
+rule pca:
+    input:
+        multiext("data/1TGP_and_50MXB-ALL-ldpruned_data", ".fam", ".bed", ".bim")
+    output:
+        multiext("results/pca_results", ".eigenvec", ".eigenval")
+    shell:
+        """
+        plink --bfile data/1TGP_and_50MXB-ALL-ldpruned_data --pca 20 \
+            --out results/pca_results
+        """
+
+
