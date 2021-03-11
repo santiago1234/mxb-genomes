@@ -1,12 +1,39 @@
 # PCA and Admixure analysis
+# Requirements:
+    # plink: PLINK v1.90b6.7 64-bit
+    # admixture: ADMIXTURE Version 1.3.0
+    # bcftools 1.9
+
+CHROMS = [2, 12, 21, 22]
+# values of k for admixture
+K = [3, 4, 5]
+
+rule all:
+    input:
+        multiext("results/pca/pca", ".eigenvec", ".eigenval"),
+        # run different values of k for admture
+        expand("results/1TGP_and_50MXB-ALL-ldpruned_data.{k}.Q", k=K)
+
+
+
+rule combine_chromosomes:
+    input:
+        vcfs = expand("../../results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-GRCh38.vcf.gz", chrn=CHROMS)
+    output:
+        temp("data/1TGP_and_50MXB-ALL.vcf.gz")
+    shell:
+        """
+        bcftools concat {input} -Oz -o {output}
+        """
 
 
 rule vcf_to_plink:
     # this rule converts the vcf to plink format
     # also applies some filters to the data
-    input: "../../results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr22-snps-GRCh38.vcf.gz"
+    input:
+        "data/1TGP_and_50MXB-ALL.vcf.gz"
     output:
-        temp(multiext("data/1TGP_and_50MXB-ALL", ".fam", ".bed", ".bim"))
+        temp(multiext("data/1TGP_and_50MXB-ALL", ".fam", ".bed", ".bim", ".log", ".nosex"))
     params:
         # filters
         maf = 0.05,
@@ -26,12 +53,12 @@ rule snps_in_linkage_eq:
     input:
         multiext("data/1TGP_and_50MXB-ALL", ".fam", ".bed", ".bim")
     output:
-        temp(multiext("data/ldpruned_snplist", ".prune.in", ".prune.out")),
-        temp(multiext("data/1TGP_and_50MXB-ALL-ldpruned_data", ".fam", ".bed", ".bim"))
+        multiext("data/ldpruned_snplist", ".prune.in", ".prune.out"),
+        multiext("data/1TGP_and_50MXB-ALL-ldpruned_data", ".fam", ".bed", ".bim", ".log", ".nosex")
     shell:
         """
         plink --bfile data/1TGP_and_50MXB-ALL \
-            --indep-pairwise 200kb 1 0.5 \
+            --indep-pairwise 50 10 0.1 \
             --out data/ldpruned_snplist
 
         plink --bfile data/1TGP_and_50MXB-ALL \
@@ -44,11 +71,27 @@ rule pca:
     input:
         multiext("data/1TGP_and_50MXB-ALL-ldpruned_data", ".fam", ".bed", ".bim")
     output:
-        multiext("results/pca_results", ".eigenvec", ".eigenval")
+        multiext("results/pca/pca", ".eigenvec", ".eigenval")
     shell:
         """
         plink --bfile data/1TGP_and_50MXB-ALL-ldpruned_data --pca 20 \
-            --out results/pca_results
+            --out results/pca/pca
         """
 
-
+rule admixure:
+    input:
+        "data/1TGP_and_50MXB-ALL-ldpruned_data.bed"
+    output:
+        "results/1TGP_and_50MXB-ALL-ldpruned_data.{k}.Q",
+        "results/1TGP_and_50MXB-ALL-ldpruned_data.{k}.P"
+    params:
+        out_q = "1TGP_and_50MXB-ALL-ldpruned_data.{k}.Q",
+        out_p = "1TGP_and_50MXB-ALL-ldpruned_data.{k}.P",
+        k = "{k}"
+    threads: 2
+    shell:
+        """
+        admixture -j{threads} {input} {params.k}
+        mv {params.out_q} results/
+        mv {params.out_p} results/
+        """
