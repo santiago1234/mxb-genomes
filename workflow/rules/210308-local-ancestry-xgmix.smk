@@ -64,7 +64,7 @@ rule subset_haplotypes:
         vcf = "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-GRCh38.vcf.gz",
         pop_list = "results/data/210308-local-ancestry/input-data/{haplo}_pop-list.txt"
     output:
-        "results/data/210308-local-ancestry/input-data/{haplo}-chr{chrn}.vcf.gz"
+        temp("results/data/210308-local-ancestry/input-data/{haplo}-chr{chrn}.vcf.gz")
     params:
         # temporal file to save ref pop list
         pop_list_tmp = "results/data/210308-local-ancestry/sample_pop_list_tmp"
@@ -82,7 +82,7 @@ rule xgmix_genetic_map:
     input:
         "resources/genetic-maps/chr{chrn}.b38.gmap"
     output:
-        "results/data/210308-local-ancestry/input-data/chr{chrn}.b38.gmap.txt"
+        temp("results/data/210308-local-ancestry/input-data/chr{chrn}.b38.gmap.txt")
     shell:
         """
         awk -v OFS='\t' '{{print $2, $1, $3}}' {input} |\
@@ -102,7 +102,7 @@ rule xgmix_train:
         output_basename="results/data/210308-local-ancestry/mdl-{chrn}"
     conda: "../envs/xgmix.yaml"
     log: "results/logs/210308-xgmix/{chrn}-xgmix.log"
-    threads: 30
+    threads: 20
     output:
         "results/data/210308-local-ancestry/mdl-{chrn}/mdl-{chrn}.msp.tsv",
         "results/data/210308-local-ancestry/mdl-{chrn}/mdl-{chrn}.fb.tsv",
