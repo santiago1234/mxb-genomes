@@ -34,4 +34,16 @@ workflow/scripts/XGMix-master/*
 analysis-doc/*/README.docx
 analysis-doc/*/README.html
 analysis-doc/*/*.png
+analysis-doc/*/*.pdf
+analysis-doc/*/plots/*
 
+# for R
+# History files
+.Rhistory
+.Rapp.history
+
+# Session Data files
+.RData
+
+# User-specific files
+.Ruserdata
