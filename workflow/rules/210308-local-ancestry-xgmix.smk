@@ -15,6 +15,10 @@ oneTGP_pops = config['oneTGP_pops']
 rule download_XGMix:
     # this rules dowloads the software (git repo)
     # to run XGMix
+    # parameters for runing XGMix can be configured in the
+    # config file inside XGMix-master
+    # I only manually change the follwing parameters:
+    #  rm_simulated_data = True
     output:
         directory("workflow/scripts/XGMix-master")
     shell:
@@ -100,7 +104,9 @@ rule xgmix_train:
     log: "results/logs/210308-xgmix/{chrn}-xgmix.log"
     threads: 30
     output:
-        "test-{chrn}.txt"
+        "results/data/210308-local-ancestry/mdl-{chrn}/mdl-{chrn}.msp.tsv",
+        "results/data/210308-local-ancestry/mdl-{chrn}/mdl-{chrn}.fb.tsv",
+        "results/data/210308-local-ancestry/mdl-{chrn}/models/model_chm_{chrn}/model_chm_{chrn}.pkl"
     shell:
         """
         echo "RUNING XGmix !!!!!"
