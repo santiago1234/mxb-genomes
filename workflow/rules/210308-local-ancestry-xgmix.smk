@@ -104,9 +104,7 @@ rule xgmix_train:
     log: "results/logs/210308-xgmix/{chrn}-xgmix.log"
     threads: 20
     output:
-        "results/data/210308-local-ancestry/mdl-{chrn}/mdl-{chrn}.msp.tsv",
-        "results/data/210308-local-ancestry/mdl-{chrn}/mdl-{chrn}.fb.tsv",
-        "results/data/210308-local-ancestry/mdl-{chrn}/models/model_chm_{chrn}/model_chm_{chrn}.pkl"
+        directory("results/data/210308-local-ancestry/mdl-{chrn}")
     shell:
         """
         echo "RUNING XGmix !!!!!"
@@ -114,7 +112,8 @@ rule xgmix_train:
             {input.genetic_map} {params.output_basename} \
             {params.chr_nr} {params.phase} {input.reference_file} \
             {input.sample_map_file} 2>{log}
-        touch {output}
         """
+
+# rule collect_xgmix_output:
 
 
