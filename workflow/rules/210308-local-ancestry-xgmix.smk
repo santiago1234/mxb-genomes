@@ -51,7 +51,7 @@ rule pop_list_to_subset:
     input:
         "results/data/210308-local-ancestry/input-data/{haplo}_map_file.txt"
     output:
-        temp("results/data/210308-local-ancestry/input-data/{haplo}_pop-list.txt")
+        "results/data/210308-local-ancestry/input-data/{haplo}_pop-list.txt"
     shell:
         """
         cut -f1 {input} |\
