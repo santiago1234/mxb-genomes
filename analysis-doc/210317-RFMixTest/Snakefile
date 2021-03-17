@@ -6,8 +6,8 @@ rule query_haps:
         reference_pop_list = "../../results/data/210308-local-ancestry/input-data/reference_pop-list.txt",
         vcf = "../../results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr22-snps-GRCh38.vcf.gz"
     output:
-        query_vcf = "data/query-chr22.vcf.gz",
-        reference_vcf = "data/reference-chr22.vcf.gz"
+        query_vcf = temp("data/query-chr22.vcf.gz"),
+        reference_vcf = temp("data/reference-chr22.vcf.gz")
     shell:
         """
         bcftools view -S {input.query_pop_list} {input.vcf} -Oz -o {output.query_vcf}
