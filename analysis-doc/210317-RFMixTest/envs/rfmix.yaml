@@ -1,0 +1,6 @@
+name: rfmixv2
+channels:
+  - bioconda
+dependencies:
+  - rfmix =2.03.r0.9505bfa
+  - bcftools

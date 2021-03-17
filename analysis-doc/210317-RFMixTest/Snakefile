@@ -1,0 +1,67 @@
+# A test run for RFMix v2
+
+rule query_haps:
+    input:
+        query_pop_list = "../../results/data/210308-local-ancestry/input-data/query_pop-list.txt",
+        reference_pop_list = "../../results/data/210308-local-ancestry/input-data/reference_pop-list.txt",
+        vcf = "../../results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr22-snps-GRCh38.vcf.gz"
+    output:
+        query_vcf = "data/query-chr22.vcf.gz",
+        reference_vcf = "data/reference-chr22.vcf.gz"
+    shell:
+        """
+        bcftools view -S {input.query_pop_list} {input.vcf} -Oz -o {output.query_vcf}
+        bcftools view -S {input.reference_pop_list} {input.vcf} -Oz -o {output.reference_vcf}
+        """
+
+
+rule sample_map:
+    # this rule just removes the header so the input
+    # is formated for rfmix
+    input:
+        sample_map = "../../results/data/210308-local-ancestry/input-data/reference_map_file.txt"
+    output:
+        "data/sample_map_file.txt"
+    shell:
+        """
+        grep -v '^Sample' {input} >{output}
+        """
+
+
+rule genetic_map:
+    # I also need to change the coloumns order for running
+    # rfmix
+    input:
+        "../../resources/genetic-maps/chr22.b38.gmap"
+    output:
+        "data/chr22.b38.gmap.txt"
+    shell:
+        """
+        awk '{{print $2 "\t" $1 "\t" $3}}' {input} >{output}
+        """
+
+
+rule rfmix:
+    input:
+        query = "data/query-chr22.vcf.gz",
+        ref = "data/reference-chr22.vcf.gz",
+        samplemap = "data/sample_map_file.txt",
+        gmap = "data/chr22.b38.gmap.txt"
+    output:
+        "results/rfmix/rf.chr22.rfmix.Q"
+    threads: 20
+    params:
+        chrn=22,
+        basename_out="results/rfmix/rf.chr22",
+        # Average number of generations since expected admixture
+        G=10
+    conda: "envs/rfmix.yaml"
+    shell:
+        """
+        rfmix -f {input.query} -r {input.ref} -m {input.samplemap} -g {input.gmap} \
+            -o {params.basename_out} -G {params.G} --chromosome={params.chrn} \
+            --n-threads={threads}
+        """
+
+
+
