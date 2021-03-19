@@ -2,23 +2,6 @@
 # note: phasing is done in the GRCh38 genome build
 # Only biallelic snps were phased
 
-
-rule download_genetic_maps:
-    # download genetic maps from github repo:
-    # https://github.com/joepickrell/1000-genomes-genetic-maps
-    output:
-        expand("resources/genetic-maps/chr{chrn}.b38.gmap", chrn=CHROMS)
-    shell:
-        """
-        wget https://github.com/odelaneau/shapeit4/raw/master/maps/genetic_maps.b38.tar.gz
-        tar -xzf genetic_maps.b38.tar.gz
-        gunzip chr*.gz
-        mkdir -p resources/genetic-maps/
-        mv *gmap resources/genetic-maps/
-        rm genetic_maps.b38.tar.gz
-        """
-
-
 rule biallelic_snps_to_phase:
     # SHAPEIT2 does not handle multiallelic variant phasing
     # this rule retrieves biallelic snp
