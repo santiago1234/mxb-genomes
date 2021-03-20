@@ -120,4 +120,25 @@ rule mp_phase_genomes:
         shapeit --input-vcf {input.vcf} -O {params.out_basename} \
             -T {threads} -M {input.genetic_map} --output-log {log}
         """
-        
+
+
+rule mp_convert_haps_to_vcf:
+    input:
+        "results/data/210319-Phase-MXB-with-1TGP/phased/mxb-1tgp-chr{chrn}-snps-phased.sample",
+        "results/data/210319-Phase-MXB-with-1TGP/phased/mxb-1tgp-chr{chrn}-snps-phased.haps"
+    output:
+        "results/data/210319-Phase-MXB-with-1TGP/phased/mxb-1tgp-chr{chrn}-snps-phased.vcf.gz",
+        "results/data/210319-Phase-MXB-with-1TGP/phased/mxb-1tgp-chr{chrn}-snps-phased.vcf.gz.tbi",
+    params:
+        basename = "results/data/210319-Phase-MXB-with-1TGP/phased/mxb-1tgp-chr{chrn}-snps-phased",
+        out_vcf = "results/data/210319-Phase-MXB-with-1TGP/phased/mxb-1tgp-chr{chrn}-snps-phased.vcf"
+    shell:
+        """
+        shapeit -convert --input-haps {params.basename} \
+            --output-vcf {params.out_vcf}
+        bcftools view {params.out_vcf} -Oz -o {output[0]}
+        bcftools index {output[0]} --tbi
+        rm {params.out_vcf}
+        """
+
+
