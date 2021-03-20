@@ -3,18 +3,27 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 
+
+# This script defines the population used as query and reference haplotypes
 # parameters
 
 oneTGP_pops <-  snakemake@params$oneTGP_pops
-path_oneT_meta <- snakemake@input$oneT_meta
-path_mxb_meta <- snakemake@input$mxb_meta
-
+path_oneT_meta <- "resources/1TGP-samples-meta-data/igsr-1000genomes.tsv"
+path_mxb_meta <- "resources/genomes-metadata/50Genomes_info.txt"
+oneTGP_NATs <- "resources/1TGP-samples-meta-data/native-american.txt"
 # outfiles
 sample_map_file <- snakemake@output$sample_map_file
 query_pops_file <- snakemake@output$query_pops
 
 
-
+# we include this samples as reference for NAT plus the MXB genomes
+# NOTE this set of samples will be also in the query and reference haplotypes
+# at the same time
+oneTGP_NATs <- read_lines(oneTGP_NATs)
+oneTGP_NATs <- tibble(
+  Sample = oneTGP_NATs,
+  Population = "NAT"
+)
 # filter populations ------------------------------------------------------
 
 
@@ -40,9 +49,15 @@ populations <-
   select(Sample, Population)
 
 
-
+# Reference haplotypes:
+# All non AMR samples
+# and the AMR samples that are proxy for NAT
 
 sample_map <- filter(populations, Population != "AMR")
+sample_map <- bind_rows(sample_map, oneTGP_NATs)
+
+
+filter(population)
 write_tsv(sample_map, sample_map_file)
 
 

@@ -36,7 +36,8 @@ rule reference_and_query_pops:
     # the script 01-populations.R will degine the reference and query haplotypes
     input:
         oneT_meta = "resources/1TGP-samples-meta-data/igsr-1000genomes.tsv",
-        mxb_meta = "resources/genomes-metadata/50Genomes_info.txt"
+        mxb_meta = "resources/genomes-metadata/50Genomes_info.txt",
+        oneT_native_american = "resources/1TGP-samples-meta-data/native-american.txt"
     output:
         sample_map_file = "results/data/210308-local-ancestry/input-data/reference_map_file.txt",
         query_pops = "results/data/210308-local-ancestry/input-data/query_map_file.txt"
