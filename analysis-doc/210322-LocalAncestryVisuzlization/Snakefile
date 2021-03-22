@@ -1,0 +1,22 @@
+
+# where is this dir located ?
+# https://github.com/santiago1234/popgene-utils
+
+import os
+
+PATH_TO_POPGENE = "../../../../../Research/popgene-utils/"
+
+
+rule compute_global_ancestry_from_local:
+    input:
+        "../../results/data/210308-local-ancestry/predictions/mdl-{chrn}.msp.tsv"
+    output:
+        "data/local-chrn{chrn}.csv"
+    params:
+        chrn = "{chrn}",
+        rscript = os.path.join(PATH_TO_POPGENE, "scripts/global-ancestry-xgmix.R")
+    shell:
+        """
+        Rscript {params.rscript} \
+            -m {input} -c {params.chrn} -o {output}
+        """
