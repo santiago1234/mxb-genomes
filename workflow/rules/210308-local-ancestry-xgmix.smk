@@ -12,6 +12,11 @@
 oneTGP_pops = config['oneTGP_pops']
 
 
+rule xgmix_all:
+    input:
+        expand("results/data/210308-local-ancestry/trained-models/model_chm_{chrn}.pkl", chrn=CHROMS)
+        
+
 rule download_XGMix:
     # this rules dowloads the software (git repo)
     # to run XGMix
