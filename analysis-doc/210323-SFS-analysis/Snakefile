@@ -1,0 +1,35 @@
+# rule merge_all
+# rule subset_biallelic, When I merged the data i generated a few non-biallelic snps
+rule list_samples:
+    # generates a list of samples in the
+    # vcf file to analyze
+    input:
+        "../../../../../tmp/1TGP_and_50MXB-chr22-snps-GRCh38.vcf.gz"
+    output:
+        "data/samples.txt"
+    shell:
+        """
+        bcftools query -l {input} >{output}
+        """
+
+rule pop_info:
+    # make a data fram mapping samples to populations
+    input:
+        "data/samples.txt",
+        "../../resources/genomes-metadata/50Genomes_info.txt",
+        "../../resources/1TGP-samples-meta-data/igsr-1000genomes.tsv"
+    output:
+        "data/popinfo.txt"
+    shell:  "Rscript 01-pop-info.R"
+
+
+rule compute_sfs_folded:
+    input:
+        'data/popinfo.txt',
+        '../../../../../tmp/1TGP_and_50MXB-chr22-snps-GRCh38.vcf.gz'
+    output:
+        'data/sfs_subpops.csv'
+    shell:
+        '''
+        python 02-SFS-folded-populations.py
+        '''
