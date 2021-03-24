@@ -75,8 +75,10 @@ rule subset_haplotypes:
         # temporal file to save ref pop list
         pop_list_tmp = "results/data/210308-local-ancestry/sample_pop_list_tmp"
     shell:
+        # I only use the variant sites for subsetting
         """
-        bcftools view -S {input.pop_list} {input.vcf} -Oz -o {output}
+        bcftools view -S {input.pop_list} {input.vcf} |\
+            bcftools view -c1 -Oz -o {output}
         """
 
 
