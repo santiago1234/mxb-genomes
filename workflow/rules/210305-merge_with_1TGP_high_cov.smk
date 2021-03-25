@@ -49,11 +49,14 @@ rule oneTGP_get_biallelic_and_subset_pops:
     output:
         temp("results/data/210305-merged-with-1TGP/1TGP-chr{chrn}-biallelic-subset.vcf.gz"),
         temp("results/data/210305-merged-with-1TGP/1TGP-chr{chrn}-biallelic-subset.vcf.gz.tbi")
+    # In the bcftools pipeline,
+    #I use (at the end) view -c1, this will remove all non variant sites
     shell:
         """
         bcftools view -m2 -M2 -v snps {input.vcf} |\
             bcftools view -S {input.pops} |\
-            bcftools annotate --rename-chrs {input.chr_names} -Oz -o {output[0]}
+            bcftools annotate --rename-chrs {input.chr_names} |\
+            bcftools view -c1 -Oz -o {output[0]}
         bcftools index {output[0]} --tbi
         """
 
@@ -69,13 +72,12 @@ rule merge_50G_with_1TG:
         vcf_1Tg = "results/data/210305-merged-with-1TGP/1TGP-chr{chrn}-biallelic-subset.vcf.gz",
         index_1Tg = "results/data/210305-merged-with-1TGP/1TGP-chr{chrn}-biallelic-subset.vcf.gz.tbi"
     output:
-        "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-GRCh38.vcf.gz"
+        temp("results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps.vcf.gz")
     shell:
         """
         bcftools merge --missing-to-ref \
             {input.vcf_1Tg} {input.vcf_50g} |\
             bcftools annotate --set-id \
-            +'%CHROM\:%POS\:%REF\:%FIRST_ALT' \
-            -Oz -o {output}
+            +'%CHROM\:%POS\:%REF\:%FIRST_ALT' -Oz -o {output}
         """
 
