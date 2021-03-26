@@ -8,7 +8,7 @@ library(stringr)
 # parameters
 
 oneTGP_pops <-  snakemake@params$oneTGP_pops
-path_oneT_meta <- "resources/1TGP-samples-meta-data/igsr-1000genomes.tsv"
+path_oneT_meta <- "resources/1TGP-samples-meta-data/integrated_call_samples_v3.20130502.ALL.panel"
 path_mxb_meta <- "resources/genomes-metadata/50Genomes_info.txt"
 oneTGP_NATs <- "resources/1TGP-samples-meta-data/native-american.txt"
 # outfiles
@@ -27,13 +27,14 @@ oneTGP_NATs <- tibble(
 # filter populations ------------------------------------------------------
 
 
-oneT_meta <- read_tsv(path_oneT_meta)
+oneT_meta <- read.table(path_oneT_meta, header = T) %>% 
+  as_tibble()
 
 oneTGP_pops <- 
   oneT_meta %>%
-  select(`Sample name`, `Population code`, `Superpopulation code`) %>% 
-  filter(str_detect(`Population code`, oneTGP_pops)) %>% 
-  rename(Sample = `Sample name`, Population = `Superpopulation code`) 
+  select(sample, pop, super_pop) %>% 
+  filter(str_detect(pop, oneTGP_pops)) %>% 
+  rename(Sample = sample, Population = super_pop, `Population code` = pop) 
 
 mxb_meta <- read_tsv(path_mxb_meta) %>% 
   mutate(
@@ -57,7 +58,7 @@ sample_map <- filter(populations, Population != "AMR")
 sample_map <- bind_rows(sample_map, oneTGP_NATs)
 
 
-filter(population)
+
 write_tsv(sample_map, sample_map_file)
 
 

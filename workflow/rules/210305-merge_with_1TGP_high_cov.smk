@@ -14,12 +14,12 @@ rule merge_all_50mxb_with_1TGP:
 rule subset_pop_list:
     #list with populations to subset from 1TGP
     input:
-        pop_meta = "resources/1TGP-samples-meta-data/igsr-1000genomes.tsv"
+        pop_meta = "resources/1TGP-samples-meta-data/integrated_call_samples_v3.20130502.ALL.panel"
     output:
         "results/data/210305-merged-with-1TGP/pops-to-subset.txt"
     shell:
         """
-        cut -f1,4 {input} |\
+        cut -f1,2 {input} |\
             grep -E '{oneTGP_pops}' |\
             cut -f1 >{output}
         """

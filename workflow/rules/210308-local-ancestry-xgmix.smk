@@ -40,7 +40,7 @@ rule reference_and_query_pops:
     # query_map_file is a file with the query populations
     # the script 01-populations.R will degine the reference and query haplotypes
     input:
-        oneT_meta = "resources/1TGP-samples-meta-data/igsr-1000genomes.tsv",
+        oneT_meta = "resources/1TGP-samples-meta-data/integrated_call_samples_v3.20130502.ALL.panel",
         mxb_meta = "resources/genomes-metadata/50Genomes_info.txt",
         oneT_native_american = "resources/1TGP-samples-meta-data/native-american.txt"
     output:

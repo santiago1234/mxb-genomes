@@ -18,3 +18,18 @@ rule download_genetic_maps:
         mv *gmap resources/genetic-maps/
         rm genetic_maps.b38.tar.gz
         """
+
+rule oneT_genome_population_info:
+    #Download the population information
+    #for the 1TGP data
+    #NOTE: this population info table does not
+    #include the additional samples what were sequenced.
+    #This sample not included are related to the samples
+    #here and we won't use them in the project
+    output:
+        "resources/1TGP-samples-meta-data/integrated_call_samples_v3.20130502.ALL.panel"
+    shell:
+        """
+        wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/integrated_call_samples_v3.20130502.ALL.panel
+        mv integrated_call_samples_v3.20130502.ALL.panel {output}
+        """
