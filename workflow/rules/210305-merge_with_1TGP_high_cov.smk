@@ -1,5 +1,6 @@
 # Merge 50 genomes with 1TGP high coverage data
 # note that I merge the phased bialleic snps from the 50 MXB genomes
+# After I merge the data I will add the variant annotation with vep
 
 from os import path
 
@@ -81,3 +82,53 @@ rule merge_50G_with_1TG:
             +'%CHROM\:%POS\:%REF\:%FIRST_ALT' -Oz -o {output}
         """
 
+# The next rules will add variant annotation information
+#with vep
+#I use the prefix va_* to mean variant annotation
+# To run this rule vep should be installed
+# I installed vep in my home directory: ~/ensembl-vep/
+# I followed the installation instructions here:
+# http://www.ensembl.org/info/docs/tools/vep/script/vep_tutorial.html
+# I also downloaded the cache data for GRCh37 and GRCh38
+
+rule va_sort_vcf:
+    input:
+        "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps.vcf.gz",
+    output:
+        temp("results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-to-annotate.vcf")
+    shell:
+        """
+        bcftools view {input} | bcftools sort >{output}
+        """
+
+rule va_vep:
+    input:
+        "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-to-annotate.vcf"
+    output:
+        "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf_summary.html",
+        temp("results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf")
+    params:
+        assembly="GRCh38",
+        species="homo_sapiens"
+    log:
+        "results/logs/210305-merged-with-1TGP/vep-{chrn}.log"
+    shell:
+        """
+        # NOTE: I am using the path to the vep dir
+        ~/ensembl-vep/vep -i {input} \
+             --assembly {params.assembly} --cache --vcf \
+             --output_file {output[1]} 2>{log}
+        """
+
+
+rule va_compress_and_index:
+    input:
+        "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf"
+    output:
+        "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf.gz",
+        "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf.gz.tbi"
+    shell:
+        """
+        bcftools view {input} -Oz -o {output[0]}
+        bcftools index {output[0]} --tbi
+        """

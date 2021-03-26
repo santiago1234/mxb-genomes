@@ -67,7 +67,7 @@ rule pop_list_to_subset:
 
 rule subset_haplotypes:
     input:
-        vcf = "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-GRCh38.vcf.gz",
+        vcf = "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf.gz",
         pop_list = "results/data/210308-local-ancestry/input-data/{haplo}_pop-list.txt"
     output:
         temp("results/data/210308-local-ancestry/input-data/{haplo}-chr{chrn}.vcf.gz")
@@ -143,6 +143,3 @@ rule collect_xgmix_output:
         mv {params.xpred_msp} {output.pred_msp}
         mv {params.xpred_fb} {output.pred_fb}
         """
-
-
-
