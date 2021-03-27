@@ -4,6 +4,8 @@
 
 import os
 
+CHROM = [2, 21, 22]
+
 PATH_TO_POPGENE = "../../../../../Research/popgene-utils/"
 
 
@@ -19,4 +21,34 @@ rule compute_global_ancestry_from_local:
         """
         Rscript {params.rscript} \
             -m {input} -c {params.chrn} -o {output}
+        """
+
+rule msp_to_bed:
+    input:
+        "../../results/data/210308-local-ancestry/predictions/mdl-{chrn}.msp.tsv"
+    output:
+        temp("data/bed/chr{chrn}-local-ancestry-{individual}.tsv")
+    params:
+        individual = '{individual}',
+        basename = 'data/bed/chr{chrn}-local-ancestry',
+        rscript = os.path.join(PATH_TO_POPGENE, "scripts/convert-msp-to-bed.R")
+    shell:
+        """
+        Rscript {params.rscript} -m {input} -i \
+            {params.individual} -o {params.basename}
+        """
+
+rule merge_msp:
+    input:
+        expand("data/bed/chr{chrn}-local-ancestry-{{individual}}.tsv", chrn=CHROM)
+    output:
+        "data/bed/allchrn-{individual}.tsv"
+    shell:
+        """
+        #Add the header
+        head -n1 {input[0]} >{output}
+        for file in {input}
+        do
+            tail -n+2 $file >>{output}
+        done
         """
