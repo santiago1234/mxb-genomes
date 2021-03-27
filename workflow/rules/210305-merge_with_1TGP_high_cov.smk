@@ -9,7 +9,7 @@ oneTGP_pops = config['oneTGP_pops']
 
 rule merge_all_50mxb_with_1TGP:
     input:
-        expand("results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-GRCh38.vcf.gz", chrn=CHROMS)
+        expand("results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf.gz", chrn=CHROMS)
 
 rule subset_pop_list:
     #list with populations to subset from 1TGP
