@@ -105,7 +105,7 @@ rule xgmix_train:
         reference_file = "results/data/210308-local-ancestry/input-data/reference-chr{chrn}.vcf.gz",
         genetic_map = "results/data/210308-local-ancestry/input-data/chr{chrn}.b38.gmap.txt"
     params:
-        phase="False",
+        phase="True",
         chr_nr="{chrn}",
         output_basename="results/data/210308-local-ancestry/mdl-{chrn}"
     conda: "../envs/xgmix.yaml"
@@ -115,6 +115,7 @@ rule xgmix_train:
         temp(directory("results/data/210308-local-ancestry/mdl-{chrn}"))
     shell:
         """
+        #I set the phase parameter to True 
         echo "RUNING XGmix !!!!!"
         python workflow/scripts/XGMix-master/XGMIX.py {input.query_file} \
             {input.genetic_map} {params.output_basename} \
