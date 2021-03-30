@@ -63,4 +63,12 @@ write_tsv(sample_map, sample_map_file)
 
 
 query_pop <- filter(populations, Population == "AMR")
+
+## add MXB to the query populations
+mxb_samples <- 
+  populations %>% 
+  filter(str_detect(Sample, "MXB"))
+
+query_pop <- bind_rows(query_pop, mxb_samples)
+
 write_tsv(query_pop, query_pops_file)

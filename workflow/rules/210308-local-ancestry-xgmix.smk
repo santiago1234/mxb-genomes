@@ -8,6 +8,7 @@
 #
 # Query pop
 # MXL + PEL + CLM + PUR: AMR (1TGP)
+# MXB (I also include the 50 MXB genomes in the query file)
 
 oneTGP_pops = config['oneTGP_pops']
 
