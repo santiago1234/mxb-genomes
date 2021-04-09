@@ -1,0 +1,11 @@
+name: scipy
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python =3.8.5
+  - numpy
+  - pandas
+  - matplotlib
+  - scikit-allel
+  - scipy
