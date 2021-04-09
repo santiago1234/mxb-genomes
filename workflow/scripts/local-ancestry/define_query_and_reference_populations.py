@@ -91,5 +91,17 @@ def ref_sample_map(npops):
         raise ValueError('invalid number of pouplations')
 
 
-ref_sample_map(npops=n_pops).to_csv(sample_map_file, index=False)
-query_sample_map().to_csv(query_map_file, index=False)
+#RUN FUNCTIONS
+(
+    ref_sample_map(npops=n_pops)
+    .loc[:,['Sample', 'Population']]
+    .to_csv(sample_map_file, index=False, sep = '\t')
+)
+
+
+(
+    query_sample_map()
+    .loc[:,['Sample', 'Population']]
+    .to_csv(query_map_file, index=False, sep='\t')
+)
+
