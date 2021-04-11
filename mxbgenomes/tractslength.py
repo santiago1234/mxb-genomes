@@ -1,4 +1,4 @@
-# Plot tract length distribution
+# Plot tract length distribution
 
 import numpy as np
 import pandas as pd
@@ -34,10 +34,9 @@ def merge_ancestries(r_1, r_2):
     """
     merged = r_1.reset_index(drop=True)
     r_2 = r_2.reset_index(drop=True)
-    
     merged.loc[0, 'epos'] = r_2.loc[0, 'epos']
     merged.loc[0, 'egpos'] = r_2.loc[0, 'egpos']
-    
+
     return merged
 
 
@@ -48,27 +47,25 @@ def collapse_windows_to_tracks(df_chm):
     """
     # make sure df_chm is sorted by physical position
     df_chm = df_chm.sort_values(['spos'])
-    
+
     current_ancstr_block = df_chm.iloc[[0]]
     tracks = list()
 
     for index in range(1, df_chm.shape[0]):
         current_row = df_chm.iloc[[index]]
 
-        if is_ancestry_continuous(current_ancstr_block, current_row):  
-            current_ancstr_block = merge_ancestries(current_ancstr_block, current_row)
+        if is_ancestry_continuous(current_ancstr_block, current_row):
+            current_ancstr_block = merge_ancestries(
+                current_ancstr_block, current_row)
 
         else:
             tracks.append(current_ancstr_block)
             current_ancstr_block = current_row
-            
+
     tracks = pd.concat(tracks).reset_index(drop=True)
-    
-    # compute tracks length
+
+    # compute tracks length
     tracks['len_bp'] = tracks.epos - tracks.spos
     tracks['len_cm'] = tracks.egpos - tracks.sgpos
-    
+
     return tracks
-
-
-
