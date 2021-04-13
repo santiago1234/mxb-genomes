@@ -7,6 +7,8 @@ import os
 CHROM = list(range(1, 23))
 
 PATH_TO_POPGENE = "../../../../../Research/popgene-utils/"
+# I assume that the msp file hsa the format mdl-{chrn}.msp.tsv
+PATH_TO_XGMIX = "../../results/data/210308-local-ancestry/predictions/"
 
 
 rule compute_global_ancestry_from_local:
@@ -25,24 +27,21 @@ rule compute_global_ancestry_from_local:
 
 rule msp_to_bed:
     input:
-        "../../results/data/210308-local-ancestry/predictions/mdl-{chrn}.msp.tsv"
+        os.path.join(PATH_TO_XGMIX, "mdl-{chrn}.msp.tsv")
     output:
         temp("data/bed/chr{chrn}-local-ancestry-{individual}.tsv")
     params:
         individual = '{individual}',
-        basename = 'data/bed/chr{chrn}-local-ancestry',
-        rscript = os.path.join(PATH_TO_POPGENE, "scripts/convert-msp-to-bed.R")
     shell:
         """
-        Rscript {params.rscript} -m {input} -i \
-            {params.individual} -o {params.basename}
+        python scripts/msp_to_bed.py -msp {input} -ind {params.individual} -out {output}
         """
 
 rule merge_msp:
     input:
         expand("data/bed/chr{chrn}-local-ancestry-{{individual}}.tsv", chrn=CHROM)
     output:
-        "data/bed/allchrn-{individual}.tsv"
+        temp("data/bed/allchrn-{individual}.tsv")
     shell:
         """
         #Add the header
@@ -52,3 +51,11 @@ rule merge_msp:
             tail -n+2 $file >>{output}
         done
         """
+
+rule plot_cariotipo:
+    input:
+        "data/bed/allchrn-{individual}.tsv"
+    output:
+        "plots/{individual}-karyo.png"
+    script:
+        pass
