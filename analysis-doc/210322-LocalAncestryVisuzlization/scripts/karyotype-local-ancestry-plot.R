@@ -3,14 +3,27 @@ library(scales)
 library(ggthemes)
 
 theme_set(theme_tufte(base_family = "Helvetica"))
-bed <- read_tsv("data/bed/allchrn-HG01893.tsv")
-individual <- "HG01893"
+
+# define supplied parameters ----------------------------------------------
+
+# input_bed <- "data/bed/allchrn-HG01893.tsv"
+# output_plot <- "plots/karyo-HG01893.png"
+# bed <- read_tsv(input_bed)
+
+input_bed <- snakemake@input[[1]]
+output_plot <- snakemake@output[[1]]
+  
+individual <- basename(input_bed) %>%
+  str_replace("allchrn-", "") %>% 
+  str_replace(".tsv", "")
+
+bed <- read_tsv(input_bed)
 
 # aling chromosomes so the 1st position is zero ---------------------------
 
 bed <- 
   bed %>% 
-  group_by(chm) %>% 
+  group_by(chrn) %>% 
   mutate(
     spos = spos - min(spos),
     epos = epos - min(spos)
@@ -21,19 +34,19 @@ bed <-
 # draw a indicator variable for Hapl  otypes limits -------------------------
 
 limit_y_max <- function(haplo) {
-  if (haplo == 1) {
+  if (haplo == "A") {
     return(Inf)
   }
-  if (haplo == 0) {
+  if (haplo == "B") {
     return(0.5) #0.49
   }
 }
 
 limit_y_min <- function(haplo) {
-  if (haplo == 1) {
+  if (haplo == "A") {
     return(0.5)
   }
-  if (haplo == 0) {
+  if (haplo == "B") {
     return(-Inf)
   }
 }
@@ -45,12 +58,12 @@ bed <- bed %>%
   )
 
 bed %>% 
-  ggplot(aes(x = spos, fill = assignment)) +
+  ggplot(aes(x = spos, fill = Ancestry)) +
   geom_rect(
     aes(xmin = spos, xmax=epos, ymin = ymin_haplo, ymax = ymax_haplo)
   ) +
   geom_hline(yintercept = 0.5, color ="white", size = 0.1) +
-  facet_grid(chm ~.,switch = "y") +
+  facet_grid(chrn ~.,switch = "y") +
   scale_x_continuous(
     expand = c(0,0),
     labels = label_number(scale = 1e-6, suffix = "Mb")
@@ -70,31 +83,8 @@ bed %>%
     x = "Position relative to chromosome start",
     title = individual
   )
-ggsave("test.pdf", height = 5, width = 5)
-ggsave("test.png", height = 5, width = 5)
 
-
-# this function is to visualy check that points are placed correct --------
-
-
-bed %>% 
-  ggplot(aes(x = spos, fill = assignment)) +
-  geom_point(aes(y = Haplotype),shape = 21, position = "jitter") +
-  geom_hline(yintercept = 0.5, color ="white", size = 1) +
-  facet_grid(chm ~., switch = "y") +
-  scale_x_continuous(labels = label_number(scale = 1e-6, suffix = "Mb")) +
-  theme(
-    axis.ticks.y = element_blank(),
-    axis.text.y = element_blank(),
-    panel.background = element_blank(),
-    legend.position = c(1, 0)
-  ) +
-  labs(
-    y = NULL
-  ) +
-  scale_fill_viridis_d(option = "C") +
-  labs(
-    x = "Position relative to chromosome start",
-    subtitle = individual
-  )
-ggsave("test-points.pdf", height = 3, width = 8)
+ggsave(output_plot, height = 5, width = 4)
+ggsave(
+  str_replace(output_plot, ".png", ".pdf"),
+  height = 5, width = 4)

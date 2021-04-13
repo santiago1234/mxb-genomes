@@ -8,6 +8,8 @@ CHROM = list(range(1, 23))
 
 PATH_TO_POPGENE = "../../../../../Research/popgene-utils/"
 # I assume that the msp file hsa the format mdl-{chrn}.msp.tsv
+# This is the path to the directory containing the msp files
+# for all the chromosomes
 PATH_TO_XGMIX = "../../results/data/210308-local-ancestry/predictions/"
 
 
@@ -52,10 +54,10 @@ rule merge_msp:
         done
         """
 
+
 rule plot_cariotipo:
     input:
         "data/bed/allchrn-{individual}.tsv"
     output:
-        "plots/{individual}-karyo.png"
-    script:
-        pass
+        "plots/karyo-{individual}.png"
+    script: "scripts/karyotype-local-ancestry-plot.R"
