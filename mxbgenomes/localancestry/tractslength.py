@@ -1,4 +1,6 @@
-# Plot tract length distribution
+"""
+Compute trackt length distribution
+"""
 
 import numpy as np
 import pandas as pd
@@ -8,7 +10,7 @@ def is_ancestry_continuous(r_1, r_2):
     """
     Params:
         r_1: pd.DataFrame, a single row pandas frame.
-            this row contains the coulummn assigment
+            this row contains the coulummn Ancestry
         r_2: same as r_1
     Returns:
         lgl: True if r_1 and r_2 represent the same ancestry
@@ -19,7 +21,7 @@ def is_ancestry_continuous(r_1, r_2):
         fragments
     """
 
-    res = r_1.assignment.values[0] == r_2.assignment.values[0]
+    res = r_1.Ancestry.values[0] == r_2.Ancestry.values[0]
     return res
 
 
@@ -44,6 +46,12 @@ def collapse_windows_to_tracks(df_chm):
     """
     If n continous windows are from the same ancestry,
     collpase to a single continous windows.
+    Args:
+        df_chm: pd.DataFrame
+            Table with genomo coordinates and Ancestry assigments.
+    Note:
+        It is assumed that the input data represents one chromosome
+        and only one Haplotype either maternal or paternal
     """
     # make sure df_chm is sorted by physical position
     df_chm = df_chm.sort_values(['spos'])
@@ -62,10 +70,50 @@ def collapse_windows_to_tracks(df_chm):
             tracks.append(current_ancstr_block)
             current_ancstr_block = current_row
 
+    # add the last ancestry, the for loop does not include the last row
+
+    tracks.append(current_ancstr_block)
+
     tracks = pd.concat(tracks).reset_index(drop=True)
 
     # compute tracks length
     tracks['len_bp'] = tracks.epos - tracks.spos
     tracks['len_cm'] = tracks.egpos - tracks.sgpos
 
-    return tracks
+    return tracks.reset_index(drop=True)
+
+
+def computer_tract_len_dist(bed_chr_h, nbins=50, max_cm_pos=250):
+    """
+    Computes the trackts length distribution for the given input.
+    Note:
+        It is assumed that the input data represents one chromosome
+        and only one Haplotype either maternal or paternal
+    Args:
+        bed_chr_h: pd.DataFrame
+            Table with data for only one chromosome and
+            one Haplotype.
+        nbins: int,
+            the number of bins to use
+        max_cm_pos: int,
+            the maximum value for the binning)
+    Returns:
+        pd.DataFrame with distribution
+    """
+    # Collapse to continous ancestry tracts
+    bed_chr_h = collapse_windows_to_tracks(bed_chr_h)
+    bins = np.linspace(start=0, stop=max_cm_pos, num=nbins)
+
+    bed_chr_h['bins_cm'] = pd.cut(bed_chr_h.len_cm, bins,
+                                  labels=bins.round()[:-1],
+                                  include_lowest=True)
+    new_names = {'index': 'tract_len_bin', 'bins_cm': 'relative_frequency'}
+    distribution = (
+        bed_chr_h
+        .bins_cm
+        .value_counts()
+        .reset_index()
+        .rename(new_names, axis=1)
+    )
+
+    return distribution
