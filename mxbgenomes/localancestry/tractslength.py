@@ -42,7 +42,7 @@ def merge_ancestries(r_1, r_2):
     return merged
 
 
-def collapse_windows_to_tracks(df_chm):
+def collapse_windows_to_tracts(df_chm):
     """
     If n continous windows are from the same ancestry,
     collpase to a single continous windows.
@@ -57,7 +57,7 @@ def collapse_windows_to_tracks(df_chm):
     df_chm = df_chm.sort_values(['spos'])
 
     current_ancstr_block = df_chm.iloc[[0]]
-    tracks = list()
+    tracts = list()
 
     for index in range(1, df_chm.shape[0]):
         current_row = df_chm.iloc[[index]]
@@ -67,20 +67,31 @@ def collapse_windows_to_tracks(df_chm):
                 current_ancstr_block, current_row)
 
         else:
-            tracks.append(current_ancstr_block)
+            tracts.append(current_ancstr_block)
             current_ancstr_block = current_row
 
     # add the last ancestry, the for loop does not include the last row
 
-    tracks.append(current_ancstr_block)
+    tracts.append(current_ancstr_block)
 
-    tracks = pd.concat(tracks).reset_index(drop=True)
+    tracts = pd.concat(tracts).reset_index(drop=True)
 
-    # compute tracks length
-    tracks['len_bp'] = tracks.epos - tracks.spos
-    tracks['len_cm'] = tracks.egpos - tracks.sgpos
+    # compute tracts length
+    tracts['len_bp'] = tracts.epos - tracts.spos
+    tracts['len_cm'] = tracts.egpos - tracts.sgpos
 
-    return tracks.reset_index(drop=True)
+    return tracts.reset_index(drop=True)
+
+
+def _make_bins_to_fill_na(bins, ancestries):
+    """
+    Internal function to generate a table bins x ancestries
+    """
+    def myfmt(x, y): return str(round(x)) + '-' + str(round(y))
+    bins_labs = [myfmt(a, b) for (a, b) in zip(bins[:-1], bins[1:])]
+    df_1 = pd.DataFrame({'tract_length': bins_labs})
+    df_2 = pd.DataFrame({'Ancestry': ancestries})
+    return bins_labs, df_1.merge(df_2, how='cross')
 
 
 def computer_tract_len_dist(bed_chr_h, nbins=50, max_cm_pos=250):
@@ -101,19 +112,26 @@ def computer_tract_len_dist(bed_chr_h, nbins=50, max_cm_pos=250):
         pd.DataFrame with distribution
     """
     # Collapse to continous ancestry tracts
-    bed_chr_h = collapse_windows_to_tracks(bed_chr_h)
+    bed_chr_h = collapse_windows_to_tracts(bed_chr_h)
     bins = np.linspace(start=0, stop=max_cm_pos, num=nbins)
 
-    bed_chr_h['bins_cm'] = pd.cut(bed_chr_h.len_cm, bins,
-                                  labels=bins.round()[:-1],
-                                  include_lowest=True)
-    new_names = {'index': 'tract_len_bin', 'bins_cm': 'relative_frequency'}
+    # make useful label for the cm bins
+    ancestries = bed_chr_h.Ancestry.unique().tolist()
+    bins_labs, full_data = _make_bins_to_fill_na(bins, ancestries)
+
+    bed_chr_h['tract_length'] = pd.cut(bed_chr_h.len_cm, bins,
+                                       labels=bins_labs,
+                                       include_lowest=True)
+
     distribution = (
-        bed_chr_h
-        .bins_cm
+        bed_chr_h[['Ancestry', 'tract_length']]
         .value_counts()
         .reset_index()
-        .rename(new_names, axis=1)
+        .rename({0: 'Frequency'}, axis=1)
     )
+    distribution['tract_length'] = distribution.tract_length.astype(str)
+    distribution = pd.merge(full_data, distribution, how="left", on=[
+                            'tract_length', 'Ancestry'])
 
-    return distribution
+    # Missing value indicates a frequency of 0
+    return distribution.fillna(0)
