@@ -2,36 +2,42 @@
 # where is this dir located ?
 # https://github.com/santiago1234/popgene-utils
 
+from os.path import join
 import os
 
 CHROM = list(range(1, 23))
+configfile: "config.yaml"
 
-PATH_TO_POPGENE = "../../../../../Research/popgene-utils/"
+RESULTS_DIR = join('results', config['results_prefix'])
+DATA_DIR = join('data', config['results_prefix'])
+PLOTS_DIR = join('plots', config['results_prefix'])
+
+# PATH_TO_POPGENE = "../../../../../Research/popgene-utils/"
 # I assume that the msp file hsa the format mdl-{chrn}.msp.tsv
 # This is the path to the directory containing the msp files
 # for all the chromosomes
-PATH_TO_XGMIX = "../../results/data/210308-local-ancestry/predictions/"
+PATH_TO_XGMIX = config['PATH_TO_XGMIX']
 
 
-rule compute_global_ancestry_from_local:
-    input:
-        "../../results/data/210308-local-ancestry/predictions/mdl-{chrn}.msp.tsv"
-    output:
-        "data/local-chrn{chrn}.csv"
-    params:
-        chrn = "{chrn}",
-        rscript = os.path.join(PATH_TO_POPGENE, "scripts/global-ancestry-xgmix.R")
-    shell:
-        """
-        Rscript {params.rscript} \
-            -m {input} -c {params.chrn} -o {output}
-        """
+# rule compute_global_ancestry_from_local:
+#     input:
+#         "../../results/data/210308-local-ancestry/predictions/mdl-{chrn}.msp.tsv"
+#     output:
+#         "data/local-chrn{chrn}.csv"
+#     params:
+#         chrn = "{chrn}",
+#         rscript = join(PATH_TO_POPGENE, "scripts/global-ancestry-xgmix.R")
+#     shell:
+#         """
+#         Rscript {params.rscript} \
+#             -m {input} -c {params.chrn} -o {output}
+#         """
 
 rule msp_to_bed:
     input:
-        os.path.join(PATH_TO_XGMIX, "mdl-{chrn}.msp.tsv")
+        join(PATH_TO_XGMIX, "mdl-{chrn}.msp.tsv")
     output:
-        temp("data/bed/chr{chrn}-local-ancestry-{individual}.tsv")
+        join(DATA_DIR, "bed/chr{chrn}-local-ancestry-{individual}.tsv")
     params:
         individual = '{individual}',
     shell:
@@ -41,9 +47,9 @@ rule msp_to_bed:
 
 rule merge_msp:
     input:
-        expand("data/bed/chr{chrn}-local-ancestry-{{individual}}.tsv", chrn=CHROM)
+        expand(join(DATA_DIR, "bed/chr{chrn}-local-ancestry-{{individual}}.tsv"), chrn=CHROM)
     output:
-        temp("data/bed/allchrn-{individual}.tsv")
+        join(DATA_DIR, "bed/allchrn-{individual}.tsv")
     shell:
         """
         #Add the header
@@ -57,7 +63,18 @@ rule merge_msp:
 
 rule plot_cariotipo:
     input:
-        "data/bed/allchrn-{individual}.tsv"
+        join(DATA_DIR, "bed/allchrn-{individual}.tsv")
     output:
-        "plots/karyo-{individual}.png"
+        join(PLOTS_DIR, "karyo-{individual}.png")
     script: "scripts/karyotype-local-ancestry-plot.R"
+
+
+rule compute_tract_len_distribution:
+    input:
+        "data/bed/chr{chrn}-local-ancestry-{individual}.tsv"
+    output:
+        "data/tracts/{individual}-tracts.csv"
+    shell:
+        """
+        echo
+        """
