@@ -37,7 +37,7 @@ rule msp_to_bed:
     input:
         join(PATH_TO_XGMIX, "mdl-{chrn}.msp.tsv")
     output:
-        join(DATA_DIR, "bed/chr{chrn}-local-ancestry-{individual}.tsv")
+        temp(join(DATA_DIR, "bed/chr{chrn}-local-ancestry-{individual}.tsv"))
     params:
         individual = '{individual}',
     shell:
@@ -71,10 +71,10 @@ rule plot_cariotipo:
 
 rule compute_tract_len_distribution:
     input:
-        "data/bed/chr{chrn}-local-ancestry-{individual}.tsv"
+        join(DATA_DIR, "bed/allchrn-{individual}.tsv")
     output:
-        "data/tracts/{individual}-tracts.csv"
+        join(RESULTS_DIR, "tracts/{individual}-tracts.csv")
     shell:
         """
-        echo
+        python scripts/tract_lenght.py -bed {input} -out {output}
         """
