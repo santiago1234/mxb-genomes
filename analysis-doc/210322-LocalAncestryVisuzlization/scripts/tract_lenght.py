@@ -41,7 +41,8 @@ def run(args):
     tracts = (
         tracts
         .groupby(['Ancestry', 'tract_length'])
-        .sum('Frequency')
+        [['Frequency']]
+        .sum()
         .reset_index()
     )
 
