@@ -10,7 +10,6 @@ by population.
         -MXL
 """
 
-from mxbgenomes.utils import load_1tgp_metada
 from fnmatch import fnmatch
 import numpy as np
 import argparse
@@ -19,14 +18,14 @@ import pandas as pd
 import os
 import sys
 sys.path.append('../../')
-
+from mxbgenomes.utils import load_1tgp_metada
 
 # inpute parmeters
 def run(args):
     # arguments
 
     path_to_panel = args.path_to_panel
-    path_to_tracts = args.path_to_panel
+    path_to_tracts = args.path_to_tracts
     patern_tracts = "*-tracts.csv"
     outputfile = args.outputfile
 

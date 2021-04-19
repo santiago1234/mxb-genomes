@@ -4,6 +4,11 @@
 
 from os.path import join
 import os
+import pandas as pd
+import sys
+sys.path.append('../../')
+from mxbgenomes.utils import load_1tgp_metada
+from utils import subpops_and_samples  # see script: utils.py
 
 CHROM = list(range(1, 23))
 configfile: "config.yaml"
@@ -17,7 +22,10 @@ PLOTS_DIR = join('plots', config['results_prefix'])
 # This is the path to the directory containing the msp files
 # for all the chromosomes
 PATH_TO_XGMIX = config['PATH_TO_XGMIX']
-
+subpops = ['MXL', 'PEL', 'PUR', 'CLM']
+ONETGP = load_1tgp_metada('../../resources/1TGP-samples-meta-data/integrated_call_samples_v3.20130502.ALL.panel', filter_subpops=True)
+ONETGP = ONETGP[ONETGP.Subpopulation.isin(subpops)]
+SAMPLES = ONETGP.Samplename.to_list()
 
 # rule compute_global_ancestry_from_local:
 #     input:
@@ -78,3 +86,25 @@ rule compute_tract_len_distribution:
         """
         python scripts/tract_lenght.py -bed {input} -out {output}
         """
+
+
+rule tract_dist_over_subpopulation:
+    """
+    tract distribution averaged over individuals
+    from the populations.
+    """
+    input:
+       expand(join(RESULTS_DIR, "tracts/{individual}-tracts.csv"), individual=SAMPLES)
+    output:
+        join(RESULTS_DIR, "tract-distribution-by-population.csv")
+    params:
+        path_to_tracts = join(RESULTS_DIR, "tracts")
+    shell:
+        """
+        # See the script for additional info
+        python scripts/average_tract_dist_subpops.py \
+            -tracts {params.path_to_tracts} \
+            -panel ../../resources/1TGP-samples-meta-data/integrated_call_samples_v3.20130502.ALL.panel \
+            -out {output}
+        """
+
