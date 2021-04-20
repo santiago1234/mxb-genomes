@@ -13,6 +13,28 @@
 #       - AFR: YRI
 #       - EAS: CHB
 
+rule lai_all:
+    input:
+        expand("results/data/210409-local-ancestry/{npops}-pops/trained-models/model_chm_{chrn}.pkl",  chrn=CHROMS, npops=['4'])
+
+
+rule lai_download_XGMix:
+    # this rules dowloads the software (git repo)
+    # to run XGMix
+    # parameters for runing XGMix can be configured in the
+    # config file inside XGMix-master
+    # I only manually change the follwing parameters:
+    #  rm_simulated_data = True
+	#  n_cores = 20
+    output:
+        directory("workflow/scripts/XGMix-master")
+    shell:
+        """
+        wget https://github.com/AI-sandbox/XGMix/archive/master.zip
+        unzip master.zip
+        rm master.zip
+        mv XGMix-master workflow/scripts/
+        """
 
 rule lai_ref_and_query_pops:
     input:
