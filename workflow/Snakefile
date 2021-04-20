@@ -27,8 +27,6 @@ rule all:
 
 
 include: "rules/210409-lai-xgmix.smk"
-include: "rules/210319-Phase-MXB-with-1TGP.smk"
-include: "rules/210308-local-ancestry-xgmix.smk"
 include: "rules/210305-merge_with_1TGP_high_cov.smk"
 include: "rules/210303-phase.smk"
 include: "rules/210301-lift-over-to-GRCh38.smk"
