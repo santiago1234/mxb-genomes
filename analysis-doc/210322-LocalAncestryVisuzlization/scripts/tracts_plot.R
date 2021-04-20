@@ -1,5 +1,8 @@
-library(tidyverse)
-
+library(tidyr)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(readr)
 # uncoment to test the code
 # input_tracts_file <- "results/3-pops/tract-distribution-by-population.csv"
 input_tracts_file <- snakemake@input[[1]] 
