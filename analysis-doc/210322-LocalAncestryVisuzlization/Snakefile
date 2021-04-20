@@ -8,7 +8,6 @@ import pandas as pd
 import sys
 sys.path.append('../../')
 from mxbgenomes.utils import load_1tgp_metada
-from utils import subpops_and_samples  # see script: utils.py
 
 CHROM = list(range(1, 23))
 configfile: "config.yaml"
