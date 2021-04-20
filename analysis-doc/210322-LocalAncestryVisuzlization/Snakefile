@@ -107,3 +107,11 @@ rule tract_dist_over_subpopulation:
             -out {output}
         """
 
+rule plot_tracts:
+    input:
+        join(RESULTS_DIR, "tract-distribution-by-population.csv")
+    output:
+        join(PLOTS_DIR, "tracts-subpopulations.png")
+    script:
+        "scripts/tracts_plot.R"
+    
