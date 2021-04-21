@@ -15,7 +15,7 @@ To plot a caryotype for a particular individual, use:
 snakemake -j2 plots/3-pops/karyo-HG00551.png
 ```
 
-![Caryotype](plots/3-pops/karyo-HG01893.png)
+![Caryotype](plots/3-pops/karyo-HG01893.png =400x)
 
 # Tract length distribution
 
@@ -24,6 +24,10 @@ snakemake -j2 plots/3-pops/karyo-HG00551.png
 snakemake  -j5 plots/3-pops/tracts-subpopulations.png
 ```
 
+
+# Global Ancestry
+
+- TODO
 
 ![Tracts](plots/3-pops/tracts-subpopulations.png)
 
