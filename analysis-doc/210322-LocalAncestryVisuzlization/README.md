@@ -24,12 +24,17 @@ snakemake -j2 plots/3-pops/karyo-HG00551.png
 snakemake  -j5 plots/3-pops/tracts-subpopulations.png
 ```
 
+![Tracts](plots/3-pops/tracts-subpopulations.png)
 
 # Global Ancestry
 
 - TODO
 
-![Tracts](plots/3-pops/tracts-subpopulations.png)
+
+# Additional Notes
+
+- Here, I also generate intermediate files that will be used to run Tracts. The files are in the dir: *results/3-pops/tracts/*
+
 
 # Requeriments
 
