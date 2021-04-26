@@ -132,3 +132,75 @@ rule va_compress_and_index:
         bcftools view {input} -Oz -o {output[0]}
         bcftools index {output[0]} --tbi
         """
+
+# ****************************************************
+# ********** REMOVE MASKED REGIONS ******************* 
+# ****************************************************
+"""
+Why? The masks are useful for population genetic analysis
+(such as estimates of mutation rate) that must focus on genomic
+regions with very low false positive and false negative rates. 
+
+
+The StrictMask directory uses a more stringent definition. This definition uses
+a narrower band for coverage, requiring that total coverage should be within 50%
+of the average, that no more than 0.1% of reads have mapping quality of zero,
+and that the average mapping quality for the position should be 56 or greater.
+
+This definition is quite stringent and focuses on the most unique regions of the
+genome.
+"""
+
+
+rule masked_bed_regions:
+    """
+    See the readme file: http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/working/20160622_genome_mask_GRCh38/README.accessible_genome_mask.20160622
+    This rule gets the bedfile of all passed sites 
+    """
+    output:
+        "results/data/210305-merged-with-1TGP/strict-mask/20160622.allChr.mask.bed" # make this file temporal?, no it is just 16Mb
+    shell:
+        """
+        wget http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/working/20160622_genome_mask_GRCh38/StrictMask/20160622.allChr.mask.bed
+		mv 20160622.allChr.mask.bed {output}
+        """
+
+rule masked_chrn:
+    """
+    Extracts the data for a particular chromosome.
+    It also changes the chromosome format name
+    from chrXX to XX.
+    """
+    input:
+        "results/data/210305-merged-with-1TGP/strict-mask/20160622.allChr.mask.bed"
+    output:
+        temp("results/data/210305-merged-with-1TGP/strict-mask/chr{chrn}_mask.bed")
+    params:
+        chrn="{chrn}"
+    shell:
+        """
+        grep '^chr{params.chrn}' {input} |\
+            sed 's/^chr//g' >{output}
+        """
+
+
+rule masked_passed_cites_vcf:
+    """
+    Filters the masked variants
+    from the input vcf
+    """
+    input:
+        mask = "results/data/210305-merged-with-1TGP/strict-mask/chr{chrn}_mask.bed",
+        vcf = "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf.gz",
+        index = "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf.gz.tbi"
+    output:
+        vcf = "results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz",
+        index = "results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz.tbi"
+    shell:
+        """
+        bcftools view -R {input.mask} {input.vcf} -Oz -o {output[0]}
+        bcftools index {output.vcf} --tbi
+        """
+
+
+
