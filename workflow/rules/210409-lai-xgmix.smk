@@ -12,10 +12,10 @@
 #       - NAT: 50 MXB + 1TGP (PEL and MXL that were shown to be representative for NAT ancestry)
 #       - AFR: YRI
 #       - EAS: CHB
-
+# I used the vcf input that has been filered for masked sites
 rule lai_all:
     input:
-        expand("results/data/210409-local-ancestry/{npops}-pops/trained-models/model_chm_{chrn}.pkl",  chrn=CHROMS, npops=['4'])
+        expand("results/data/210409-local-ancestry/{npops}-pops/trained-models/model_chm_{chrn}.pkl",  chrn=CHROMS, npops=['3', '4'])
 
 
 rule lai_download_XGMix:
@@ -70,7 +70,7 @@ rule lai_pop_list_to_subset:
 
 rule lai_subset_haplotypes:
     input:
-        vcf = "results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf.gz",
+        vcf = "results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz",
         pop_list = "results/data/210409-local-ancestry/{npops}-pops/input-data/{haplo}_pop-list.txt"
     output:
         temp("results/data/210409-local-ancestry/{npops}-pops/input-data/{haplo}-chr{chrn}.vcf.gz")
