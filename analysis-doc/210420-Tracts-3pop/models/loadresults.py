@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import glob
 import numpy as np
-import scipy.stats as st
+from scipy.stats import poisson
 
 
 def _list_boostrap_files(dir_to_res, boot_n=0):
@@ -25,6 +25,10 @@ def _load_boot_file(dir_to_res, boot_n=0, filetype="dat"):
     boot_file = [x for x in _list_boostrap_files(
         dir_to_res, boot_n) if x.endswith(filetype)][0]
     return np.loadtxt(boot_file)
+
+
+def confIntMeanPoisson(mu, conf=0.8):
+    return poisson.interval(alpha=conf, mu=mu + + 1e-9)
 
 
 def load_boot_rest(dir_to_res, boot_n, labels):
@@ -51,37 +55,15 @@ def load_boot_rest(dir_to_res, boot_n, labels):
     pred = make_frame(pred, 'pred')
     data = pd.merge(dat, pred, how='inner', on=['bins', 'Ancestry'])
     data['boot'] = boot_n
+    c_i = data.pred.map(confIntMeanPoisson)
+    data['ci_l'] = c_i.map(lambda x: x[0])
+    data['ci_u'] = c_i.map(lambda x: x[1])
     return data
 
 
-def confIntMean(a, conf=0.95):
-    mean, sem, m = np.mean(a), st.sem(a), st.t.ppf((1+conf)/2., len(a)-1)
-    return mean, mean - m*sem, mean + m*sem
 
 ############
-# TODO: put this into a function
 dir_to_res = "output/"
 labels = ['NAT', 'EUR', 'AFR']
 datos = load_boot_rest(dir_to_res, 0, labels)
-
-# compute mean and confidence interval
-
-boots = list(range(1, 20))
-boots = pd.concat([load_boot_rest(dir_to_res, x, labels) for x in boots])
-
-# Compute the cofiden interval for preds
-#
-res = (
-    boots.
-    groupby(['bins', 'Ancestry'])['pred'].
-    apply(confIntMean).
-    reset_index()
-)
-
-res['mean'] = res.pred.map(lambda x: x[0])
-res['ci_u'] = res.pred.map(lambda x: x[1])
-res['ci_l'] = res.pred.map(lambda x: x[2])
-res.drop(['pred'], axis=1, inplace=True)
-datos = datos.merge(res, how='inner', on=['bins', 'Ancestry'])
-datos.to_csv("mxl.csv", index=False)
-
+datos.to_csv('mxl.csv', index=False)
