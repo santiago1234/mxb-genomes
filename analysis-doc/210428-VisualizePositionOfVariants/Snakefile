@@ -1,0 +1,39 @@
+
+CHROMS = list(range(1, 23))
+MASKING = ['before', 'after']
+
+rule density_before_mask:
+    input:
+        # The VCF before running the mask filters
+        vcf = "../../results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf.gz"
+    output:
+        temp("data/before-mask-chr{chrn}.csv")
+    params:
+        chrn="{chrn}"
+    shell:
+        """
+        python variant_density.py -vcf {input} -chr {params.chrn} -out {output}
+        """
+
+
+rule density_after_mask:
+    input:
+        # The VCF after filterin the masked sites
+        vcf = "../../results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz"
+    output:
+        temp("data/after-mask-chr{chrn}.csv")
+    params:
+        chrn="{chrn}"
+    shell:
+        """
+        python variant_density.py -vcf {input} -chr {params.chrn} -out {output}
+        """
+
+
+rule all_densities:
+    input:
+        expand("data/{mask}-mask-chr{chrn}.csv", mask=MASKING, chrn=CHROMS)
+    output:
+        "data/densities-all.csv"
+    shell:
+        "python collect-results.py"
