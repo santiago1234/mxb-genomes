@@ -18,8 +18,14 @@ def is_ancestry_continuous(r_1, r_2):
         I assume that r_2 follows from r_1. I need
         to write conditions to make sure that r_1 and r_2
         if merged together represent continuous chromosome
-        fragments
+        fragments.
+        Also if there is a gap of more than 10000, the
+        fragments are not considered to be continous
     """
+    max_gap = 10000
+    gap = r_2.spos.values[0] - r_1.epos.values[0]
+    if gap > max_gap:
+        return False
 
     res = r_1.Ancestry.values[0] == r_2.Ancestry.values[0]
     return res
