@@ -1,8 +1,12 @@
 """
-NOTE: Before running this the AncestralAllele plugin needs to
+NOTE: Before running this, the AncestralAllele plugin needs to
 be installed, see: https://github.com/Ensembl/VEP_plugins/blob/release/104/AncestralAllele.pm
 Ancestral Allel
 """
+
+rule all:
+    input:
+        expand("data/aa-chr{chrn}.csv", chrn=range(1, 23))
 
 rule get_ancestral_sequence:
     output:
@@ -22,9 +26,11 @@ rule annote_ancestrall_allele:
         vcf = "../../results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz",
         ancestralfasta = "data/homo_sapiens_ancestor_GRCh38.fa.gz"
     output:
-        vcf_with_ancestral = "data/vcfs/1TGP_and_50MXB-chr{chrn}-AA.vcf",
-        summary = "data/vcfs/1TGP_and_50MXB-chr{chrn}-AA.vcf_summary.html"
+        vcf_with_ancestral = temp("data/vcfs/1TGP_and_50MXB-chr{chrn}-AA.vcf"),
+        summary = temp("data/vcfs/1TGP_and_50MXB-chr{chrn}-AA.vcf_summary.html")
     shell:
+        # In the vep command i only add the AA to CSQ data. This is
+        # specified with the --fileds command
         """
         ~/ensembl-vep/vep -i {input.vcf} \
             --plugin AncestralAllele,{input.ancestralfasta} \
@@ -32,3 +38,12 @@ rule annote_ancestrall_allele:
             --vcf --fields "AA" \
             -o {output}
         """
+
+rule ancestral_allele_table:
+    # Generate a table with the ancestral allele and the variant ID
+    # to save this table and not the whole VCF file
+    input:
+        "data/vcfs/1TGP_and_50MXB-chr{chrn}-AA.vcf"
+    output:
+        "data/aa-chr{chrn}.csv"
+    shell: "python aatable.py {input} {output}"
