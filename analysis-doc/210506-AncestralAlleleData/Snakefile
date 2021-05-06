@@ -1,0 +1,34 @@
+"""
+NOTE: Before running this the AncestralAllele plugin needs to
+be installed, see: https://github.com/Ensembl/VEP_plugins/blob/release/104/AncestralAllele.pm
+Ancestral Allel
+"""
+
+rule get_ancestral_sequence:
+    output:
+        "data/homo_sapiens_ancestor_GRCh38.fa.gz"
+    shell:
+        """
+        wget ftp://ftp.ensembl.org/pub/current_fasta/ancestral_alleles/homo_sapiens_ancestor_GRCh38.tar.gz
+        tar xfz homo_sapiens_ancestor_GRCh38.tar.gz
+        cat homo_sapiens_ancestor_GRCh38/*.fa | bgzip -c > homo_sapiens_ancestor_GRCh38.fa.gz
+        rm -rf homo_sapiens_ancestor_GRCh38/ homo_sapiens_ancestor_GRCh38.tar.gz
+        mv homo_sapiens_ancestor_GRCh38.fa.gz data/
+        """
+
+
+rule annote_ancestrall_allele:
+    input:
+        vcf = "../../results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz",
+        ancestralfasta = "data/homo_sapiens_ancestor_GRCh38.fa.gz"
+    output:
+        vcf_with_ancestral = "data/vcfs/1TGP_and_50MXB-chr{chrn}-AA.vcf",
+        summary = "data/vcfs/1TGP_and_50MXB-chr{chrn}-AA.vcf_summary.html"
+    shell:
+        """
+        ~/ensembl-vep/vep -i {input.vcf} \
+            --plugin AncestralAllele,{input.ancestralfasta} \
+            --cache --assembly GRCh38 \
+            --vcf --fields "AA" \
+            -o {output}
+        """
