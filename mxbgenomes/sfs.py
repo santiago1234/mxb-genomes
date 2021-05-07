@@ -1,0 +1,111 @@
+import allel
+import numpy as np
+import pandas as pd
+
+
+# test_data
+
+vcf_file = "/Users/santiagomedina/mxb-genomes/analysis-doc/210404-AncestralAlleleSFS/variant_effect_output.vcf.gz"
+aa_file = "/Users/santiagomedina/mxb-genomes/analysis-doc/210404-AncestralAlleleSFS/ancestral.csv"
+
+
+def load_GA_and_aa(vcf_file, aa_file):
+    """
+    Loads the Genotype Array from the VCF file.
+    And obtain information about the ancestral allel.
+    Args:
+        vcf_file: str, path to vcf file. Assume the SNPs in the
+            vcf file are biallelic
+        aa_file: str, path to csv file with variant ID and ancestral allel
+            See:
+                https://github.com/santiago1234/mxb-genomes/tree/main/analysis-doc/210506-AncestralAlleleData
+    Returns:
+        genotype array: The VCF genotype array,
+            3d array variants, samples, and chromosomes.
+        is_alt_aa: logical vector where True indicates
+            that the ALT allele is the AA. This array is
+            aligned to ga, that is the i-th variant in ge
+            is the i element in is_alt_aa
+        vcf: vcf file object
+    """
+    vcf = allel.read_vcf(
+        vcf_file, alt_number=1)  # set alt_number=1 to consider biallelic variants
+    aa = pd.read_csv(aa_file)
+    aa = aa.drop_duplicates(subset=['ID'])
+
+    # Make a frame
+    df = {
+        'ID': vcf['variants/ID'],
+        'REF': vcf['variants/REF'],
+        'ALT': vcf['variants/ALT']
+    }
+    df = pd.DataFrame(df)
+
+    # Add the ancestral allel
+    df = pd.merge(df, aa, how='left', on='ID')
+    df = df.set_index('ID')
+
+    # Sanity check, that the variants are aligned with the vcf
+
+    if not np.all(vcf['variants/ID'] == df.index):
+        raise ValueError('sanity check not passed, data is no aligned')
+    # We want to switch the reference allel
+    # for the alternative allel when the
+    # alternative allel is the ancestral.
+    is_alt_aa = (df.ALT == df.AA).to_numpy()
+
+    # Extract the genotype data
+
+    ga = vcf['calldata/GT']
+
+    return ga, is_alt_aa, vcf
+
+
+def zeros_to_ones_anc_viceversa(x):
+    if x == 0:
+        return 1
+    elif x == 1:
+        return 0
+    else:
+        return x
+
+
+def fix_ancestral_allel(ga, is_alt_aa):
+    """
+    Args:
+        ga: genotype array
+        is_alt_aa: logical vector where True indicates
+            that the ALT allele is the AA. This array is
+            aligned to ga, that is the i-th variant in ge
+            is the i element in is_alt_aa
+    Returns:
+        Fixed genotype array. Fixed means that if ALT is
+        the AA then we swicht a 0 by a 1 and viceversa.
+    """
+    ga_fixed = ga.copy()
+    # I use this function becuase the genotype array may contain
+    # other values besides 0s and 1s. For example -1  for missing
+    # data and 2 for a multiallelic variant. I do not want to change
+    # this values.
+    fix_f = np.vectorize(zeros_to_ones_anc_viceversa)
+    ga_fixed[is_alt_aa, :, :] = fix_f(ga[is_alt_aa, :, :])
+    return ga_fixed
+
+
+def sfs_unfolded(vcf_file, aa_file, subpops=None):
+    """
+    """
+    ga, is_alt_aa, vcf = load_GA_and_aa(vcf_file, aa_file)
+    ga_fixed = fix_ancestral_allel(ga, is_alt_aa)
+    ga_fixed = allel.GenotypeArray(ga_fixed)
+
+    if subpops is None:
+        sfs = ga_fixed.count_alles(max_allele=1)
+
+    return sfs
+
+
+def proyect_sfs(sfs, n):
+    pass
+
+
