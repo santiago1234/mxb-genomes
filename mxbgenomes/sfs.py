@@ -72,6 +72,7 @@ def zeros_to_ones_anc_viceversa(x):
 
 def fix_ancestral_allel(ga, is_alt_aa):
     """
+    Fix the ancestral allel to be the reference allel.
     Args:
         ga: genotype array
         is_alt_aa: logical vector where True indicates
@@ -92,16 +93,53 @@ def fix_ancestral_allel(ga, is_alt_aa):
     return ga_fixed
 
 
+def get_population_indices(vcf, samples):
+    """
+    This function returns the indices in the vcf samples
+    that are from the given population (samples list).
+    Params:
+        vcf, vcf with samples
+        samples: list of sample names
+    """
+    vcf_samples = vcf['samples'].tolist()
+    indices = [vcf_samples.index(s) for s in samples]
+    return indices
+
+
+def _val_sample(sample, samples_in_vcf):
+    if sample not in samples_in_vcf:
+        raise ValueError('Sample: {} not found in vcf samples'.format(sample))
+
+
+def _val_samples(samples, vcf):
+    """
+    Make sure list of supplied samples are
+    present in vcf file
+    """
+    [_val_sample(x, vcf['samples']) for x in samples]
+
+
 def sfs_unfolded(vcf_file, aa_file, subpops=None):
     """
+    Subpops: dict, maps supopulation names to sample names.
+        sample names should be present in the vcf_file.
     """
     ga, is_alt_aa, vcf = load_GA_and_aa(vcf_file, aa_file)
     ga_fixed = fix_ancestral_allel(ga, is_alt_aa)
     ga_fixed = allel.GenotypeArray(ga_fixed)
 
     if subpops is None:
-        sfs = ga_fixed.count_alles(max_allele=1)
+        ac = ga_fixed.count_alleles(max_allele=1)
+        sfs = allel.sfs(ac[:, 1])
 
+    else:
+        # make sure all samples are in vcf
+        [_val_samples(x, vcf) for x in subpops.values()]
+        # Now get the indices in vcf file for the populations
+        subpops_indices = {pop: get_population_indices(
+            vcf, subpops[pop]) for pop in subpops}
+        ac = ga_fixed.count_alleles_subpops(subpops_indices, max_allele=1)
+        sfs = {x: allel.sfs(ac[x][:, 1]) for x in subpops}
     return sfs
 
 
@@ -109,3 +147,13 @@ def proyect_sfs(sfs, n):
     pass
 
 
+# helper code
+popinfo = load_populations_info("../")
+
+# Generate an array mapping pop names to pop indices in vcf
+subpops = (
+    popinfo
+    .groupby('Subpopulation')
+    .apply(lambda x: x.Samplename.to_list())
+    .to_dict()
+)
