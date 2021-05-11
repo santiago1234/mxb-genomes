@@ -138,7 +138,15 @@ def proyect_sfs(sfs, n, pop_id):
 
 def sfs_unfolded(vcf_file, aa_file, subpops=None, project_haplod_size=None):
     """
+    Compute unfolded site frequency spectrum. In case
+    the supplied ancestral allele matches the alternative allele
+    it switches reference for alternative.
     Args:
+        vcf_file: str, path to vcf file. Assume the SNPs in the
+            vcf file are biallelic
+        aa_file: str, path to csv file with variant ID and ancestral allel
+            See:
+                https://github.com/santiago1234/mxb-genomes/tree/main/analysis-doc/210506-AncestralAlleleData
         subpops: dict, maps supopulation names to sample names.
             sample names should be present in the vcf_file.
         project_haplod_size: int, haploid sample size to project
@@ -146,12 +154,13 @@ def sfs_unfolded(vcf_file, aa_file, subpops=None, project_haplod_size=None):
     Returns:
         dict, mapping population names to SFS.
     """
+    print('loading vcf ...')
     ga, is_alt_aa, vcf = load_GA_and_aa(vcf_file, aa_file)
-    print('fixing ancestral allel')
+    print('fixing ancestral allel ...')
     ga_fixed = fix_ancestral_allel(ga, is_alt_aa)
     ga_fixed = allel.GenotypeArray(ga_fixed)
 
-    print('computing SFS')
+    print('computing SFS ...')
     if subpops is None:
         ac = ga_fixed.count_alleles(max_allele=1)
         sfs = allel.sfs(ac[:, 1])
@@ -167,18 +176,38 @@ def sfs_unfolded(vcf_file, aa_file, subpops=None, project_haplod_size=None):
         sfs = {x: allel.sfs(ac[x][:, 1]) for x in subpops}
 
     if project_haplod_size is not None:
-        print('projecting SFS')
-        sfs = {x: proyect_sfs(sfs[x], project_haplod_size, x) for x in subpops}
+        print('projecting SFS ...')
+        sfs = {x: proyect_sfs(sfs[x], project_haplod_size, x) for x in sfs.keys()}
 
     return sfs
 
-# helper code
-popinfo = load_populations_info("../")
 
-# Generate an array mapping pop names to pop indices in vcf
-subpops = (
-    popinfo
-    .groupby('Subpopulation')
-    .apply(lambda x: x.Samplename.to_list())
-    .to_dict()
-)
+def sfs_to_frame(sfs):
+    """
+    Put the project sfs in a nice format tidy frame
+    Args:
+        sfs: dict, mapping populations to sfs. All the sfs(s)
+        have the same dimensions
+    """
+    df = (
+        pd.DataFrame(sfs)
+        .reset_index()
+        .rename(columns={'index': 'n'})
+        .melt(id_vars=['n'], var_name='Population', value_name='Freq')
+    )
+    return df
+
+
+
+# helper code
+# how to generate the subpops info
+# from utils import load_populations_info
+# popinfo = load_populations_info("../")
+
+# # Generate an array mapping pop names to pop indices in vcf
+# subpops = (
+#     popinfo
+#     .groupby('Subpopulation')
+#     .apply(lambda x: x.Samplename.to_list())
+#     .to_dict()
+# )
