@@ -1,0 +1,5 @@
+# Analysis code
+
+rule biallelic_variants:
+    input: "variant_effect_output.vcf.gz"
+    output: ""
