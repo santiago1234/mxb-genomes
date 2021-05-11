@@ -31,7 +31,7 @@ def run(args):
 
     # Load 1TGP pop info
     panel = load_1tgp_metada(path_to_panel)
-    panel.drop(columns=['Superpopulation', 'gender'], inplace=True)
+    panel.drop(columns=['Superpopulation', 'Gender'], inplace=True)
 
     # load tracts files
     tracts_files = [os.path.join(path_to_tracts, x)
