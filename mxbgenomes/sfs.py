@@ -1,4 +1,5 @@
 import allel
+import moments
 import numpy as np
 import pandas as pd
 
@@ -119,18 +120,42 @@ def _val_samples(samples, vcf):
     [_val_sample(x, vcf['samples']) for x in samples]
 
 
-def sfs_unfolded(vcf_file, aa_file, subpops=None):
+def proyect_sfs(sfs, n, pop_id):
     """
-    Subpops: dict, maps supopulation names to sample names.
-        sample names should be present in the vcf_file.
+    Args:
+        sfs: np.array, The frequency spectrum data
+        n: diploid population size to project to
+        pod_id: str, population name
+    Returns:
+        np.array project spectrum
+    """
+    # make moments.Spectrun object
+    spectrum = moments.Spectrum(sfs, pop_ids=[pop_id], data_folded=False)
+    diploid_pop_size = 2 * n
+    projected_sp = spectrum.project([diploid_pop_size])
+    return np.array(projected_sp)
+    
+
+def sfs_unfolded(vcf_file, aa_file, subpops=None, project_haplod_size=None):
+    """
+    Args:
+        subpops: dict, maps supopulation names to sample names.
+            sample names should be present in the vcf_file.
+        project_haplod_size: int, haploid sample size to project
+            SFS to. If None, the SFS is not projected.
+    Returns:
+        dict, mapping population names to SFS.
     """
     ga, is_alt_aa, vcf = load_GA_and_aa(vcf_file, aa_file)
+    print('fixing ancestral allel')
     ga_fixed = fix_ancestral_allel(ga, is_alt_aa)
     ga_fixed = allel.GenotypeArray(ga_fixed)
 
+    print('computing SFS')
     if subpops is None:
         ac = ga_fixed.count_alleles(max_allele=1)
         sfs = allel.sfs(ac[:, 1])
+        sfs = {'Global': sfs}  # Make the output a dict, so it is consistent
 
     else:
         # make sure all samples are in vcf
@@ -140,12 +165,12 @@ def sfs_unfolded(vcf_file, aa_file, subpops=None):
             vcf, subpops[pop]) for pop in subpops}
         ac = ga_fixed.count_alleles_subpops(subpops_indices, max_allele=1)
         sfs = {x: allel.sfs(ac[x][:, 1]) for x in subpops}
+
+    if project_haplod_size is not None:
+        print('projecting SFS')
+        sfs = {x: proyect_sfs(sfs[x], project_haplod_size, x) for x in subpops}
+
     return sfs
-
-
-def proyect_sfs(sfs, n):
-    pass
-
 
 # helper code
 popinfo = load_populations_info("../")
