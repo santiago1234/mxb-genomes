@@ -9,6 +9,7 @@ dependencies:
   - pandas
   - matplotlib
   - scikit-allel
+  - moments
   - scipy
   - r-base =4.0.3 
   - r-tidyr =1.1.2
