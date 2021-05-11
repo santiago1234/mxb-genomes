@@ -1,5 +1,21 @@
 # Analysis code
 
 rule biallelic_variants:
-    input: "variant_effect_output.vcf.gz"
-    output: ""
+    input: "../../results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz"
+    output: temp("data/biallelic-chrn{chrn}.vcf.gz")
+    shell:
+        """
+        bcftools view -m2 -M2 -v snps {input} -Oz -o {output}
+        """
+
+
+rule sfs:
+    input:
+        "data/biallelic-chrn{chrn}.vcf.gz",
+        "../210506-AncestralAlleleData/data/aa-chr{chrn}.csv"  # Acnestral allele data
+    output: "data/sfs-{chrn}.csv"
+	shell:
+		"""
+		python compute-sfs.py {input[0]} {input[1]} {output}
+		"""
+    
