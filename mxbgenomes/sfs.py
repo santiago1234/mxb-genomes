@@ -6,8 +6,36 @@ import pandas as pd
 
 # test_data
 
-vcf_file = "/Users/santiagomedina/mxb-genomes/analysis-doc/210404-AncestralAlleleSFS/variant_effect_output.vcf.gz"
-aa_file = "/Users/santiagomedina/mxb-genomes/analysis-doc/210404-AncestralAlleleSFS/ancestral.csv"
+vcf_file = "/Users/santiagomedina/tmp/1TGP_and_50MXB-chr22-snps-vep-mask-GRCh38.vcf.gz"
+aa_file = "/Users/santiagomedina/tmp/aa-chr22.csv"
+
+
+def ancestal_allel_stats(df):
+    """
+    Compute the ancestral allel statistics
+    Args:
+        df: DataFrame where each row is a variant
+        and has REF, ALT, and AA columns
+    Returns:
+        stats: stats, how many REF is ALT?, etc.
+    """
+    aa_missing = df.AA.isnull().to_numpy()
+    aa_is_dot = (df.AA == '.').to_numpy()
+    aa_is_N = (df.AA == "N").to_numpy()  # N in fasta file
+    aa_is_ref = (df.AA == df.REF).to_numpy()
+    aa_is_alt = (df.AA == df.ALT).to_numpy()
+    aa_unknown = (aa_is_N + aa_is_dot + aa_missing)
+    # the next case is when the ancestral allel exits
+    # but it is neither the alternative or the reference
+    aa_not_ref_or_alt = np.logical_and(np.logical_and(~aa_is_ref, ~aa_is_alt), ~aa_unknown)
+    stats = {
+        'case': ['aa_is_ref', 'aa_is_alt', 'aa_is_dot', 'aa_is_N', 'aa_missing', 'aa_not_ref_or_alt'],
+        'n': [aa_is_ref, aa_is_alt, aa_is_dot, aa_is_N, aa_missing, aa_not_ref_or_alt]
+    }
+    stats = pd.DataFrame(stats)
+    stats['n'] = stats['n'].map(np.sum)
+    stats['p'] = stats['n'] / stats['n'].sum() * 100
+    return stats
 
 
 def load_GA_and_aa(vcf_file, aa_file):
@@ -28,9 +56,10 @@ def load_GA_and_aa(vcf_file, aa_file):
             aligned to ga, that is the i-th variant in ge
             is the i element in is_alt_aa
         vcf: vcf file object
+        stats: pd.DataFrame, statistics for the ancestral allel and the vcf file
     """
     vcf = allel.read_vcf(
-        vcf_file, alt_number=1)  # set alt_number=1 to consider biallelic variants
+        vcf_file, alt_number=1)  # set alt_number=1 for biallelic variants
     aa = pd.read_csv(aa_file)
     aa = aa.drop_duplicates(subset=['ID'])
 
@@ -45,6 +74,8 @@ def load_GA_and_aa(vcf_file, aa_file):
     # Add the ancestral allel
     df = pd.merge(df, aa, how='left', on='ID')
     df = df.set_index('ID')
+    # stats for th ancestral allel
+    stats = ancestal_allel_stats(df)
 
     # Sanity check, that the variants are aligned with the vcf
 
@@ -59,7 +90,7 @@ def load_GA_and_aa(vcf_file, aa_file):
 
     ga = vcf['calldata/GT']
 
-    return ga, is_alt_aa, vcf
+    return ga, is_alt_aa, vcf, stats
 
 
 def zeros_to_ones_anc_viceversa(x):
@@ -153,9 +184,10 @@ def sfs_unfolded(vcf_file, aa_file, subpops=None, project_haplod_size=None):
             SFS to. If None, the SFS is not projected.
     Returns:
         dict, mapping population names to SFS.
+        stats: pd.DataFrame, statistics for the ancestral allel and the vcf file
     """
     print('loading vcf ...')
-    ga, is_alt_aa, vcf = load_GA_and_aa(vcf_file, aa_file)
+    ga, is_alt_aa, vcf, stats = load_GA_and_aa(vcf_file, aa_file)
     print('fixing ancestral allel ...')
     ga_fixed = fix_ancestral_allel(ga, is_alt_aa)
     ga_fixed = allel.GenotypeArray(ga_fixed)
@@ -179,7 +211,7 @@ def sfs_unfolded(vcf_file, aa_file, subpops=None, project_haplod_size=None):
         print('projecting SFS ...')
         sfs = {x: proyect_sfs(sfs[x], project_haplod_size, x) for x in sfs.keys()}
 
-    return sfs
+    return sfs, stats
 
 
 def sfs_to_frame(sfs):
@@ -196,7 +228,6 @@ def sfs_to_frame(sfs):
         .melt(id_vars=['n'], var_name='Population', value_name='Freq')
     )
     return df
-
 
 
 # helper code
