@@ -26,6 +26,6 @@ subpops = (
 )
 
 spectrum, stats = sfs.sfs_unfolded(vcf_file, aa_file, subpops=subpops, project_haplod_size=50)
-spectrum, stats = sfs.sfs_to_frame(spectrum)
+spectrum = sfs.sfs_to_frame(spectrum)
 spectrum.to_csv(outfile, index=False)
 stats.to_csv(statsfile, index=False)
