@@ -24,3 +24,10 @@ Example:
 | 22:10519530:T:C | T    |
 | 22:10519634:T:G | T    |
 | 22:10519639:G:C | G    |
+
+
+## NOTE:
+
+The ancestral allel data generated here, is specific to be used with the input VCF file used to retrieve the data.
+If you wish to use other set of variants, you need to re-run the pipeline changin the input vcf in the [Snakefile](Snakefile).
+The reason for this, is that the output tables will only contain the ancestral allele the for variants in the input VCF.

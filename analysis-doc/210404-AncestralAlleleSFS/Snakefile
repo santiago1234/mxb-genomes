@@ -13,9 +13,11 @@ rule sfs:
     input:
         "data/biallelic-chrn{chrn}.vcf.gz",
         "../210506-AncestralAlleleData/data/aa-chr{chrn}.csv"  # Acnestral allele data
-    output: "data/sfs-{chrn}.csv"
+    output:
+        "data/sfs-{chrn}.csv",
+        "data/aa-stats-{chrn}.csv"  # Stats for the ancestral allel
 	shell:
 		"""
-		python compute-sfs.py {input[0]} {input[1]} {output}
+		python compute-sfs.py {input[0]} {input[1]} {output[0]} {output[1]}
 		"""
     
