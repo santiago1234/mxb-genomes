@@ -13,7 +13,7 @@ from mxbgenomes.utils import load_populations_info
 
 vcf_file = sys.argv[1]
 aa_file = sys.argv[2]
-outfile = sys.argv[4]
+outfile = sys.argv[3]
 statsfile = sys.argv[4]
 
 popinfo = load_populations_info("../../")
