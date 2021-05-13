@@ -1,0 +1,88 @@
+"""
+analysis to generate SFS object.
+"""
+
+
+# I use a regular expression with the variant consequences I want
+# to retrieve, see: https://m.ensembl.org/info/genome/variation/prediction/predicted_data.html
+#
+SYNONYMOUS = '(synonymous_variant|stop_retained_variant|start_retained_variant)'
+NON_SYNONYMOUS = '(missense_variant|inframe_deletion|inframe_insertion|frameshift_variant|stop_gained|coding_sequence_variant)'
+
+
+# TODO:
+#    write rule to merge all chromosomes VCF into one,
+#    and also the AncestralAlleleData
+
+rule var_id_to_vep_consequences:
+    input:
+        # A vcf that has VEP annotation in the INFO field
+        "/Users/santiagomedina/tmp/1TGP_and_50MXB-chr22-snps-vep-mask-GRCh38.vcf.gz"
+    output:
+        "data/variants-csq.txt"
+    shell:
+        # The -d option in the bcftools command is to
+        # To print each consequence on a separate line,
+        # rather than as a comma-separated string on a single line.
+        # This will make easier the task processing
+        """
+        bcftools +split-vep {input} -f '%ID\t%Consequence\n' -d >{output}
+        """
+
+
+rule subset_synonymous:
+    input:
+        "data/variants-csq.txt"
+    output:
+        temp("data/synonymous-vars.txt")
+    shell:
+        """
+        grep -E '{SYNONYMOUS}' {input} |\
+            cut -f1 |\
+            sort |\
+            uniq > {output}
+        """
+
+
+rule subset_nonsynonymous:
+    input:
+        "data/variants-csq.txt"
+    output:
+        temp("data/nonsynonymous-vars.txt")
+    shell:
+        """
+        grep -E '{NON_SYNONYMOUS}' {input} |\
+            cut -f1 |\
+            sort |\
+            uniq > {output}
+        """
+
+
+rule subset_vcf_vars:
+    input:
+        vcf = "/Users/santiagomedina/tmp/1TGP_and_50MXB-chr22-snps-vep-mask-GRCh38.vcf.gz",
+        ids_type = "data/{type}-vars.txt"
+    output:
+        "data/vcf-{type}.vcf.gz"
+    shell:
+        """
+        bcftools view -i 'ID=@{input.ids_type}' {input.vcf} -Oz -o {output}
+        """
+
+rule sfs:
+    input:
+        "data/vcf-{type}.vcf.gz",
+        "../210506-AncestralAlleleData/data/aa-chr22.csv"  # TODO: fix chromosome or merge ALL
+    output:
+        "results/sfs-{type}.csv",
+        "results/aa-stats-{type}.csv"
+    shell:
+        """
+        python ../210404-AncestralAlleleSFS/compute-sfs.py {input[0]} {input[1]} {output[0]} {output[1]}
+        """
+
+
+rule all:
+    input:
+        "results/sfs-synonymous.csv",
+        "results/sfs-nonsynonymous.csv",
