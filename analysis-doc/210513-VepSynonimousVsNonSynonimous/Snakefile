@@ -1,5 +1,5 @@
 """
-analysis to generate SFS object.
+Compute the SFS for synonymous and nonsynonymous variants
 """
 
 
@@ -78,7 +78,7 @@ rule sfs:
         "results/aa-stats-{type}.csv"
     shell:
         """
-        python ../210404-AncestralAlleleSFS/compute-sfs.py {input[0]} {input[1]} {output[0]} {output[1]}
+        python compute-sfs.py {input[0]} {input[1]} {output[0]} {output[1]}
         """
 
 
