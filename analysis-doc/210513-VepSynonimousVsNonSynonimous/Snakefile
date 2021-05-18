@@ -1,23 +1,58 @@
 """
 Compute the SFS for synonymous and nonsynonymous variants
+
+NOTES:
+    - To run this pipeline you need to activate the popgene conda environment:
+        conda activate popgene
+    - Also, I use the bcftools pluggin split-vep: https://samtools.github.io/bcftools/howtos/plugin.split-vep.html
+        The varible BCFTOOLS_PLUGINS should point to the correct path.
 """
 
 
 # I use a regular expression with the variant consequences I want
 # to retrieve, see: https://m.ensembl.org/info/genome/variation/prediction/predicted_data.html
-#
+
 SYNONYMOUS = '(synonymous_variant|stop_retained_variant|start_retained_variant)'
 NON_SYNONYMOUS = '(missense_variant|inframe_deletion|inframe_insertion|frameshift_variant|stop_gained|coding_sequence_variant)'
+CHROMOSOMES = range(1, 23)
 
 
-# TODO:
-#    write rule to merge all chromosomes VCF into one,
-#    and also the AncestralAlleleData
+rule concat_vcfs:
+    input:
+        expand("../../results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz", chrn=CHROMOSOMES)
+    output:
+        temp("data/all-vcf.gz")
+    shell:
+        """
+        bcftools concat {input} -Oz -o {output}
+        """
+
+
+rule concat_ancestral_allel:
+    input:
+        expand("../210506-AncestralAlleleData/data/aa-chr{chrn}.csv", chrn=CHROMOSOMES)
+    output:
+        temp("data/all-ancestral-allel.csv")
+    shell:
+        """
+        awk '(NR == 1) || (FNR > 1)' {input} >{output}
+        """
+
+
+rule biallelic_snps:
+    input:
+        "data/all-vcf.gz"
+    output:
+        temp("data/all-biallelicSnps-vcf.gz")
+    shell:
+        """
+        bcftools view -m2 -M2 -v snps {input} -Oz -o {output}
+        """
 
 rule var_id_to_vep_consequences:
     input:
         # A vcf that has VEP annotation in the INFO field
-        "/Users/santiagomedina/tmp/1TGP_and_50MXB-chr22-snps-vep-mask-GRCh38.vcf.gz"
+        "data/all-biallelicSnps-vcf.gz"
     output:
         "data/variants-csq.txt"
     shell:
@@ -60,7 +95,7 @@ rule subset_nonsynonymous:
 
 rule subset_vcf_vars:
     input:
-        vcf = "/Users/santiagomedina/tmp/1TGP_and_50MXB-chr22-snps-vep-mask-GRCh38.vcf.gz",
+        vcf = "data/all-biallelicSnps-vcf.gz",
         ids_type = "data/{type}-vars.txt"
     output:
         "data/vcf-{type}.vcf.gz"
@@ -72,7 +107,7 @@ rule subset_vcf_vars:
 rule sfs:
     input:
         "data/vcf-{type}.vcf.gz",
-        "../210506-AncestralAlleleData/data/aa-chr22.csv"  # TODO: fix chromosome or merge ALL
+        "data/all-ancestral-allel.csv"
     output:
         "results/sfs-{type}.csv",
         "results/aa-stats-{type}.csv"
