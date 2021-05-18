@@ -54,7 +54,7 @@ rule var_id_to_vep_consequences:
         # A vcf that has VEP annotation in the INFO field
         "data/all-biallelicSnps-vcf.gz"
     output:
-        "data/variants-csq.txt"
+        temp("data/variants-csq.txt")
     shell:
         # The -d option in the bcftools command is to
         # To print each consequence on a separate line,
@@ -98,7 +98,7 @@ rule subset_vcf_vars:
         vcf = "data/all-biallelicSnps-vcf.gz",
         ids_type = "data/{type}-vars.txt"
     output:
-        "data/vcf-{type}.vcf.gz"
+        temp("data/vcf-{type}.vcf.gz")
     shell:
         """
         bcftools view -i 'ID=@{input.ids_type}' {input.vcf} -Oz -o {output}
