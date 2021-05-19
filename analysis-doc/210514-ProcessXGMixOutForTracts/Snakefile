@@ -1,0 +1,26 @@
+CHROM = range(1, 23)
+
+rule merge_xgmix_chromosome:
+    # Merge the XGMix msp files
+    # to have one for all the genome
+    input:
+        expand("../../results/data/210409-local-ancestry/{{Np}}-pops/predictions/mdl-{chrn}.msp.tsv", chrn=CHROM)
+    output:
+        "data/{Np}-pops/all-msp.csv"
+    params:
+        path_to_msp_files = "../../results/data/210409-local-ancestry/{Np}-pops/predictions/"
+
+    shell:
+        """
+        python scripts/combine-chromosomes-xgmix.py {params.path_to_msp_files} {output}
+        """
+
+
+rule remove_low_coverage_tracts:
+    pass
+
+
+rule merge_tracts:
+    pass
+
+
