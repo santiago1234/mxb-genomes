@@ -1,4 +1,19 @@
+import pandas as pd
+import sys
+sys.path.append('../../')
+from mxbgenomes.utils import load_populations_info
+
 CHROM = range(1, 23)
+
+# Get the list of admixed samples, samples in pops PEL, PUR, CLM, MXL
+pops = load_populations_info('../..')
+# Here, we only focus on admixed populations
+pops = pops[pops.Subpopulation.isin(['MXL', 'PEL', 'PUR', 'CLM'])]
+SAMPLES = pops.Samplename.tolist()
+
+# dict mapping popnames to samples
+ADMIXDED_POPS = pops.groupby('Subpopulation')['Samplename'].apply(list).to_dict()
+
 
 rule merge_xgmix_chromosome:
     # Merge the XGMix msp files
@@ -17,10 +32,57 @@ rule merge_xgmix_chromosome:
 
 
 rule remove_low_coverage_tracts:
-    pass
+    input:
+        "data/{Np}-pops/all-msp.csv"
+    output:
+        "data/{Np}-pops/all-msp-lowCovClean.csv"
+    params:
+        # How many windows to remove?
+        topN = 22
+    shell:
+        """
+        python scripts/remove_low_cov_windows.py {input} {params.topN} {output}
+        """
 
 
-rule merge_tracts:
-    pass
+rule process_admixed_samples:
+    input:
+        "data/{Np}-pops/all-msp-lowCovClean.csv"
+    output:
+        "data/{Np}-pops/bed/{sample}.bed"
+    params:
+        outdir = "data/{Np}-pops/bed",
+        sample = "{sample}"
+    shell:
+        """
+        python scripts/process-individuals.py {input} {params.outdir} {params.sample}
+        """
 
 
+rule plot_karyogram:
+    input:
+        "data/{Np}-pops/bed/{sample}.bed"
+    output:
+        "plots/{Np}-pops/karyogram-{sample}.png"
+    script:
+        "scripts/karyotype-local-ancestry-plot.R"
+
+
+rule make_tracts_input:
+    input:
+        "data/{Np}-pops/bed/{sample}.bed"
+    output:
+        "data/{Np}-pops/tracts/{subpop}/{sample}_anc_A_cM.bed",
+        "data/{Np}-pops/tracts/{subpop}/{sample}_anc_B_cM.bed"
+    params:
+        samplename = "{sample}",
+        outdir = "data/{Np}-pops/tracts/{subpop}"
+    shell:
+        """
+        python scripts/make_tracts_input.py {input} {params.samplename} {params.outdir}
+        """
+
+rule tracts_input_PUR:
+    input:
+        expand("data/3-pops/tracts/PUR/{sample}_anc_A_cM.bed", sample = ADMIXDED_POPS['PUR']),
+        expand("data/3-pops/tracts/PUR/{sample}_anc_B_cM.bed", sample = ADMIXDED_POPS['PUR'])
