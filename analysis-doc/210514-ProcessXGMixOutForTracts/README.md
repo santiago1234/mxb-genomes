@@ -1,14 +1,30 @@
 ## Pipeline to process XGMix output for running Tracts
 
-# Step 1:
 
-# Step 2: Remove low density windows
+## Step 1: Remove low density windows
 
-# Step 3: Merge continuous ancestry windows into tracts
+Here, I removed the top 22 windows with lowest SNP density. Approx one region per chromosome.
 
-# Step 4: To bed like format for running tracts
+## Step 2: Merge continuous ancestry windows into tracts
 
-# Step 5: Visualization
+## Step 3: To bed like format for running tracts
 
-- Individual karyograms
-- Tracts length distribution histogram
+The data to run tracs is here: *data/3-pops/tracts/PUR/*
+
+To generate the data use:
+
+```
+snakemake -j10 all
+```
+
+## Step 4: Visualization
+
+Individual karyograms
+
+To generate a particular karyogram run:
+
+```
+snakemake -j1 plots/3-pops/karyogram-HG01893.png
+```
+
+![karyo](plots/3-pops/karyogram-HG01893.png)
