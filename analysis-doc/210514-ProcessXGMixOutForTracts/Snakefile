@@ -68,21 +68,32 @@ rule plot_karyogram:
         "scripts/karyotype-local-ancestry-plot.R"
 
 
-rule make_tracts_input:
+def population_to_samples_bed(wildcards):
+    return expand("data/{{Np}}-pops/bed/{sample}.bed", sample=ADMIXDED_POPS[wildcards.subpop])
+
+
+rule make_tracts_input_subpop:
+    # This rule will generate the output bed files
+    # in a format ready to use with Tracts
     input:
-        "data/{Np}-pops/bed/{sample}.bed"
+        population_to_samples_bed
     output:
-        "data/{Np}-pops/tracts/{subpop}/{sample}_anc_A_cM.bed",
-        "data/{Np}-pops/tracts/{subpop}/{sample}_anc_B_cM.bed"
+        directory("data/{Np}-pops/tracts/{subpop}")
     params:
-        samplename = "{sample}",
         outdir = "data/{Np}-pops/tracts/{subpop}"
     shell:
         """
-        python scripts/make_tracts_input.py {input} {params.samplename} {params.outdir}
+        mkdir -p {params.outdir}
+        for samplebed in {input}
+        do
+            # extract the sample name from the input bed file
+            sample_name=$(basename -s .bed $samplebed)
+            echo "processing: $sample_name"
+            python scripts/make_tracts_input.py $samplebed $sample_name {params.outdir}
+        done
         """
 
-rule tracts_input_PUR:
+
+rule all:
     input:
-        expand("data/3-pops/tracts/PUR/{sample}_anc_A_cM.bed", sample = ADMIXDED_POPS['PUR']),
-        expand("data/3-pops/tracts/PUR/{sample}_anc_B_cM.bed", sample = ADMIXDED_POPS['PUR'])
+        expand("data/{Np}-pops/tracts/{subpop}", Np= ['3', '4'], subpop=['PUR', 'MXL', 'CLM', 'PEL'])
