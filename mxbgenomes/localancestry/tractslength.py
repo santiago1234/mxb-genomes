@@ -22,7 +22,7 @@ def is_ancestry_continuous(r_1, r_2):
         Also if there is a gap of more than max_gap, the
         fragments are not considered to be continous
     """
-    max_gap = 5e6
+    max_gap = 2e6
     gap = r_2.spos.values[0] - r_1.epos.values[0]
     if gap > max_gap:
         return False
