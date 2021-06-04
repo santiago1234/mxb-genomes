@@ -12,8 +12,6 @@ NOTES:
 # I use a regular expression with the variant consequences I want
 # to retrieve, see: https://m.ensembl.org/info/genome/variation/prediction/predicted_data.html
 
-SYNONYMOUS = '(synonymous_variant|stop_retained_variant|start_retained_variant)'
-NON_SYNONYMOUS = '(missense_variant|inframe_deletion|inframe_insertion|frameshift_variant|stop_gained|coding_sequence_variant)'
 CHROMOSOMES = range(1, 23)
 
 

@@ -1,4 +1,4 @@
-#  Analyzing the distribution of variants: Synonymous vs Non-Synonymous
+#  SFS by Variant Category, exploratory analysis
 
 ## Overview
 
