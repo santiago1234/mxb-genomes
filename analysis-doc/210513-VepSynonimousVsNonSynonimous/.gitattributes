@@ -1,3 +1,10 @@
 plots/NtoNS.png filter=lfs diff=lfs merge=lfs -text
 plots/sfs-maf.png filter=lfs diff=lfs merge=lfs -text
 plots/sfs.png filter=lfs diff=lfs merge=lfs -text
+plots/SFS-all.png filter=lfs diff=lfs merge=lfs -text
+plots/SynVsIntergenic.png filter=lfs diff=lfs merge=lfs -text
+plots/pairwise-comparison-Categories.png filter=lfs diff=lfs merge=lfs -text
+plots/sfs-Pops.png filter=lfs diff=lfs merge=lfs -text
+plots/sfs-lof.png filter=lfs diff=lfs merge=lfs -text
+plots/sfs-missense.png filter=lfs diff=lfs merge=lfs -text
+plots/sfs-synonymous.png filter=lfs diff=lfs merge=lfs -text
