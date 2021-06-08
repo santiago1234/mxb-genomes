@@ -8,3 +8,10 @@ plots/sfs-Pops.png filter=lfs diff=lfs merge=lfs -text
 plots/sfs-lof.png filter=lfs diff=lfs merge=lfs -text
 plots/sfs-missense.png filter=lfs diff=lfs merge=lfs -text
 plots/sfs-synonymous.png filter=lfs diff=lfs merge=lfs -text
+plots/sfs-missense-folded.png filter=lfs diff=lfs merge=lfs -text
+plots/sfs-synonymous-folded.png filter=lfs diff=lfs merge=lfs -text
+plots/SynVsIntergenic-folded.png filter=lfs diff=lfs merge=lfs -text
+plots/pairwise-comparison-Categories-folded.png filter=lfs diff=lfs merge=lfs -text
+plots/sfs-lof-folded.png filter=lfs diff=lfs merge=lfs -text
+plots/SFS-all-folded.png filter=lfs diff=lfs merge=lfs -text
+plots/sfs-Pops-folded.png filter=lfs diff=lfs merge=lfs -text
