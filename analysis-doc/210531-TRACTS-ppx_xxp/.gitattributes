@@ -1,0 +1,2 @@
+plots/sfs-chr22.png filter=lfs diff=lfs merge=lfs -text
+plots/taino.png filter=lfs diff=lfs merge=lfs -text

@@ -1,3 +1,5 @@
+# Ignore specific files
+analysis-doc/210531-TRACTS-ppx_xxp/output-*
 tmp/*
 .snakemake/
 */.snakemake/
