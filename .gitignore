@@ -1,4 +1,7 @@
 # Ignore specific files
+# data in resources
+resources/*/*.gz
+resources/*/*.bed
 analysis-doc/210531-TRACTS-ppx_xxp/output-*
 tmp/*
 .snakemake/
