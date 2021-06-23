@@ -41,7 +41,10 @@ analysis-doc/*/README.docx
 analysis-doc/*/README.html
 analysis-doc/*/*.png
 analysis-doc/*/*.pdf
-analysis-doc/*/plots/*
+# In case of subdirs
+analysis-doc/*/*/*.png
+analysis-doc/*/*/*.pdf
+analysis-doc/*/*/plots/*
 
 # for R
 # History files
