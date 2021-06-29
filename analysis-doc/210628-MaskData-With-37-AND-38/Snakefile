@@ -82,3 +82,32 @@ rule msk_apply_mask38:
 		bcftools view -R {input.mask} {input.vcf} -Oz -o {output.vcf}
         bcftools index {output.vcf} --tbi
 		"""
+
+
+
+def get_vcf_for_spectume(wildcards):
+    """
+    gets the vcf bassed on wilcard.
+    """
+    path_to_vcfs_given_mask = {
+            "unmasked": "",
+            "37": "data/vcfs/1TGP_and_50MXB-chr{chrn}-37msk.vcf.gz",
+            "37and38": "data/vcfs/1TGP_and_50MXB-chr{chrn}-37and38msk.vcf.gz"
+        }
+    return path_to_vcfs_given_mask[wildcards.mask]
+
+
+rule compute_joint_sfs:
+    input:
+        get_vcf_for_spectume,
+        aa_data = "../210506-AncestralAlleleData/data/aa-chr{chrn}.csv"
+    output:
+        "results/joint-sfs-chr{chrn}-mask-{mask}-MXL-MXB.csv",
+        "results/joint-sfs-chr{chrn}-mask-{mask}-MXL-IBS.csv"
+    shell:
+        """
+        python scripts/compute_jointsfs.py {input[0]} {input[1]} ../../ MXL-MXB {output[0]}
+        python scripts/compute_jointsfs.py {input[0]} {input[1]} ../../ MXL-IBS {output[1]}
+        """
+
+

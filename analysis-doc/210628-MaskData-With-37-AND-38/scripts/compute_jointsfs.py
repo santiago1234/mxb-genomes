@@ -1,7 +1,8 @@
 """
 Compute the joint SFS between populations from MXB and MXL.
 usage:
-    python compute_jointsfs.py <vcf_file> <aa_file> <rootToMXB> <outfile>
+    python compute_jointsfs.py <vcf_file> <aa_file> <rootToMXB> <poppair> <outfile>
+poppair: is a string with a pair of poulations separated by a dash character, i.e: MXB-MXL
 """
 
 import pandas as pd
@@ -16,8 +17,9 @@ vcf_file = sys.argv[1]
 aa_file = sys.argv[2]
 root_to_mxb = sys.argv[3]
 pop_info = load_populations_info(root_to_mxb)
-populations = ['MXL', 'MXB']
-outfile = sys.argv[4]
+populations = sys.argv[4]
+populations = populations.split('-')
+outfile = sys.argv[5]
 
 spectrum, pop_index = joint_sfs(vcf_file, aa_file, populations, pop_info)
 
