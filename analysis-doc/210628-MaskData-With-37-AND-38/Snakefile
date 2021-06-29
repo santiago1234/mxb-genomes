@@ -90,7 +90,7 @@ def get_vcf_for_spectume(wildcards):
     gets the vcf bassed on wilcard.
     """
     path_to_vcfs_given_mask = {
-            "unmasked": "",
+            "unmasked": "../../results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-vep-GRCh38.vcf.gz",
             "37": "data/vcfs/1TGP_and_50MXB-chr{chrn}-37msk.vcf.gz",
             "37and38": "data/vcfs/1TGP_and_50MXB-chr{chrn}-37and38msk.vcf.gz"
         }
@@ -111,3 +111,6 @@ rule compute_joint_sfs:
         """
 
 
+rule all:
+    input:
+        expand("results/joint-sfs-chr22-mask-{mask}-MXL-MXB.csv", mask=['unmasked', '37', '37and38'])
