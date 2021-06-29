@@ -103,14 +103,16 @@ rule compute_joint_sfs:
         aa_data = "../210506-AncestralAlleleData/data/aa-chr{chrn}.csv"
     output:
         "results/joint-sfs-chr{chrn}-mask-{mask}-MXL-MXB.csv",
+        "results/joint-sfs-chr{chrn}-mask-{mask}-MXL-YRI.csv",
         "results/joint-sfs-chr{chrn}-mask-{mask}-MXL-IBS.csv"
     shell:
         """
         python scripts/compute_jointsfs.py {input[0]} {input[1]} ../../ MXL-MXB {output[0]}
-        python scripts/compute_jointsfs.py {input[0]} {input[1]} ../../ MXL-IBS {output[1]}
+        python scripts/compute_jointsfs.py {input[0]} {input[1]} ../../ MXL-YRI {output[1]}
+        python scripts/compute_jointsfs.py {input[0]} {input[1]} ../../ MXL-IBS {output[2]}
         """
 
 
 rule all:
     input:
-        expand("results/joint-sfs-chr22-mask-{mask}-MXL-MXB.csv", mask=['unmasked', '37', '37and38'])
+        expand("results/joint-sfs-chr22-mask-{mask}-MXL-YRI.csv", mask=['unmasked', '37', '37and38'])
