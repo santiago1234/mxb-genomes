@@ -6,7 +6,7 @@ import pandas as pd
 
 # test_data
 
-vcf_file = "/Users/santiagomedina/tmp/1TGP_and_50MXB-chr22-snps-vep-mask-GRCh38.vcf.gz"
+vcf_file = "/Users/santiagomedina/tmp/1TGP_and_50MXB-chr22-snps-vep-GRCh38.vcf.gz"
 aa_file = "/Users/santiagomedina/tmp/aa-chr22.csv"
 
 
@@ -230,15 +230,80 @@ def sfs_to_frame(sfs):
     return df
 
 
-# helper code
-# how to generate the subpops info
-# from utils import load_populations_info
-# popinfo = load_populations_info("../")
+def joint_sfs(vcf_file, aa_file, populations, popinfo):
+    """
+    Compute the Joint Site Frequency Spectrum. It also polarizes
+    to the ancestral allele.
+    Args:
+        vcf_file: str, path to VCF file.
+        aa_file: str, path to csv file with variant ID and ancestral allel
+            See:
+                https://github.com/santiago1234/mxb-genomes/tree/main/analysis-doc/210506-AncestralAlleleData
+        populations: list of populations to compute joint spectrum on.
+        popinfo: population info. A data frame that has columns:
+            Samplename -> The sample names that should be present in the vcf file.
+            Subpopulation -> The subpopulations the populations should be found here. It
+            may also contain other populations.
+    Returns:
+        tupple: spectrum, pop_index,
+            spectrum -> multidimensional numpy array that represents the joint SFS.
+            pop_index -> dict mapping indexes in multidimensional array to populations.
+    """
+    print('loading vcf ...')
+    ga, is_alt_aa, vcf, stats = load_GA_and_aa(vcf_file, aa_file)
+    print('polarizing to ancestral allel ...')
+    ga_fixed = fix_ancestral_allel(ga, is_alt_aa)
+    ga_fixed = allel.GenotypeArray(ga_fixed)
 
-# # Generate an array mapping pop names to pop indices in vcf
-# subpops = (
-#     popinfo
-#     .groupby('Subpopulation')
-#     .apply(lambda x: x.Samplename.to_list())
-#     .to_dict()
-# )
+
+    # # Generate an array mapping pop names to pop indices in vcf
+
+    subpops = (
+        popinfo
+        [popinfo.Subpopulation.isin(populations)]
+        .groupby('Subpopulation')
+        .apply(lambda x: x.Samplename.to_list())
+        .to_dict()
+    )
+
+
+    # make sure all samples are in vcf
+    [_val_samples(x, vcf) for x in subpops.values()]
+
+    # Now get the indices in vcf file for the populations
+    subpops_indices = {pop: get_population_indices(
+        vcf, subpops[pop]) for pop in subpops}
+
+    # allele counts
+    ac = ga_fixed.count_alleles_subpops(subpops_indices, max_allele=1)
+
+    # index to populations, In the joint SFS which pop is index 0, 1, 2, etc.?
+    index_to_pops = {i: pop for i, pop in enumerate(subpops.keys())}
+
+    diploid_size = lambda pop: 2 * len(subpops[pop]) + 1
+
+    dimensions = [diploid_size(index_to_pops[i]) for i in index_to_pops]
+    n_variants, _ = ac[list(subpops.keys())[0]].shape
+    jsfs = np.zeros(dimensions, dtype=np.int64)
+
+
+    def variant_position(var_index):
+        """
+        Where does the variant falls in the jsfs
+        TODO:
+        """
+        # get the allel counts for the given variants
+        # i use the index to get the data from the allel counts array
+        variant_allele_counts = {pop:ac[pop][var_index] for pop in subpops.keys()}
+        # get now the alternative allele count
+        alternative_count = {pop:variant_allele_counts[pop][-1] for pop in subpops.keys()}
+        # now get the index position for this variant in jsfs
+        return tuple(alternative_count[index_to_pops[i]] for i in index_to_pops.keys())
+
+
+    print('computing jsfs ...')
+    for i in range(n_variants):
+        jsfs[variant_position(i)] += 1
+
+    return jsfs, index_to_pops
+
