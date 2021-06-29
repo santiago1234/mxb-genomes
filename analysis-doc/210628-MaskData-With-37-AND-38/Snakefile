@@ -1,0 +1,84 @@
+# GRCh37 mask -------------------------------------------------------------
+
+rule msk_37mask_to38:
+    input:
+        bed = "../../resources/genome-masks/20140520.strict_mask.autosomes.bed",
+        chain_file = "../../resources/GRCh38-genome-liftOverToGRCh38/hg19ToHg38.over.chain.gz"
+    output:
+        "data/GRCh37-mask-LiftedtoGRCh38.bed",
+        "data/GRCh37-mask-LiftedtoGRCh38.bed.unmap"
+    shell:
+        """
+        CrossMap.py bed {input.chain_file} {input.bed} {output[0]}
+        """
+
+
+rule msk_get_mask_for_chromosome37:
+    """
+    I extract the data for a single chromosome.
+    My vcf file has the format XX for chromosome name (e.g. 22)
+    and the bed file, with the mask, has the format chrXX.
+    Here, I will change the format from chrXX -> XX.
+    """
+    input:
+        "data/GRCh37-mask-LiftedtoGRCh38.bed"
+    output: "data/masks/GRCh37-chr{chrn}.bed"
+    params:
+        chrn = "{chrn}"
+
+    shell:
+        """
+        grep '^chr{params.chrn}' {input} |\
+        	sed 's/^chr//g' >{output}
+        """
+
+
+rule msk_apply_mask37:
+	input:
+		vcf = "../../results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr22-snps-vep-GRCh38.vcf.gz",
+        index = "../../results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr22-snps-vep-GRCh38.vcf.gz.tbi",
+		mask = "data/masks/GRCh37-chr{chrn}.bed"
+	output:
+		vcf = "data/vcfs/1TGP_and_50MXB-chr{chrn}-37msk.vcf.gz",
+		index = "data/vcfs/1TGP_and_50MXB-chr{chrn}-37msk.vcf.gz.tbi",
+	shell:
+		"""
+		bcftools view -R {input.mask} {input.vcf} -Oz -o {output.vcf}
+        bcftools index {output.vcf} --tbi
+		"""
+
+# GRCh38 mask -------------------------------------------------------------
+
+rule msk_get_mask_for_chromosome38:
+    """
+    I extract the data for a single chromosome.
+    My vcf file has the format XX for chromosome name (e.g. 22)
+    and the bed file, with the mask, has the format chrXX.
+    Here, I will change the format from chrXX -> XX.
+    """
+    input:
+        "../../resources/genome-masks/20160622.allChr.mask.bed"
+    output: "data/masks/GRCh38-chr{chrn}.bed"
+    params:
+        chrn = "{chrn}"
+
+    shell:
+        """
+        grep '^chr{params.chrn}' {input} |\
+        	sed 's/^chr//g' >{output}
+        """
+
+
+rule msk_apply_mask38:
+	input:
+		vcf = "data/vcfs/1TGP_and_50MXB-chr{chrn}-37msk.vcf.gz",
+        index = "data/vcfs/1TGP_and_50MXB-chr{chrn}-37msk.vcf.gz.tbi",
+		mask = "data/masks/GRCh38-chr{chrn}.bed"
+	output:
+		vcf = "data/vcfs/1TGP_and_50MXB-chr{chrn}-37and38msk.vcf.gz",
+		index = "data/vcfs/1TGP_and_50MXB-chr{chrn}-37and38msk.vcf.gz.tbi",
+	shell:
+		"""
+		bcftools view -R {input.mask} {input.vcf} -Oz -o {output.vcf}
+        bcftools index {output.vcf} --tbi
+		"""
