@@ -1,0 +1,93 @@
+import sys
+sys.path.append("../../")
+from mxbgenomes import utils
+
+# get the samples for MXL and MXB
+pops = utils.load_populations_info('../../')
+MXL = pops[pops.Subpopulation == 'MXL'].Samplename.to_list()
+MXB = pops[pops.Subpopulation == 'MXB'].Samplename.to_list()
+ALL_MX = MXL + MXB
+
+rule get_sample_list:
+    output:
+        "data/mx-samples.txt"
+    shell:
+        """
+        echo {ALL_MX} |\
+            tr [:space:] '\n' >{output}
+        """
+
+rule MX_vcf:
+    # bcfile with mx samples
+    input:
+        samples = "data/mx-samples.txt",
+        vcf = "../210628-MaskData-With-37-AND-38/data/vcfs/1TGP_and_50MXB-chr22-37and38msk.vcf.gz"
+    output:
+        "data/mx-SNPs.vcf.gz"
+    shell:
+        """
+        # get the MX samples (MXL + MXB)
+        # drop non variant snps
+        # keep only biallelic snps
+        bcftools view -S {input.samples} {input.vcf} |\
+            bcftools view -c1 |\
+            bcftools view -m2 -M2 -v snps -Oz -o {output}
+        """
+
+rule hw_stats:
+    input:
+        "data/mx-SNPs.vcf.gz"
+    output:
+        "data/hw-stats.csv"
+    shell:
+        """
+        python scripts/hw.py {input} {output}
+        """
+
+
+rule filter_snps_hw:
+    input:
+        "data/hw-stats.csv"
+    output:
+        temp("data/hw-e-{cutoff}.txt")
+    params:
+        cutoff = lambda wildcars: 10 ** (-1 * int(wildcars.cutoff))
+    shell:
+        """
+        awk -F, '{{ if ($3 >= {params.cutoff}) print $1}}' {input} >{output}
+        """
+
+rule filter_vcf_by_hw:
+    input:
+        vcf = "data/mx-SNPs.vcf.gz",
+        hw_pass = "data/hw-e-{cutoff}.txt"
+    output:
+        temp("data/mxb-SNPs-e-{cutoff}.vcf.gz")
+    shell:
+        """
+        bcftools view --include ID==@{input.hw_pass} {input.vcf} -Oz -o {output}
+        """
+
+rule compute_sfs:
+    input:
+        vcf = "data/mxb-SNPs-e-{cutoff}.vcf.gz",
+        aa_file = "../210506-AncestralAlleleData/data/aa-chr22.csv"
+    output:
+        "results/sfs-hw-e-{cutoff}.csv"
+    shell:
+        """
+        python ../210628-MaskData-With-37-AND-38/scripts/compute_jointsfs.py \
+            {input.vcf} \
+            {input.aa_file} \
+            ../../ \
+            MXL-MXB \
+            {output}
+        """
+
+rule all:
+    input:
+        expand("results/sfs-hw-e-{cutoff}.csv", cutoff=[2, 4, 6, 8, 10, 100])
+
+
+
+
