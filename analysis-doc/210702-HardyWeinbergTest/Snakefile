@@ -1,3 +1,9 @@
+"""
+I will run HW on three data sets:
+    - MX: MXL + MXB
+    - MXB
+    - MXL
+"""
 import sys
 sys.path.append("../../")
 from mxbgenomes import utils
@@ -8,37 +14,50 @@ MXL = pops[pops.Subpopulation == 'MXL'].Samplename.to_list()
 MXB = pops[pops.Subpopulation == 'MXB'].Samplename.to_list()
 ALL_MX = MXL + MXB
 
-rule get_sample_list:
-    output:
-        "data/mx-samples.txt"
-    shell:
-        """
-        echo {ALL_MX} |\
-            tr [:space:] '\n' >{output}
-        """
 
-rule MX_vcf:
-    # bcfile with mx samples
+def get_sample_list(wildcars):
+    """
+    this function returns a list of samples for:
+        - MX: MXL + MXB
+        - MXL: MXL
+        - MX: MXB
+    Note:
+        The output is a string were samples are separated with ",".
+        This is for using with bcftools view -s
+    """
+    name_to_samples = {
+        "MX": ','.join(ALL_MX),
+        "MXL": ','.join(MXL),
+        "MXB": ','.join(MXB)
+    }
+    return name_to_samples[wildcars.sample]
+
+
+
+rule subset_sample_vcf:
+    # Get the VCF for the given sample
     input:
-        samples = "data/mx-samples.txt",
         vcf = "../210628-MaskData-With-37-AND-38/data/vcfs/1TGP_and_50MXB-chr22-37and38msk.vcf.gz"
     output:
-        "data/mx-SNPs.vcf.gz"
+        temp("data/mx-SNPs-sub-{sample}.vcf.gz")
+    params:
+        sample_list = get_sample_list
     shell:
         """
         # get the MX samples (MXL + MXB)
         # drop non variant snps
         # keep only biallelic snps
-        bcftools view -S {input.samples} {input.vcf} |\
+        bcftools view -s {params.sample_list} {input.vcf} |\
             bcftools view -c1 |\
             bcftools view -m2 -M2 -v snps -Oz -o {output}
         """
 
+
 rule hw_stats:
     input:
-        "data/mx-SNPs.vcf.gz"
+        "data/mx-SNPs-sub-{sample}.vcf.gz"
     output:
-        "data/hw-stats.csv"
+        temp("data/hw-stats-sub-{sample}.csv")
     shell:
         """
         python scripts/hw.py {input} {output}
@@ -47,33 +66,39 @@ rule hw_stats:
 
 rule filter_snps_hw:
     input:
-        "data/hw-stats.csv"
+        "data/hw-stats-sub-{sample}.csv"
     output:
-        temp("data/hw-e-{cutoff}.txt")
+        pasan_filter = "data/hw-e-{cutoff}-pasan-{sample}.txt",
+        nopasan_filter = "data/hw-e-{cutoff}-nopasan-{sample}.txt"
     params:
         cutoff = lambda wildcars: 10 ** (-1 * int(wildcars.cutoff))
     shell:
         """
-        awk -F, '{{ if ($3 >= {params.cutoff}) print $1}}' {input} >{output}
+        awk -F, '{{ if ($3 >= {params.cutoff}) print $1}}' {input} >{output.pasan_filter}
+        # This list represents the list of SNPs that would be discarded
+        awk -F, '{{ if ($3 < {params.cutoff}) print $1}}' {input} >{output.nopasan_filter}
         """
 
 rule filter_vcf_by_hw:
     input:
-        vcf = "data/mx-SNPs.vcf.gz",
-        hw_pass = "data/hw-e-{cutoff}.txt"
+        # NOTE:
+        #   I want to compute the joint SFS, then I subset the SNPs from
+        #   the vcf file with MXL and MXB samples (MX).
+        vcf = "data/mx-SNPs-sub-MX.vcf.gz",
+        hw_pasan = "data/hw-e-{cutoff}-{pasan}-{sample}.txt"
     output:
-        temp("data/mxb-SNPs-e-{cutoff}.vcf.gz")
+        temp("data/mxb-SNPs-e-{cutoff}-{pasan}-{sample}.vcf.gz")
     shell:
         """
-        bcftools view --include ID==@{input.hw_pass} {input.vcf} -Oz -o {output}
+        bcftools view --include ID==@{input.hw_pasan} {input.vcf} -Oz -o {output}
         """
 
 rule compute_sfs:
     input:
-        vcf = "data/mxb-SNPs-e-{cutoff}.vcf.gz",
+        vcf = "data/mxb-SNPs-e-{cutoff}-{pasan}-{sample}.vcf.gz",
         aa_file = "../210506-AncestralAlleleData/data/aa-chr22.csv"
     output:
-        "results/sfs-hw-e-{cutoff}.csv"
+        "results/sfs-hw-e-{cutoff}-{pasan}-{sample}.csv"
     shell:
         """
         python ../210628-MaskData-With-37-AND-38/scripts/compute_jointsfs.py \
@@ -86,7 +111,7 @@ rule compute_sfs:
 
 rule all:
     input:
-        expand("results/sfs-hw-e-{cutoff}.csv", cutoff=[2, 4, 6, 8, 10, 100])
+        expand("results/sfs-hw-e-{cutoff}-{pasan}-{sample}.csv", cutoff=[2, 4, 6, 8, 10, 100], pasan=['nopasan', 'pasan'], sample=['MXL', 'MXB', 'MX'])
 
 
 
