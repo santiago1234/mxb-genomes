@@ -31,5 +31,9 @@ d = {
     'p': p
 }
 
-pd.DataFrame(d).to_csv(outfile, index=False)
+(
+    pd.DataFrame(d)
+    .dropna()
+    .to_csv(outfile, index=False)
+)
 
