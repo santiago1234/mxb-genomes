@@ -2,8 +2,9 @@
 I will run HW on three data sets:
     - MX: MXL + MXB
     - MXB
-    - MXL
+    - NAT: 1TGP proxy nat samples (29) + MXB
 """
+import numpy as np
 import sys
 sys.path.append("../../")
 from mxbgenomes import utils
@@ -12,7 +13,13 @@ from mxbgenomes import utils
 pops = utils.load_populations_info('../../')
 MXL = pops[pops.Subpopulation == 'MXL'].Samplename.to_list()
 MXB = pops[pops.Subpopulation == 'MXB'].Samplename.to_list()
-ALL_MX = MXL + MXB
+# Load the proxy samples for NAT from 1TGP
+NAT_1tgp = np.loadtxt('../../resources/1TGP-samples-meta-data/native-american.txt', dtype=np.object0).tolist()
+MX = MXL + MXB
+NAT = NAT_1tgp + MXB
+
+# PARAMETERS
+HW_CUTOFF = 0.05
 
 
 def get_sample_list(wildcars):
@@ -26,8 +33,8 @@ def get_sample_list(wildcars):
         This is for using with bcftools view -s
     """
     name_to_samples = {
-        "MX": ','.join(ALL_MX),
-        "MXL": ','.join(MXL),
+        "MX": ','.join(MX),
+        "NAT": ','.join(NAT),
         "MXB": ','.join(MXB)
     }
     return name_to_samples[wildcars.sample]
@@ -39,7 +46,7 @@ rule subset_sample_vcf:
     input:
         vcf = "../210628-MaskData-With-37-AND-38/data/vcfs/1TGP_and_50MXB-chr22-37and38msk.vcf.gz"
     output:
-        temp("data/mx-SNPs-sub-{sample}.vcf.gz")
+        "data/mx-SNPs-sub-{sample}.vcf.gz"
     params:
         sample_list = get_sample_list
     shell:
@@ -68,10 +75,10 @@ rule filter_snps_hw:
     input:
         "data/hw-stats-sub-{sample}.csv"
     output:
-        pasan_filter = "data/hw-e-{cutoff}-pasan-{sample}.txt",
-        nopasan_filter = "data/hw-e-{cutoff}-nopasan-{sample}.txt"
+        pasan_filter = "data/hw-pasan-{sample}.txt",
+        nopasan_filter = "data/hw-nopasan-{sample}.txt"
     params:
-        cutoff = lambda wildcars: 10 ** (-1 * int(wildcars.cutoff))
+        cutoff = HW_CUTOFF
     shell:
         """
         awk -F, '{{ if ($3 >= {params.cutoff}) print $1}}' {input} >{output.pasan_filter}
@@ -85,20 +92,24 @@ rule filter_vcf_by_hw:
         #   I want to compute the joint SFS, then I subset the SNPs from
         #   the vcf file with MXL and MXB samples (MX).
         vcf = "data/mx-SNPs-sub-MX.vcf.gz",
-        hw_pasan = "data/hw-e-{cutoff}-{pasan}-{sample}.txt"
+        # For these SNPs we reject HW equilibrium
+        snps_to_drop = "data/hw-nopasan-{sample}.txt"
     output:
-        temp("data/mxb-SNPs-e-{cutoff}-{pasan}-{sample}.vcf.gz")
+        "data/mxb-SNPs-pasan-{sample}.vcf.gz",
+        "data/mxb-SNPs-nopasan-{sample}.vcf.gz"
     shell:
         """
-        bcftools view --include ID==@{input.hw_pasan} {input.vcf} -Oz -o {output}
+        bcftools view --exclude ID==@{input.snps_to_drop} {input.vcf} -Oz -o {output[0]}
+        bcftools view --include ID==@{input.snps_to_drop} {input.vcf} -Oz -o {output[1]}
         """
+
 
 rule compute_sfs:
     input:
-        vcf = "data/mxb-SNPs-e-{cutoff}-{pasan}-{sample}.vcf.gz",
+        vcf = "data/mxb-SNPs-{pasan}-{sample}.vcf.gz",
         aa_file = "../210506-AncestralAlleleData/data/aa-chr22.csv"
     output:
-        "results/sfs-hw-e-{cutoff}-{pasan}-{sample}.csv"
+        "results/sfs-hw-{pasan}-{sample}.csv"
     shell:
         """
         python ../210628-MaskData-With-37-AND-38/scripts/compute_jointsfs.py \
@@ -111,8 +122,44 @@ rule compute_sfs:
 
 rule all:
     input:
-        expand("results/sfs-hw-e-{cutoff}-{pasan}-{sample}.csv", cutoff=[2, 4, 6, 8, 10, 100], pasan=['nopasan', 'pasan'], sample=['MXL', 'MXB', 'MX'])
+        expand("results/sfs-hw-{pasan}-{sample}.csv", pasan=['nopasan', 'pasan'], sample=['MX', 'MXB', 'NAT'])
 
 
+## Compute the spectrum by droping snps in MX + NAT + MXB.
 
+rule all_snps_to_drop:
+    input:
+        expand("data/hw-nopasan-{sample}.txt", sample=['NAT', 'MX'])
+    output:
+        "data/filtering/snps-to-drop.txt"
+    shell: 
+        """
+        cat {input} |sort|uniq >{output}
+        """
 
+rule vcf_hw_filtered:
+    input:
+        snps_to_drop= "data/filtering/snps-to-drop.txt",
+        vcf = "data/mx-SNPs-sub-MX.vcf.gz"
+    output:
+        "data/filtering/snps-hw-all.vcf.gz"
+    shell:
+        """
+        bcftools view --exclude ID==@{input.snps_to_drop} {input.vcf} -Oz -o {output}
+        """
+
+rule compute_sfs_in_final_vcf:
+    input:
+        vcf = "data/filtering/snps-hw-all.vcf.gz",
+        aa_file = "../210506-AncestralAlleleData/data/aa-chr22.csv"
+    output:
+        "results/final-sfs.csv"
+    shell:
+        """
+        python ../210628-MaskData-With-37-AND-38/scripts/compute_jointsfs.py \
+            {input.vcf} \
+            {input.aa_file} \
+            ../../ \
+            MXL-MXB \
+            {output}
+        """
