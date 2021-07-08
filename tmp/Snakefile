@@ -1,0 +1,39 @@
+"""
+Pipeline to remove SNPs not in HW equilibrium.
+
+======= >>>> 1st
+First we remove SNPs not in HW equilibrium
+within the continental populations:
+    - AFR (YRI)
+    - EUR (IBS + GBR)
+    - EAS (CHB)
+    - MXB (50 MXB)
+
+We do not consider the admixed mexican population (MXL). We
+use a relaxed p-value cut-off, 1e6.
+
+======= >>>> 2nd
+A second run of the HW equilibrium is to homogenize the 50 MXB
+genomes with the 1TGP data. We have observed that there are
+variants not called in the MXB genomes that were called in the 1TGP
+and vice versa. This is likely due to differences in the variant
+calling pipelines or also that the 50 MXB genomes were called in the
+GRCh37 build (I lifter over to GRCh38) and the 1TGP in GRCh38.
+
+For this I run HW equilibrium, in the following set of samples:
+    - MX (50 MXB + MXL)
+    - NAT (50 MXB + 1TGP-NAT)
+        1TGP-NAT, is the samples from 1TGP that are a proxy for NAT ancestry.
+        see: resources/1TGP-samples-meta-data/native-american.txt
+
+Here, I use a strict HW pvalue of 0.05
+"""
+
+
+## Define the p-value cutoffs
+HWp_CONTINENTAL = 1e-6
+HWp_MX_NAT = 0.05
+
+
+
+
