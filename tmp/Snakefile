@@ -28,12 +28,73 @@ For this I run HW equilibrium, in the following set of samples:
 
 Here, I use a strict HW pvalue of 0.05
 """
+import pandas as pd
+import sys
+# TODO: check correct path once adapted to the main workflow.
+sys.path.append("../")
+from mxbgenomes.utils import load_populations_info
+from os.path import join
+
+# ***********************************************************
+# ****** GLOBAL VARS ********
+# ***********************************************************
+# Define the p-value cutoffs
+HWp_CONTINENTAL = 1e-6  # 1st
+HWp_MX_NAT = 0.05  # 2nd
+
+# The dir to save pipeline output
+DESTINATION_DIR = "data/"
+CONTINENTAL = ['MXB', 'AFR', 'EUR', 'EAS']
+
+def subpops_to_samples():
+    pops = load_populations_info("../")
+
+    def get_continental_samples(pop):
+        cont = pops[pops.Superpopulation == pop]
+        cont = cont.Samplename.to_list()
+        return cont
 
 
-## Define the p-value cutoffs
-HWp_CONTINENTAL = 1e-6
-HWp_MX_NAT = 0.05
+    mappings = {x: get_continental_samples(x) for x in CONTINENTAL}
+
+    mxb_samples = get_continental_samples('MXB')
+    mxl_samples = pops[pops.Subpopulation == 'MXL'].Samplename.to_list()
+    nat1tgp_samples = (
+        pd.read_table(
+            "../resources/1TGP-samples-meta-data/native-american.txt",
+            names=['Samplename']
+        )
+        .Samplename
+        .to_list()
+    )
+
+    mappings['NAT'] = mxb_samples + nat1tgp_samples
+    mappings['MX'] = mxb_samples + mxl_samples
+    return mappings
+
+SUBPOPS = subpops_to_samples()
+
+# functions to apply on wildcars
+
+def hw_pval(wildcars):
+    """
+    get the hw-pvalue bassed on HW.
+    """
+    if wildcars.subpop in CONTINENTAL:
+        return HWp_CONTINENTAL
+    else:
+        return HWp_MX_NAT
+
+def samples_list(wildcars):
+    """
+    Get the sample for the subpopulation.
+    The output is a string were samples are separated by commas:
+        A,B,C,D
+    Intented for using with bcftools view -s
+    """
+    return ','.join(SUBPOPS[wildcars.subpop])
 
 
-
-
+# *********************************************************************
+# ********** PIPELINE CODE
+# *********************************************************************
