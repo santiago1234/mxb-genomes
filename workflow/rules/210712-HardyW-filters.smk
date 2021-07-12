@@ -10,7 +10,7 @@ within the continental populations:
     - MXB (50 MXB)
 
 We do not consider the admixed mexican population (MXL). We
-use a relaxed p-value cut-off, 1e6.
+use a relaxed p-value cut-off, 1e4.
 
 ======= >>>> 2nd
 A second run of the HW equilibrium is to homogenize the 50 MXB
@@ -30,8 +30,8 @@ Here, I use a strict HW pvalue of 0.05
 """
 import pandas as pd
 import sys
-# TODO: check correct path once adapted to the main workflow.
-sys.path.append("../")
+sys.path.append("./")
+import os
 from mxbgenomes.utils import load_populations_info
 from os.path import join
 
@@ -43,12 +43,12 @@ HWp_CONTINENTAL = 0.0001  # 1st
 HWp_MX_NAT = 0.05  # 2nd
 
 # The dir to save pipeline output
-DESTINATION_DIR = "data/"
+DESTINATION_DIR = "results/data/210713-HardyW-filters/"
 CONTINENTAL = ['MXB', 'AFR', 'EUR', 'EAS']
 MX_NAT = ['MX', 'NAT']
 
 def subpops_to_samples():
-    pops = load_populations_info("../")
+    pops = load_populations_info("./")
 
     def get_continental_samples(pop):
         cont = pops[pops.Superpopulation == pop]
@@ -62,7 +62,7 @@ def subpops_to_samples():
     mxl_samples = pops[pops.Subpopulation == 'MXL'].Samplename.to_list()
     nat1tgp_samples = (
         pd.read_table(
-            "../resources/1TGP-samples-meta-data/native-american.txt",
+            "./resources/1TGP-samples-meta-data/native-american.txt",
             names=['Samplename']
         )
         .Samplename
@@ -107,9 +107,9 @@ rule hw_subpop_vcf:
     Also remove non variant SNPs and keep only biallelic SNPs.
     """
     input:
-        "../analysis-doc/210628-MaskData-With-37-AND-38/data/vcfs/1TGP_and_50MXB-chr{chrn}-37and38msk.vcf.gz"
+        "results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz"
     output:
-        temp(join(DESTINATION_DIR, "vcfs/subpop-{subpop}-chr{chrn}.vcf.gz"))
+        temp("results/data/210713-HardyW-filters/vcfs/subpop-{subpop}-chr{chrn}.vcf.gz")
     params:
         sl = samples_list
     shell:
@@ -120,47 +120,47 @@ rule hw_subpop_vcf:
         """
 
 
-rule hw_test:
-    """
-    Run the HW and obtain p-values for each SNP.
-    """
-    input:
-        join(DESTINATION_DIR, "vcfs/subpop-{subpop}-chr{chrn}.vcf.gz")
-    output:
-        join(DESTINATION_DIR, "hw/subpop-{subpop}-chr{chrn}.csv")
-    message: "running HW test on {input}"
-    shell:
-        """
-        python hw-test.py {input} {output}
-        """
-
-rule hw_snps_to_rm:
-    """
-    Get the SNPs that will be removed.
-    """
-    input:
-        join(DESTINATION_DIR, "hw/subpop-{subpop}-chr{chrn}.csv")
-    output:
-        join(DESTINATION_DIR, "snps-to-remove/subpop-{subpop}-chr{chrn}.txt")
-    params:
-        hw_pval = hw_pval  # I am calling the function to get the cuttoff bassed on the population
-    shell:
-        """
-        # Simply filter SNPs from the table
-        awk -F, '{{ if ($3 < {params.hw_pval}) print $1}}' {input} >{output}
-        """
-
-
-rule hw_filter_VCF_by_HW:
-    input:
-        vcf = "../analysis-doc/210628-MaskData-With-37-AND-38/data/vcfs/1TGP_and_50MXB-chr{chrn}-37and38msk.vcf.gz",
-        snps_to_drop = expand(join(DESTINATION_DIR, "snps-to-remove/subpop-{subpop}-chr{{chrn}}.txt"), subpop=CONTINENTAL + MX_NAT)
-    output:
-        all_snp_to_rm = join(DESTINATION_DIR, "snps-to-remove/all-chr{chrn}.txt"),
-        vcf_hw = join(DESTINATION_DIR, "1TGP_and_50MXB-mask-HW-chr{chrn}.vcf.gz")
-    shell:
-        """
-        cat {input.snps_to_drop} | sort| uniq >{output.all_snp_to_rm}
-        bcftools view --exclude ID==@{output.all_snp_to_rm} {input.vcf} -Oz -o {output.vcf_hw}
-        """
-
+#rule hw_test:
+#    """
+#    Run the HW and obtain p-values for each SNP.
+#    """
+#    input:
+#        join(DESTINATION_DIR, "vcfs/subpop-{subpop}-chr{chrn}.vcf.gz")
+#    output:
+#        join(DESTINATION_DIR, "hw/subpop-{subpop}-chr{chrn}.csv")
+#    message: "running HW test on {input}"
+#    shell:
+#        """
+#        python hw-test.py {input} {output}
+#        """
+#
+#rule hw_snps_to_rm:
+#    """
+#    Get the SNPs that will be removed.
+#    """
+#    input:
+#        join(DESTINATION_DIR, "hw/subpop-{subpop}-chr{chrn}.csv")
+#    output:
+#        join(DESTINATION_DIR, "snps-to-remove/subpop-{subpop}-chr{chrn}.txt")
+#    params:
+#        hw_pval = hw_pval  # I am calling the function to get the cuttoff bassed on the population
+#    shell:
+#        """
+#        # Simply filter SNPs from the table
+#        awk -F, '{{ if ($3 < {params.hw_pval}) print $1}}' {input} >{output}
+#        """
+#
+#
+#rule hw_filter_VCF_by_HW:
+#    input:
+#        vcf = "../analysis-doc/210628-MaskData-With-37-AND-38/data/vcfs/1TGP_and_50MXB-chr{chrn}-37and38msk.vcf.gz",
+#        snps_to_drop = expand(join(DESTINATION_DIR, "snps-to-remove/subpop-{subpop}-chr{{chrn}}.txt"), subpop=CONTINENTAL + MX_NAT)
+#    output:
+#        all_snp_to_rm = join(DESTINATION_DIR, "snps-to-remove/all-chr{chrn}.txt"),
+#        vcf_hw = join(DESTINATION_DIR, "1TGP_and_50MXB-mask-HW-chr{chrn}.vcf.gz")
+#    shell:
+#        """
+#        cat {input.snps_to_drop} | sort| uniq >{output.all_snp_to_rm}
+#        bcftools view --exclude ID==@{output.all_snp_to_rm} {input.vcf} -Oz -o {output.vcf_hw}
+#        """
+#
