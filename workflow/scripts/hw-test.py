@@ -17,7 +17,7 @@ NOTE:
 import pandas as pd
 import allel
 import sys
-sys.path.append("../")
+sys.path.append("./")
 from mxbgenomes.stats import hw_test
 
 vcf_file = sys.argv[1]

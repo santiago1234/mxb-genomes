@@ -100,6 +100,10 @@ def samples_list(wildcars):
 # ********** PIPELINE CODE
 # *********************************************************************
 
+rule hw_all:
+    input:
+        expand("results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz", chrn=CHROMS)
+
 
 rule hw_subpop_vcf:
     """
@@ -120,47 +124,52 @@ rule hw_subpop_vcf:
         """
 
 
-#rule hw_test:
-#    """
-#    Run the HW and obtain p-values for each SNP.
-#    """
-#    input:
-#        join(DESTINATION_DIR, "vcfs/subpop-{subpop}-chr{chrn}.vcf.gz")
-#    output:
-#        join(DESTINATION_DIR, "hw/subpop-{subpop}-chr{chrn}.csv")
-#    message: "running HW test on {input}"
-#    shell:
-#        """
-#        python hw-test.py {input} {output}
-#        """
-#
-#rule hw_snps_to_rm:
-#    """
-#    Get the SNPs that will be removed.
-#    """
-#    input:
-#        join(DESTINATION_DIR, "hw/subpop-{subpop}-chr{chrn}.csv")
-#    output:
-#        join(DESTINATION_DIR, "snps-to-remove/subpop-{subpop}-chr{chrn}.txt")
-#    params:
-#        hw_pval = hw_pval  # I am calling the function to get the cuttoff bassed on the population
-#    shell:
-#        """
-#        # Simply filter SNPs from the table
-#        awk -F, '{{ if ($3 < {params.hw_pval}) print $1}}' {input} >{output}
-#        """
-#
-#
-#rule hw_filter_VCF_by_HW:
-#    input:
-#        vcf = "../analysis-doc/210628-MaskData-With-37-AND-38/data/vcfs/1TGP_and_50MXB-chr{chrn}-37and38msk.vcf.gz",
-#        snps_to_drop = expand(join(DESTINATION_DIR, "snps-to-remove/subpop-{subpop}-chr{{chrn}}.txt"), subpop=CONTINENTAL + MX_NAT)
-#    output:
-#        all_snp_to_rm = join(DESTINATION_DIR, "snps-to-remove/all-chr{chrn}.txt"),
-#        vcf_hw = join(DESTINATION_DIR, "1TGP_and_50MXB-mask-HW-chr{chrn}.vcf.gz")
-#    shell:
-#        """
-#        cat {input.snps_to_drop} | sort| uniq >{output.all_snp_to_rm}
-#        bcftools view --exclude ID==@{output.all_snp_to_rm} {input.vcf} -Oz -o {output.vcf_hw}
-#        """
-#
+rule hw_test:
+    """
+    Run the HW and obtain p-values for each SNP.
+    """
+    input:
+        "results/data/210713-HardyW-filters/vcfs/subpop-{subpop}-chr{chrn}.vcf.gz"
+    output:
+        temp("results/data/210713-HardyW-filters/hw/subpop-{subpop}-chr{chrn}.csv")
+    message: "running HW test on {input}"
+    conda:
+        "../envs/scipy.yaml"
+    shell:
+        """
+        python workflow/scripts/hw-test.py {input} {output}
+        """
+
+rule hw_snps_to_rm:
+    """
+    Get the SNPs that will be removed.
+    """
+    input:
+        "results/data/210713-HardyW-filters/hw/subpop-{subpop}-chr{chrn}.csv"
+    output:
+        "results/data/210713-HardyW-filters/snps-to-remove/subpop-{subpop}-chr{chrn}.txt"
+    params:
+        hw_pval = hw_pval  # I am calling the function to get the cuttoff bassed on the population
+    shell:
+        """
+        # Simply filter SNPs from the table
+        awk -F, '{{ if ($3 < {params.hw_pval}) print $1}}' {input} >{output}
+        """
+
+
+rule hw_filter_VCF_by_HW:
+    input:
+        vcf = "results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz",
+        index = "results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz.tbi",
+        snps_to_drop = expand("results/data/210713-HardyW-filters/snps-to-remove/subpop-{subpop}-chr{{chrn}}.txt", subpop=CONTINENTAL + MX_NAT)
+    output:
+        all_snp_to_rm = "results/data/210713-HardyW-filters/snps-to-remove/all-chr{chrn}.txt",
+        vcf = "results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz",
+        index = "results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz.tbi"
+    shell:
+        """
+        cat {input.snps_to_drop} | sort| uniq >{output.all_snp_to_rm}
+        bcftools view --exclude ID==@{output.all_snp_to_rm} {input.vcf} -Oz -o {output.vcf}
+        bcftools index {output.vcf} --tbi
+        """
+
