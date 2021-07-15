@@ -70,7 +70,7 @@ rule lai_pop_list_to_subset:
 
 rule lai_subset_haplotypes:
     input:
-        vcf = "results/data/210305-merged-with-1TGP/strict-mask/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-GRCh38.vcf.gz",
+        vcf = "results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz",
         pop_list = "results/data/210409-local-ancestry/{npops}-pops/input-data/{haplo}_pop-list.txt"
     output:
         temp("results/data/210409-local-ancestry/{npops}-pops/input-data/{haplo}-chr{chrn}.vcf.gz")
