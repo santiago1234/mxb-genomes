@@ -1,186 +1,199 @@
 ## Pipeline for running relate
 
+from os.path import join
 
-PATH_TO_RELATE = "../../../../software/relate_v1.1.7_x86_64_dynamic/"
+PATH_TO_RELATE = "/data/programs/relate_v1.1.7_x86_64_dynamic/"
 # The path tho the following directory has data I have generated
 # there for the estimation of the gene genealogies, for example:
 # - genetic map
 # - ancestral genome
 # - genomic mask
+# - a script used to put the recombination map in the format needed to run relate.
 PATH_TO_GENEALOGIES_DIR = "../../../gene-genealogies-mxb/"
 
-# rule samples_to_analyze:
-#     # get the list of samples
-#     input:
-#         "../../resources/210721-poplabels-50mxb-and-PEL/poplabels.txt"
-#     output:
-#         temp("data/relate-input/samples.txt")
-#     shell:
-#         """
-#         cut -d' ' -f1 {input} |\
-#             tail -n +2 >{output}  # drop header
-#         """
-# 
-# 
-# rule get_vcf:
-#     input:
-#         "/data/users/smedina/projects/mxb-genomes/results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz",
-#         "data/relate-input/samples.txt"
-#     output:
-#         temp("data/relate-input/vcfs/genotypes-{chrn}.vcf.gz")
-#     shell:
-#         """
-#         bcftools view -S {input[1]} {input[0]} |\
-#             bcftools view --min-ac=1 -Oz -o {output}
-#         # the last line gets the variant region
-#         # see: https://www.biostars.org/p/203809/
-#         """
-# 
+
+rule poplabels:
+    output:
+        "data/poplabels.txt"
+    shell: "python scripts/makepoplabels.py"
+
+
+rule samples_to_analyze:
+    # get the list of samples
+    input:
+        "data/poplabels.txt"
+    output:
+        "data/relate-input/samples.txt"
+    shell:
+        """
+        cut -d' ' -f1 {input} |\
+            tail -n +2 >{output}  # drop header
+        """
+
+
+rule get_vcf:
+    # NOTE:
+    #   ***** IMPORTANT *****
+    #   define the input vcf files to run
+    input:
+        "../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz",
+        "data/relate-input/samples.txt"
+    output:
+        temp("data/relate-input/vcfs/genotypes-chr{chrn}.vcf.gz")
+    shell:
+        """
+        bcftools view -S {input[1]} {input[0]} |\
+            bcftools view --min-ac=1 -Oz -o {output}
+        # the last line gets the variant region
+        # see: https://www.biostars.org/p/203809/
+        """
+
 # ### **********************************************************************************
 # ## PREPARING INPUT FILES
 # ### **********************************************************************************
 # 
-# rule conver_from_vcf:
-#     input:
-#         "data/relate-input/vcfs/genotypes-{chrn}.vcf.gz"
-#     output:
-#         "data/relate-input/haps-sample/genotypes-{chrn}.haps",
-#         "data/relate-input/haps-sample/genotypes-{chrn}.sample"
-#     params:
-#         vcf_file_no_ext = "data/relate-input/vcfs/genotypes-{chrn}"
-#     shell:
-#         """
-#         ~/software/relate_v1.1.7_x86_64_dynamic/bin/RelateFileFormats \
-#             --mode ConvertFromVcf \
-#             --haps {output[0]} --sample {output[1]} \
-#             -i {params.vcf_file_no_ext}
-#         """
-# 
-# 
-# rule rm_nonbiallelic_SNPs:
-#     input:
-#         "data/relate-input/haps-sample/genotypes-{chrn}.haps"
-#     output:
-#         "data/relate-input/haps-sample/genotypes-biallelic-{chrn}.haps"
-#     params:
-#         output = "data/relate-input/haps-sample/genotypes-biallelic-{chrn}"
-#     shell:
-#         """
-#         ~/software/relate_v1.1.7_x86_64_dynamic/bin/RelateFileFormats \
-#             --mode RemoveNonBiallelicSNPs \
-#             --haps {input} \
-#             -o {params.output}
-#         """
-# 
-# rule flip_ancestral_snp:
-#     input:
-#         haps = "data/relate-input/haps-sample/genotypes-biallelic-{chrn}.haps",
-#         sample = "data/relate-input/haps-sample/genotypes-{chrn}.sample",
-#         ancestral_genome = "../../resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38.fa.gz"
-#     output:
-#         "data/relate-input/haps-sample/genotypes-biallelic-flip-{chrn}.haps"
-#     params:
-#         output = "data/relate-input/haps-sample/genotypes-biallelic-flip-{chrn}"
-#     shell:
-#         """
-#         ~/software/relate_v1.1.7_x86_64_dynamic/bin/RelateFileFormats \
-#             --mode FlipHapsUsingAncestor \
-#             --haps {input.haps} \
-#             --sample {input.sample} \
-#             --ancestor {input.ancestral_genome} \
-#             -o {params.output}
-#         """
-# 
-# rule filter_genomic_mask:
-#     input:
-#         mask = "../../resources/210721-genome-masks/20160622.chr{chrn}.mask.fasta.gz",
-#         sample = "data/relate-input/haps-sample/genotypes-{chrn}.sample",
-#         haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-{chrn}.haps"
-#     output:
-#         haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-{chrn}.haps",
-#         dist = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-{chrn}.dist"
-#     params:
-#         output = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-{chrn}"
-#     shell:
-#         """
-#         ~/software/relate_v1.1.7_x86_64_dynamic/bin/RelateFileFormats \
-#             --mode FilterHapsUsingMask \
-#             --haps {input.haps} \
-#             --sample {input.sample} \
-#             --mask {input.mask} \
-#             -o {params.output}
-#         """
-# 
-# rule snp_annotation:
-#     input:
-#         haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-{chrn}.haps",
-#         sample = "data/relate-input/haps-sample/genotypes-{chrn}.sample",
-#         poplabels = "../../resources/210721-poplabels-50mxb-and-PEL/poplabels.txt",
-#         ancestral_genome = "../../resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38.fa.gz"
-#     output:
-#         "data/relate-input/snp-annotation-{chrn}.annot"
-#     params:
-#         output = "data/relate-input/snp-annotation-{chrn}"
-#     shell:
-#         """
-#         ~/software/relate_v1.1.7_x86_64_dynamic/bin/RelateFileFormats \
-#             --mode GenerateSNPAnnotations \
-#             --haps {input.haps} \
-#             --sample {input.sample} \
-#             --ancestor {input.ancestral_genome} \
-#             --poplabels {input.poplabels} \
-#             -o {params.output}
-#         """
-# 
-# 
-# rule genetic_map:
-#     # add the recombination rate to the genetic map
-#     # and output in format needed to run relate
-#     input:
-#         gm = "../../resources/210719-genetic-maps/chr{chrn}.b38.gmap"
-#     output:
-#         "data/relate-input/genetic-maps/chr{chrn}-with-recombrate.b38.gmap"
-#     shell:
-#         """
-#         python ../../src/add_recombination_rate_to_gm.py {input} \
-#             {wildcards.chrn} {output}
-#         """
-# 
-# 
+rule conver_from_vcf:
+    input:
+        "data/relate-input/vcfs/genotypes-chr{chrn}.vcf.gz"
+    output:
+        temp("data/relate-input/haps-sample/genotypes-chr{chrn}.haps"),
+        "data/relate-input/haps-sample/genotypes-chr{chrn}.sample"
+    params:
+        vcf_file_no_ext = "data/relate-input/vcfs/genotypes-chr{chrn}"
+    shell:
+        """
+        {PATH_TO_RELATE}/bin/RelateFileFormats \
+            --mode ConvertFromVcf \
+            --haps {output[0]} --sample {output[1]} \
+            -i {params.vcf_file_no_ext}
+        """
+
+
+rule rm_nonbiallelic_SNPs:
+    input:
+        "data/relate-input/haps-sample/genotypes-chr{chrn}.haps"
+    output:
+        temp("data/relate-input/haps-sample/genotypes-biallelic-chr{chrn}.haps")
+    params:
+        output = "data/relate-input/haps-sample/genotypes-biallelic-chr{chrn}"
+    shell:
+        """
+        {PATH_TO_RELATE}/bin/RelateFileFormats \
+            --mode RemoveNonBiallelicSNPs \
+            --haps {input} \
+            -o {params.output}
+        """
+
+rule flip_ancestral_snp:
+    input:
+        haps = "data/relate-input/haps-sample/genotypes-biallelic-chr{chrn}.haps",
+        sample = "data/relate-input/haps-sample/genotypes-chr{chrn}.sample",
+        ancestral_genome = join(PATH_TO_GENEALOGIES_DIR, "resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38.fa.gz")
+    output:
+        temp("data/relate-input/haps-sample/genotypes-biallelic-flip-chr{chrn}.haps")
+    params:
+        output = "data/relate-input/haps-sample/genotypes-biallelic-flip-chr{chrn}"
+    shell:
+        """
+        {PATH_TO_RELATE}/bin/RelateFileFormats \
+            --mode FlipHapsUsingAncestor \
+            --haps {input.haps} \
+            --sample {input.sample} \
+            --ancestor {input.ancestral_genome} \
+            -o {params.output}
+        """
+
+rule filter_genomic_mask:
+    input:
+        mask = join(PATH_TO_GENEALOGIES_DIR, "resources/210721-genome-masks/20160622.chr{chrn}.mask.fasta.gz"),
+        sample = "data/relate-input/haps-sample/genotypes-chr{chrn}.sample",
+        haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-chr{chrn}.haps"
+    output:
+        # TODO: Make haps a temporal file
+        haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}.haps",
+        dist = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}.dist"
+    params:
+        output = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}"
+    shell:
+        """
+        {PATH_TO_RELATE}/bin/RelateFileFormats \
+            --mode FilterHapsUsingMask \
+            --haps {input.haps} \
+            --sample {input.sample} \
+            --mask {input.mask} \
+            -o {params.output}
+        """
+
+rule snp_annotation:
+    input:
+        haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}.haps",
+        sample = "data/relate-input/haps-sample/genotypes-chr{chrn}.sample",
+        poplabels = "data/poplabels.txt",
+        ancestral_genome = join(PATH_TO_GENEALOGIES_DIR, "resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38.fa.gz")
+    output:
+        "data/relate-input/snp-annotation-chr{chrn}.annot"
+    params:
+        output = "data/relate-input/snp-annotation-chr{chrn}"
+    shell:
+        """
+        {PATH_TO_RELATE}/bin/RelateFileFormats \
+            --mode GenerateSNPAnnotations \
+            --haps {input.haps} \
+            --sample {input.sample} \
+            --ancestor {input.ancestral_genome} \
+            --poplabels {input.poplabels} \
+            -o {params.output}
+        """
+
+
+rule genetic_map:
+    # add the recombination rate to the genetic map
+    # and output in format needed to run relate
+    input:
+        gm = join(PATH_TO_GENEALOGIES_DIR, "resources/210719-genetic-maps/chr{chrn}.b38.gmap")
+    output:
+        temp("data/relate-input/genetic-maps/chr{chrn}-with-recombrate.b38.gmap")
+    shell:
+        """
+        python {PATH_TO_GENEALOGIES_DIR}/src/add_recombination_rate_to_gm.py {input} \
+            {wildcards.chrn} {output}
+        """
+
+
 # ### **********************************************************************************
 # ## RUN RELATE
 # ### **********************************************************************************
-# 
-# 
-# rule construct_genealogies:
-#     input:
-#         haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-{chrn}.haps",
-#         sample = "data/relate-input/haps-sample/genotypes-{chrn}.sample",
-#         gmap = "data/relate-input/genetic-maps/chr{chrn}-with-recombrate.b38.gmap",
-#         annot = "data/relate-input/snp-annotation-{chrn}.annot"
-#     output:
-#         "data/gene-genealogies/genealogies_chr{chrn}.mut",
-#         "data/gene-genealogies/genealogies_chr{chrn}.anc"
-#     params:
-#         output = "genealogies_chr{chrn}",
-#         outdir = "data/gene-genealogies/"
-#     shell:
-#         """
-#         ~/software/relate_v1.1.7_x86_64_dynamic/bin/Relate \
-#             --mode All \
-#             -m 1.25e-8 \
-#             -N 30000 \
-#             --haps {input.haps} \
-#             --sample {input.sample} \
-#             --map {input.gmap} \
-#             --annot {input.annot} \
-#             --seed 1 \
-#             -o {params.output}
-#         mkdir -p {params.outdir}
-#         mv {params.output}.mut {params.outdir}
-#         mv {params.output}.anc {params.outdir}
-#         """
-# 
+
+rule construct_genealogies:
+    input:
+        haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}.haps",
+        sample = "data/relate-input/haps-sample/genotypes-chr{chrn}.sample",
+        gmap = "data/relate-input/genetic-maps/chr{chrn}-with-recombrate.b38.gmap",
+        annot = "data/relate-input/snp-annotation-chr{chrn}.annot"
+    output:
+        "data/gene-genealogies/genealogies_chr{chrn}.mut",
+        "data/gene-genealogies/genealogies_chr{chrn}.anc"
+    params:
+        output = "genealogies_chr{chrn}",
+        outdir = "data/gene-genealogies/"
+    threads: 10
+    shell:
+        """
+        {PATH_TO_RELATE}/scripts/RelateParallel/RelateParallel.sh \
+            --mode All \
+            -m 1.25e-8 \
+            -N 30000 \
+            --haps {input.haps} \
+            --sample {input.sample} \
+            --map {input.gmap} \
+            --annot {input.annot} \
+            --seed 1 \
+            -o {params.output} \
+            --threads {threads}
+        mkdir -p {params.outdir}
+        mv {params.output}.mut {params.outdir}
+        mv {params.output}.anc {params.outdir}
+        """
 # 
 # 
 # ### **********************************************************************************
