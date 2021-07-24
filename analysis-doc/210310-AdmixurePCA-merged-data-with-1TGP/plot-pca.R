@@ -13,9 +13,9 @@ mxb_meta <- read_tsv("../../resources/genomes-metadata/50Genomes_info.txt") %>%
   ) %>% 
   select(Sample, Population, Superpopulation)
 
-oneT_meta <- read_tsv("../../resources/1TGP-samples-meta-data/igsr-1000genomes.tsv") %>% 
-  select(`Sample name`, `Population code`, `Population name`, `Superpopulation code`) %>% 
-  rename(Sample = `Sample name`, Population = `Population code`, Superpopulation = `Superpopulation code`) %>% 
+oneT_meta <- read_tsv("../../resources/1TGP-samples-meta-data/integrated_call_samples_v3.20130502.ALL.panel") %>% 
+  select(sample, pop, super_pop) %>% 
+  rename(Sample = sample, Population = pop, Superpopulation = super_pop) %>% 
   select(Sample, Population, Superpopulation)
 
 pop_info <- bind_rows(mxb_meta, oneT_meta)
