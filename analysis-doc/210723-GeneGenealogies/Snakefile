@@ -110,7 +110,7 @@ rule filter_genomic_mask:
         haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-chr{chrn}.haps"
     output:
         # TODO: Make haps a temporal file
-        haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}.haps",
+        haps = temp("data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}.haps"),
         dist = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}.dist"
     params:
         output = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}"
@@ -200,21 +200,22 @@ rule construct_genealogies:
 # ## Modules, analysis of genealogies
 # ### **********************************************************************************
 # 
-# rule estimate_pop_size:
-#     input:
-#         poplabels = "../../resources/210721-poplabels-50mxb-and-PEL/poplabels.txt",
-#         mut = expand("data/gene-genealogies/genealogies_chr{chrn}.mut", chrn=[22]),
-#         anc = expand("data/gene-genealogies/genealogies_chr{chrn}.anc", chrn=[22])
-#     params:
-#         input = "data/gene-genealogies/genealogies_chr22"
-#     shell:
-#         """
-#         ../../bin/relate_v1.1.7_x86_64_dynamic/scripts/EstimatePopulationSize/EstimatePopulationSize.sh \
-#             -i {params.input} \
-#             --noanc 1 \
-#             -m 1.25e-8 \
-#             --poplabels {input.poplabels} \
-#             --seed 1 \
-#             --num_iter 2 \
-#             -o popsize
-#         """
+rule estimate_pop_size:
+    input:
+        poplabels = "data/poplabels.txt",
+        mut = expand("data/gene-genealogies/genealogies_chr{chrn}.mut", chrn=[22]),
+        anc = expand("data/gene-genealogies/genealogies_chr{chrn}.anc", chrn=[22])
+    params:
+        input = "data/gene-genealogies/genealogies_chr22"
+    threads: 10
+    shell:
+        """
+        {PATH_TO_RELATE}/scripts/EstimatePopulationSize/EstimatePopulationSize.sh \
+            -i {params.input} \
+            --noanc 1 \
+            -m 1.25e-8 \
+            --poplabels {input.poplabels} \
+            --seed 1 \
+            -o popsize \
+            --threads {threads}
+        """
