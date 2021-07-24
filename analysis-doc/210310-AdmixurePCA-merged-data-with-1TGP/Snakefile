@@ -19,7 +19,7 @@ rule all:
 
 rule combine_chromosomes:
     input:
-        vcfs = expand("../../results/data/210305-merged-with-1TGP/1TGP_and_50MXB-chr{chrn}-snps-GRCh38.vcf.gz", chrn=CHROMS)
+        vcfs = expand("../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz", chrn=CHROMS)
     output:
         temp("data/1TGP_and_50MXB-ALL.vcf.gz")
     shell:
