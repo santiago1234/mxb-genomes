@@ -284,7 +284,7 @@ def joint_sfs(vcf_file, aa_file, populations, popinfo):
 
     dimensions = [diploid_size(index_to_pops[i]) for i in index_to_pops]
     n_variants, _ = ac[list(subpops.keys())[0]].shape
-    jsfs = np.zeros(dimensions, dtype=np.int64)
+    jsfs = np.zeros(dimensions, dtype=np.int32)
 
 
     def variant_position(var_index):
