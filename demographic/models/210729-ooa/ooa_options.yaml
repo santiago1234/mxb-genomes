@@ -1,0 +1,27 @@
+parameters:
+- name: TA
+  description: Time before present of ancestral expansion
+  values:
+  - demes:
+      ancestral:
+        epochs:
+          0: end_time
+- name: TB
+  description: Time of YRI-OOA split
+  values:
+  - demes:
+      AMH:
+        epochs:
+          0: end_time
+- name: TF
+  description: Time of IBS-CHB split
+  values:
+  - demes:
+      OOA:
+        epochs:
+          0: end_time
+constraints:
+- params: [TA, TB]
+  constraint: greater_than
+- params: [TB, TF]
+  constraint: greater_than
