@@ -15,9 +15,9 @@ from mxbgenomes.utils import load_populations_info
 
 pops = load_populations_info('../../')
 
-pops_to_use = ['MXL', 'MXB', 'IBS', 'YRI', 'CHB']
+pops_to_use = ['MXB', 'MXL', 'IBS', 'YRI', 'CHB']
 new_colnames = {
-        'Subpopulation': 'populations',
+        'Subpopulation': 'population',
         'Samplename': 'sample',
         'Superpopulation': 'group'
     }
