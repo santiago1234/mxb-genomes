@@ -88,7 +88,7 @@ rule flip_ancestral_snp:
     input:
         haps = "data/relate-input/haps-sample/genotypes-biallelic-chr{chrn}.haps",
         sample = "data/relate-input/haps-sample/genotypes-chr{chrn}.sample",
-        ancestral_genome = join(PATH_TO_GENEALOGIES_DIR, "resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38.fa.gz")
+        ancestral_genome = join(PATH_TO_GENEALOGIES_DIR, "resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38/homo_sapiens_ancestor_{chrn}.fa")
     output:
         temp("data/relate-input/haps-sample/genotypes-biallelic-flip-chr{chrn}.haps")
     params:
@@ -129,7 +129,7 @@ rule snp_annotation:
         haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}.haps",
         sample = "data/relate-input/haps-sample/genotypes-chr{chrn}.sample",
         poplabels = "data/poplabels.txt",
-        ancestral_genome = join(PATH_TO_GENEALOGIES_DIR, "resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38.fa.gz")
+        ancestral_genome = join(PATH_TO_GENEALOGIES_DIR, "resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38/homo_sapiens_ancestor_{chrn}.fa")
     output:
         "data/relate-input/snp-annotation-chr{chrn}.annot"
     params:
@@ -207,7 +207,6 @@ rule estimate_pop_size:
         anc = expand("data/gene-genealogies/genealogies_chr{chrn}.anc", chrn=[22])
     params:
         input = "data/gene-genealogies/genealogies_chr22"
-    threads: 10
     shell:
         """
         {PATH_TO_RELATE}/scripts/EstimatePopulationSize/EstimatePopulationSize.sh \
@@ -216,6 +215,5 @@ rule estimate_pop_size:
             -m 1.25e-8 \
             --poplabels {input.poplabels} \
             --seed 1 \
-            -o popsize \
-            --threads {threads}
+            -o popsize
         """
