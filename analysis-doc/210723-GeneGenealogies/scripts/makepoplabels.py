@@ -6,6 +6,7 @@ I will use the following populations:
     - IBS
     - CHB
     - YRI
+    - PEL (samples representative of NAT ancestry)
 """
 import numpy as np
 import pandas as pd
@@ -13,9 +14,13 @@ import sys
 sys.path.append('../../')
 from mxbgenomes.utils import load_populations_info
 
+
 pops = load_populations_info('../../')
 
-pops_to_use = ['MXB', 'MXL', 'IBS', 'YRI', 'CHB']
+
+nat_1tgp = np.loadtxt('../../resources/1TGP-samples-meta-data/native-american.txt', dtype=np.object_)
+
+pops_to_use = ['MXB', 'MXL', 'IBS', 'YRI', 'CHB', 'PEL']
 new_colnames = {
         'Subpopulation': 'population',
         'Samplename': 'sample',
@@ -30,4 +35,11 @@ pops = (
     )
 
 
+# drop pel samples that are not NAT
+pel = pops[pops.population == 'PEL']
+pel_not_nat = pel['sample'][~pel['sample'].isin(nat_1tgp)].to_list()
+pops = pops[~pops['sample'].isin(pel_not_nat)] 
+
+
+# save samples
 pops.to_csv("data/poplabels.txt", index=False, sep=' ')
