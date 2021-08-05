@@ -1,0 +1,48 @@
+CATEGORIES = {
+    'synonymous': 'synonymous_variant',
+    'missense': 'missense_variant',
+    'loss_of_function': '(stop_gained|frameshift_variant|stop_lost|start_lost|inframe_insertion|inframe_deletion)',
+    'intergenic': 'intergenic_variant',
+    'intron': 'intron_variant',
+    'utr_5_or_3': '(5_prime_UTR_variant|3_prime_UTR_variant)'
+}
+
+
+rule var_id_to_vep_consequences:
+    input:
+        # A vcf that has VEP annotation in the INFO field
+        "../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr22-snps-vep-mask-HW-GRCh38.vcf.gz"
+    output:
+        temp("data/variants-csq.txt")
+    shell:
+        # The -d option in the bcftools command is to
+        # To print each consequence on a separate line,
+        # rather than as a comma-separated string on a single line.
+        # This will make easier the task processing
+        """
+        bcftools +split-vep {input} -f '%ID\t%Consequence\n' -d >{output}
+        """
+
+
+def get_var_from_cat(wildcards):
+    return CATEGORIES[wildcards.cat]
+
+
+rule subset_var_cat:
+    # Get a list of the SNPs that are from
+    # the given category
+    input:
+        "data/variants-csq.txt"
+    output:
+        "data/var-{cat}.txt"
+    params:
+        cat = get_var_from_cat
+    shell:
+        """
+        grep -E '{params.cat}' {input} |\
+            cut -f1 |\
+            sort |\
+            uniq > {output}
+            
+        """
+
