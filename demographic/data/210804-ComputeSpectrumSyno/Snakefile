@@ -1,3 +1,6 @@
+CHROMOSOMES = range(1, 23)
+
+		
 CATEGORIES = {
     'synonymous': 'synonymous_variant',
     'missense': 'missense_variant',
@@ -8,10 +11,24 @@ CATEGORIES = {
 }
 
 
+rule concat_vcfs_and_extract_biallelic:
+    # Concat all the vcfs into one and
+    # extract only the biallelic SNPs.
+    input:
+        expand("../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz", chrn=CHROMOSOMES)
+    output:
+        temp("data/all-biallelicSnps.vcf.gz")
+    shell:
+        """
+        bcftools concat {input} |\
+            bcftools view -m2 -M2 -v snps -Oz -o {output}
+        """
+
+
 rule var_id_to_vep_consequences:
     input:
         # A vcf that has VEP annotation in the INFO field
-        "../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr22-snps-vep-mask-HW-GRCh38.vcf.gz"
+        "data/all-biallelicSnps.vcf.gz"
     output:
         temp("data/variants-csq.txt")
     shell:
@@ -46,3 +63,25 @@ rule subset_var_cat:
             
         """
 
+
+rule concat_ancestral_allel:
+    input:
+        expand("../../../analysis-doc/210506-AncestralAlleleData/data/aa-chr{chrn}.csv", chrn=CHROMOSOMES)
+    output:
+        "data/all-ancestral-allel.csv"
+    shell:
+        """
+        awk '(NR == 1) || (FNR > 1)' {input} >{output}
+        """
+
+
+rule subset_vcf_vars:
+    input:
+        vcf = "data/all-biallelicSnps.vcf.gz",
+        ids_type = "data/var-{cat}.txt"
+    output:
+        "data/vcf-{cat}.vcf.gz"
+    shell:
+        """
+        bcftools view -i 'ID=@{input.ids_type}' {input.vcf} -Oz -o {output}
+        """

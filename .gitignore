@@ -4,6 +4,7 @@ resources/*/*.gz
 resources/*/*.bed
 analysis-doc/210531-TRACTS-ppx_xxp/output-*
 tmp/*
+demographic/data/*/data/*
 .snakemake/
 */.snakemake/
 analysis
