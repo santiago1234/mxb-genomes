@@ -1,0 +1,61 @@
+# this is a comment
+description:
+    Model for admixture in Mexico, this model was estimated with
+    tracts using a ccx_xxp model.
+time_units: generations
+generation_time: 29
+demes:
+- name: YRI
+  description: Yoruba in Ibadan, Nigeria
+  epochs:
+  - start_size: 50000
+    end_time: 0
+- name: IBS
+  description: Iberian populations in Spain (IBS).
+  epochs:
+  - start_size: 50000
+    end_time: 0
+- name: CHB
+  description: Han Chinese in Beijing, China
+  epochs:
+  - start_size: 50000
+    end_time: 0
+- name: MXB
+  description: Native American population in Mexico.
+  epochs:
+  - start_size: 20000
+    end_time: 0
+- name: MXL
+  description: Admixed population in Mexico
+  ancestors: [IBS, MXB]
+  proportions: [0.201, 0.799]  # Obtained from Tracts
+  start_time: 16
+  epochs:
+  - end_time: 0
+    start_size: 20000
+    end_size: 50000
+migrations:
+  - source: IBS
+    dest: MXL
+    rate: 0.058
+  - source: MXB
+    dest: MXL
+    rate: 0.046
+pulses:
+  - source: YRI
+    dest: MXL
+    proportion: 0.042
+    time: 11
+  - source: YRI
+    dest: MXL
+    proportion: 0.046
+    time: 10
+  - source: CHB
+    dest: MXL
+    proportion: 0.002
+    time: 11
+  - source: CHB
+    dest: MXL
+    proportion: 0.003
+    time: 10
+
