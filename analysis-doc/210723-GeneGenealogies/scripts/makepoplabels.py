@@ -37,7 +37,7 @@ pops = (
 
 # drop pel samples that are not NAT
 pel = pops[pops.population == 'PEL']
-pel_not_nat = pel['sample'][~pel['sample'].isin(nat_1tgp)].to_list()
+pel_not_nat = pel['sample'][~pel['sample'].isin(nat_1tgp)].tolist()
 pops = pops[~pops['sample'].isin(pel_not_nat)] 
 
 

@@ -10,6 +10,7 @@ PATH_TO_RELATE = "/data/programs/relate_v1.1.7_x86_64_dynamic/"
 # - genomic mask
 # - a script used to put the recombination map in the format needed to run relate.
 PATH_TO_GENEALOGIES_DIR = "../../../gene-genealogies-mxb/"
+CHROMS = list(range(1, 23))
 
 
 rule poplabels:
@@ -110,7 +111,7 @@ rule filter_genomic_mask:
         haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-chr{chrn}.haps"
     output:
         # TODO: Make haps a temporal file
-        haps = temp("data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}.haps"),
+        haps = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}.haps",
         dist = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}.dist"
     params:
         output = "data/relate-input/haps-sample/genotypes-biallelic-flip-mask-chr{chrn}"
@@ -171,8 +172,8 @@ rule construct_genealogies:
         gmap = "data/relate-input/genetic-maps/chr{chrn}-with-recombrate.b38.gmap",
         annot = "data/relate-input/snp-annotation-chr{chrn}.annot"
     output:
-        "data/gene-genealogies/genealogies_chr{chrn}.mut",
-        "data/gene-genealogies/genealogies_chr{chrn}.anc"
+        "data/gene-genealogies/genealogies_chr{chrn}.mut.gz",
+        "data/gene-genealogies/genealogies_chr{chrn}.anc.gz"
     params:
         output = "genealogies_chr{chrn}",
         outdir = "data/gene-genealogies/"
@@ -193,13 +194,20 @@ rule construct_genealogies:
         mkdir -p {params.outdir}
         mv {params.output}.mut {params.outdir}
         mv {params.output}.anc {params.outdir}
+        # compress to save space
+        gzip {params.outdir}/{params.output}.mut
+        gzip {params.outdir}/{params.output}.anc
         """
+
+rule genealogies_all_autosomes:
+    input:
+        expand("data/gene-genealogies/genealogies_chr{chrn}.mut.gz", chrn=CHROMS),
+        expand("data/gene-genealogies/genealogies_chr{chrn}.anc.gz", chrn=CHROMS)
 # 
 # 
 # ### **********************************************************************************
 # ## Modules, analysis of genealogies
 # ### **********************************************************************************
-# 
 rule estimate_pop_size:
     input:
         poplabels = "data/poplabels.txt",
