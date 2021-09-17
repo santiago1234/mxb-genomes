@@ -1,0 +1,118 @@
+## -> -> -> -> -> -> |||||| <- <- <- <- <- <- <- <-
+## Step 1: LiftOver MEGA regions to GRCh38
+## -> -> -> -> -> -> |||||| <- <- <- <- <- <- <- <-
+
+rule lift_over_mega_array:
+    input:
+        "data/mega-array-regions/Multi-EthnicGlobal_D1.bed"
+    output:
+        "data/mega-array-regions/Multi-EthnicGlobal_D1-GRCh38.bed",
+        "data/mega-array-regions/Multi-EthnicGlobal_D1-GRCh38.bed.unmap"
+    shell:
+        """
+        # Download chain file
+        wget http://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/hg19ToHg38.over.chain.gz
+        # run crossmap
+        CrossMap.py bed hg19ToHg38.over.chain.gz {input} {output[0]}
+        rm hg19ToHg38.over.chain.gz
+        """
+
+
+## -> -> -> -> -> -> |||||| <- <- <- <- <- <- <- <-
+## Step 2: Subset samples
+## And keep pnly biallelic snps
+## -> -> -> -> -> -> |||||| <- <- <- <- <- <- <- <-
+
+
+
+rule sample_list:
+    input:
+        "../../resources/1TGP-samples-meta-data/integrated_call_samples_v3.20130502.ALL.panel"
+    output:
+        "data/tmp/samples.txt"
+    params:
+        samples = "(PUR|CLM|PEL|MXL)"
+    shell:
+        """
+        grep -E '{params.samples}' {input} |\
+            cut -f1 |\
+            tail -n +2 >{output}
+        """
+
+
+rule subset_samples_from_vcf:
+    input:
+        samples = "data/tmp/samples.txt",
+        vcf = "../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz"
+    output:
+        "data/vcfs/AMR-chr{chrn}.vcf.gz"
+    shell:
+        """
+        # select the samples
+        # keep only variant sites
+        # keep only biallelic variants
+        bcftools view -S {input.samples} {input.vcf} |\
+            bcftools view -c1 |\
+            bcftools view -m2 -M2 -v snps -Oz -o {output}
+        """
+
+
+
+## -> -> -> -> -> -> |||||| <- <- <- <- <- <- <- <-
+## Step 3: SPLIT vcfs by variant categories.
+## -> -> -> -> -> -> |||||| <- <- <- <- <- <- <- <-
+
+
+def variant_term(wildcards):
+    if wildcards.VarClass == 'INTERGENIC':
+        return 'intergenic_variant'
+
+    if wildcards.VarClass == 'SYNONYMOUS':
+        return 'synonymous_variant'
+
+    if wildcards.VarClass == 'DELETERIOUS':
+        return '(transcript_ablation|splice_acceptor_variant|splice_donor_variant|stop_gained|frameshift_variant|stop_lost|start_lost|transcript_amplification|inframe_insertion|inframe_deletion|missense_variant|protein_altering_variant)'
+
+
+rule var_id_to_vep_consequences:
+    input:
+        # A vcf that has VEP annotation in the INFO field
+        "data/vcfs/AMR-chr{chrn}.vcf.gz"
+    output:
+        "data/tmp/variants-csq-chr{chrn}.txt"
+    shell:
+        # The -d option in the bcftools command is to
+        # To print each consequence on a separate line,
+        # rather than as a comma-separated string on a single line.
+        # This will make easier the task processing
+        """
+        bcftools +split-vep {input} -f '%ID\t%Consequence\n' -d >{output}
+        """
+
+rule snps_by_variant_class:
+    input:
+        "data/tmp/variants-csq-chr{chrn}.txt"
+    output:
+        "data/tmp/vc-{VarClass}-chr{chrn}.txt"
+    params:
+        so_term = variant_term
+    shell:
+        """
+        grep -E '{params.so_term}' {input} |\
+            cut -f1 |\
+            sort |\
+            uniq >{output}
+        """
+
+
+rule vcf_by_variant_class:
+    input:
+        vcf = "data/vcfs/AMR-chr{chrn}.vcf.gz",
+        ids_type = "data/tmp/vc-{VarClass}-chr{chrn}.txt"
+    output:
+        vcf = "data/vcfs/AMR-var{VarClass}-chr{chrn}-typeGENOME.vcf.gz"
+    shell:
+        """
+        bcftools view -i 'ID=@{input.ids_type}' {input.vcf} -Oz -o {output}
+        """
+
