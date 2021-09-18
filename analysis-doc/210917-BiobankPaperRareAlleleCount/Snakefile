@@ -1,3 +1,9 @@
+### VARIABLE
+
+CHROM = list(range(1, 23))
+VARTYPE = ['INTERGENIC', 'SYNONYMOUS', 'DELETERIOUS']
+REGION = ['GENOME', 'ARRAY']
+
 ## -> -> -> -> -> -> |||||| <- <- <- <- <- <- <- <-
 ## Step 1: LiftOver MEGA regions to GRCh38
 ## -> -> -> -> -> -> |||||| <- <- <- <- <- <- <- <-
@@ -16,6 +22,19 @@ rule lift_over_mega_array:
         CrossMap.py bed hg19ToHg38.over.chain.gz {input} {output[0]}
         rm hg19ToHg38.over.chain.gz
         """
+
+rule rm_chr_prefix:
+    # remove the chr prefix to match the chromosome names in the vcf file
+    input:
+        "data/mega-array-regions/Multi-EthnicGlobal_D1-GRCh38.bed",
+    output:
+        "data/mega-array-regions/Multi-EthnicGlobal_D1-GRCh38-NOT-chr-prefix.bed"
+    shell:
+        """
+        cat {input} |\
+            sed 's/^chr//g' >{output}
+        """
+        
 
 
 ## -> -> -> -> -> -> |||||| <- <- <- <- <- <- <- <-
@@ -45,7 +64,7 @@ rule subset_samples_from_vcf:
         samples = "data/tmp/samples.txt",
         vcf = "../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz"
     output:
-        "data/vcfs/AMR-chr{chrn}.vcf.gz"
+        temp("data/vcfs/AMR-chr{chrn}.vcf.gz")
     shell:
         """
         # select the samples
@@ -79,7 +98,7 @@ rule var_id_to_vep_consequences:
         # A vcf that has VEP annotation in the INFO field
         "data/vcfs/AMR-chr{chrn}.vcf.gz"
     output:
-        "data/tmp/variants-csq-chr{chrn}.txt"
+        temp("data/tmp/variants-csq-chr{chrn}.txt")
     shell:
         # The -d option in the bcftools command is to
         # To print each consequence on a separate line,
@@ -89,11 +108,12 @@ rule var_id_to_vep_consequences:
         bcftools +split-vep {input} -f '%ID\t%Consequence\n' -d >{output}
         """
 
+
 rule snps_by_variant_class:
     input:
         "data/tmp/variants-csq-chr{chrn}.txt"
     output:
-        "data/tmp/vc-{VarClass}-chr{chrn}.txt"
+        temp("data/tmp/vc-{VarClass}-chr{chrn}.txt")
     params:
         so_term = variant_term
     shell:
@@ -110,9 +130,53 @@ rule vcf_by_variant_class:
         vcf = "data/vcfs/AMR-chr{chrn}.vcf.gz",
         ids_type = "data/tmp/vc-{VarClass}-chr{chrn}.txt"
     output:
-        vcf = "data/vcfs/AMR-var{VarClass}-chr{chrn}-typeGENOME.vcf.gz"
+        vcf = temp("data/vcfs/AMR-var{VarClass}-chr{chrn}-typeGENOME.vcf.gz"),
+        index = temp("data/vcfs/AMR-var{VarClass}-chr{chrn}-typeGENOME.vcf.gz.tbi")
     shell:
         """
-        bcftools view -i 'ID=@{input.ids_type}' {input.vcf} -Oz -o {output}
+        bcftools view -i 'ID=@{input.ids_type}' {input.vcf} -Oz -o {output.vcf}
+        bcftools index --tbi {output.vcf}
         """
 
+rule subset_array_regions:
+    input:
+        vcf = "data/vcfs/AMR-var{VarClass}-chr{chrn}-typeGENOME.vcf.gz",
+        index = "data/vcfs/AMR-var{VarClass}-chr{chrn}-typeGENOME.vcf.gz.tbi",
+        arr_regions = "data/mega-array-regions/Multi-EthnicGlobal_D1-GRCh38-NOT-chr-prefix.bed"
+    output:
+        temp("data/vcfs/AMR-var{VarClass}-chr{chrn}-typeARRAY.vcf.gz")
+    shell:
+        """
+        bcftools view -R {input.arr_regions} {input.vcf} -Oz -o {output}
+        """
+
+## -> -> -> -> -> -> |||||| <- <- <- <- <- <- <- <-
+## Step 4: Count variants
+## -> -> -> -> -> -> |||||| <- <- <- <- <- <- <- <-
+
+
+rule count_alt_alleles_per_sample:
+    input:
+        vcf = "data/vcfs/AMR-var{VarClass}-chr{chrn}-type{Regions}.vcf.gz",
+        anc_genome = "../../../gene-genealogies-mxb/resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38/homo_sapiens_ancestor_{chrn}.fa"
+    output:
+        temp("data/counts/counts-var{VarClass}-chr{chrn}-type{Regions}.csv")
+    shell:
+        """
+        python scripts/processdata.py {input.vcf} {input.anc_genome} {output}
+        """
+        
+
+rule count_derived_alleles_per_individual:
+    input:
+        "data/counts/counts-var{VarClass}-chr{chrn}-type{Regions}.csv"
+    output:
+        "data/counts/derived-counts-individual-var{VarClass}-chr{chrn}-type{Regions}.csv" 
+    shell:
+        """
+        python scripts/count-derived-allels.py {input} {output}
+        """
+
+rule aggregate_counts:
+    input:
+        expand("data/counts/derived-counts-individual-var{VarClass}-chr{chrn}-type{Regions}.csv", VarClass=VARTYPE, chrn=CHROM, Regions=REGION) 

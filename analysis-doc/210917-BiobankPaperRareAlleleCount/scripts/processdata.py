@@ -70,5 +70,5 @@ d = pd.merge(
         count_alt_allels_per_sample_and_variant(),
         how='inner', on='ID')
 
-d.to_csv(output, index=False)
+d.to_csv(outfile, index=False)
 
