@@ -90,6 +90,7 @@ admixture$Sample <- factor(admixture$Sample, levels = order_x)
 # order for populations ---------------------------------------------------
 pop_order <- c("YRI", "IBS", "GBR", "PUR", "CLM", "MXL", "PEL", "MXB", "CHB")
 admixture$Population <- factor(admixture$Population, levels = pop_order)
+write_csv(admixture, "results/admixture.csv")
 
 color_order <- c("EUR","MXB", "AFR", "EAS", "AMR") %>% rev()
 admixture$cluster_grp <- factor(admixture$cluster_grp, levels = color_order)
