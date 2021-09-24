@@ -7,11 +7,13 @@ import pandas as pd
 from Bio import SeqIO
 import moments
 import allel
+import pickle
 
 
 vcf = "../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr22-snps-vep-mask-HW-GRCh38.vcf.gz"
 poplabs = "poplabs.csv"
 ancgenome = '/Users/santiagomedina/tmp/ancestral-genome-autosomes.fasta'
+outprefix = "tmp"
 
 
 def load_data(vcf, ancgenome, poplabs):
@@ -203,19 +205,59 @@ def initialize_jsfs(poplabs):
     return sfs, index_to_pops, pops_to_index
 
 
-def populate_sfs_with_variants(sfs, allele_counts,  pops_to_index):
-    n_vars = allele_counts[pops_to_index[0]].shape[0]
+def populate_sfs_with_variants(sfs, allele_counts,  index_to_pops):
+    n_vars = allele_counts[index_to_pops[0]].shape[0]
     for K in range(n_vars):
-        var_loc = locate_variant_in_sfs(allele_counts, pops_to_index, K)
+        var_loc = locate_variant_in_sfs(allele_counts, index_to_pops, K)
         sfs[var_loc] += 1
     return sfs
 
 
-
+def polarize_counts(counts):
+    """
+    Counts: AlleleCountsArray
+    switch alternative counts for reference counts
+    """
+    polarized = counts.copy()
+    polarized[:, 0] = counts[:, 1]
+    polarized[:, 1] = counts[:, 0]
+    return polarized
 
 vcf, poplabs, ancgenome = load_data(vcf, ancgenome, poplabs)
 aa_table = annotate_ancestral_allel(vcf, ancgenome)
 
 allele_counts = count_allels(vcf, poplabs)
 aa_condition = ancestral_allel_category(aa_table)
-sfs, pops_to_index, index_to_pops = initialize_jsfs(poplabs)
+stats = summary_aastats(aa_condition)
+sfs, index_to_pops, pops_to_index = initialize_jsfs(poplabs)
+
+# Polarize ancestral allele
+# REF = AA
+ac_ref_aa = {
+    pop: allele_counts[pop][aa_condition['REF_is_AA']]
+    for pop in allele_counts.keys()
+}
+sfs = populate_sfs_with_variants(sfs, ac_ref_aa, index_to_pops)
+
+ac_alt_aa = {
+    pop: allele_counts[pop][aa_condition['ALT_is_AA']]
+    for pop in allele_counts.keys()
+}
+
+ac_alt_aa_polarizedd = {pop: polarize_counts(ac_alt_aa[pop]) for pop in allele_counts}
+
+sfs = populate_sfs_with_variants(sfs, ac_alt_aa_polarizedd, index_to_pops)
+
+# order pops by index
+pop_ids = [index_to_pops[i] for i in range(len(index_to_pops))]
+spectrum = moments.Spectrum(sfs, pop_ids=pop_ids, data_folded=False)
+
+
+# save output
+stats_file = open(outprefix + '-stats.txt', "w")
+stats_file.write(stats)
+stats_file.close()
+
+spec_file = open(outprefix + '-spectrum.pkl', 'wb')
+pickle.dump(spectrum, spec_file)
+spec_file.close()
