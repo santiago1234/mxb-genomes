@@ -4,16 +4,17 @@ author: santiago medina
 """
 import numpy as np
 import pandas as pd
+import argparse
 from Bio import SeqIO
 import moments
 import allel
 import pickle
 
 
-vcf = "../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr22-snps-vep-mask-HW-GRCh38.vcf.gz"
-poplabs = "poplabs.csv"
-ancgenome = '/Users/santiagomedina/tmp/ancestral-genome-autosomes.fasta'
-outprefix = "tmp"
+# vcf = "../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr22-snps-vep-mask-HW-GRCh38.vcf.gz"
+# poplabs = "poplabs.csv"
+# ancgenome = '/Users/santiagomedina/tmp/ancestral-genome-autosomes.fasta'
+# outprefix = "tmp"
 
 
 def load_data(vcf, ancgenome, poplabs):
@@ -223,41 +224,93 @@ def polarize_counts(counts):
     polarized[:, 1] = counts[:, 0]
     return polarized
 
-vcf, poplabs, ancgenome = load_data(vcf, ancgenome, poplabs)
-aa_table = annotate_ancestral_allel(vcf, ancgenome)
 
-allele_counts = count_allels(vcf, poplabs)
-aa_condition = ancestral_allel_category(aa_table)
-stats = summary_aastats(aa_condition)
-sfs, index_to_pops, pops_to_index = initialize_jsfs(poplabs)
+def run(args):
+    vcf = args.vcf
+    poplabs = args.poplabs
+    ancgenome = args.ancgenome
+    outprefix = args.out
 
-# Polarize ancestral allele
-# REF = AA
-ac_ref_aa = {
-    pop: allele_counts[pop][aa_condition['REF_is_AA']]
-    for pop in allele_counts.keys()
-}
-sfs = populate_sfs_with_variants(sfs, ac_ref_aa, index_to_pops)
+    print('loading data ...')
+    vcf, poplabs, ancgenome = load_data(vcf, ancgenome, poplabs)
 
-ac_alt_aa = {
-    pop: allele_counts[pop][aa_condition['ALT_is_AA']]
-    for pop in allele_counts.keys()
-}
+    print('extracting ancestral alleles ...')
+    aa_table = annotate_ancestral_allel(vcf, ancgenome)
 
-ac_alt_aa_polarizedd = {pop: polarize_counts(ac_alt_aa[pop]) for pop in allele_counts}
+    print('computing jSFS ...')
+    allele_counts = count_allels(vcf, poplabs)
+    aa_condition = ancestral_allel_category(aa_table)
+    stats = summary_aastats(aa_condition)
+    sfs, index_to_pops, pops_to_index = initialize_jsfs(poplabs)
 
-sfs = populate_sfs_with_variants(sfs, ac_alt_aa_polarizedd, index_to_pops)
+    # Polarize ancestral allele
+    # REF = AA
+    ac_ref_aa = {
+        pop: allele_counts[pop][aa_condition['REF_is_AA']]
+        for pop in allele_counts.keys()
+    }
+    sfs = populate_sfs_with_variants(sfs, ac_ref_aa, index_to_pops)
 
-# order pops by index
-pop_ids = [index_to_pops[i] for i in range(len(index_to_pops))]
-spectrum = moments.Spectrum(sfs, pop_ids=pop_ids, data_folded=False)
+    ac_alt_aa = {
+        pop: allele_counts[pop][aa_condition['ALT_is_AA']]
+        for pop in allele_counts.keys()
+    }
+
+    ac_alt_aa_polarizedd = {pop: polarize_counts(
+        ac_alt_aa[pop]) for pop in allele_counts}
+
+    sfs = populate_sfs_with_variants(sfs, ac_alt_aa_polarizedd, index_to_pops)
+
+    # order pops by index
+    pop_ids = [index_to_pops[i] for i in range(len(index_to_pops))]
+    spectrum = moments.Spectrum(sfs, pop_ids=pop_ids, data_folded=False)
+
+    # save output
+    stats_file = open(outprefix + '-stats.txt', "w")
+    stats_file.write(stats)
+    stats_file.close()
+
+    spec_file = open(outprefix + '-spectrum.pkl', 'wb')
+    pickle.dump(spectrum, spec_file)
+    spec_file.close()
 
 
-# save output
-stats_file = open(outprefix + '-stats.txt', "w")
-stats_file.write(stats)
-stats_file.close()
+def main():
+    parser = argparse.ArgumentParser(
+        description="Compute joint SFS from vcf")
 
-spec_file = open(outprefix + '-spectrum.pkl', 'wb')
-pickle.dump(spectrum, spec_file)
-spec_file.close()
+    parser.add_argument(
+        "-vcf",
+        help="VCF file. May be uncompressed or gzip-compatible  compressed file.",
+        dest="vcf", type=str, required=True)
+
+    parser.add_argument(
+        "-poplabs",
+        help="""
+        Populations Information.
+        csv file with columns Samplename (for samples in vcf) and
+        Population.
+        If there are k populations in the column Population the SFS will be k-dimensional.
+        """,
+        dest="poplabs", type=str, required=True)
+
+    parser.add_argument(
+        "-ancgenome",
+        help="""
+        Fasta file with ancestral genome. IDs in fasta should match chromosomes
+        in VCF file.
+        """,
+        dest="ancgenome", type=str, required=True)
+
+    parser.add_argument(
+        "-out",
+        help="outprefix for output files",
+        dest="out", type=str, default="sfs"
+    )
+    parser.set_defaults(func=run)
+    args = parser.parse_args()
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()
