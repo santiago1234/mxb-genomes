@@ -1,6 +1,7 @@
 """
 Compute Joint Site Frequency Spectrum for a set of biallelic variants.
 author: santiago medina
+help: python jsfs.py --h 
 """
 import numpy as np
 import pandas as pd
@@ -277,7 +278,7 @@ def run(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Compute joint SFS from vcf")
+        description="Compute joint SFS from vcf for a set of populations")
 
     parser.add_argument(
         "-vcf",
@@ -304,7 +305,11 @@ def main():
 
     parser.add_argument(
         "-out",
-        help="outprefix for output files",
+        help="""
+        outprefix for output files. Two output files are written
+         {out}-stats.txt summarizing ancestral allele state and 
+         {out}-spectrum.pkl which contains the SFS in a moments.Spectrum object.
+        """,
         dest="out", type=str, default="sfs"
     )
     parser.set_defaults(func=run)
