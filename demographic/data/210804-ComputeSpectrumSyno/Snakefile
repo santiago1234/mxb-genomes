@@ -4,37 +4,35 @@ CHROMOSOMES = range(1, 23)
 CATEGORIES = {
     'synonymous': 'synonymous_variant',
     'missense': 'missense_variant',
-    'loss_of_function': '(stop_gained|frameshift_variant|stop_lost|start_lost|inframe_insertion|inframe_deletion)',
-    'intergenic': 'intergenic_variant',
-    'intron': 'intron_variant',
-    'utr_5_or_3': '(5_prime_UTR_variant|3_prime_UTR_variant)'
+    'lof': '(stop_gained|frameshift_variant|stop_lost|start_lost|inframe_insertion|inframe_deletion)', # loss of function
+    'intergenic': 'intergenic_variant'
 }
 
 
-rule concat_vcfs_and_extract_biallelic:
-    # Concat all the vcfs into one and
-    # extract only the biallelic SNPs.
-    input:
-        expand("../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz", chrn=CHROMOSOMES)
-    output:
-        temp("data/all-biallelicSnps.vcf.gz")
-    shell:
-        """
-        bcftools concat {input} |\
-            bcftools view -m2 -M2 -v snps -Oz -o {output}
-        """
+# rule concat_vcfs_and_extract_biallelic:
+#     # Concat all the vcfs into one and
+#     # extract only the biallelic SNPs.
+#     input:
+#         expand("../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz", chrn=CHROMOSOMES)
+#     output:
+#         temp("data/all-biallelicSnps.vcf.gz")
+#     shell:
+#         """
+#         bcftools concat {input} |\
+#             bcftools view -m2 -M2 -v snps -Oz -o {output}
+#         """
 
 
 rule var_id_to_vep_consequences:
     input:
         # A vcf that has VEP annotation in the INFO field
-        "data/all-biallelicSnps.vcf.gz"
+        "../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz"
     output:
-        temp("data/variants-csq.txt")
+        "data/variants-cats/variants-csq-chr{chrn}.txt"
     shell:
         # The -d option in the bcftools command is to
         # To print each consequence on a separate line,
-        # rather than as a comma-separated string on a single line.
+        # rather than as a comma-separachrnted string on a single line.
         # This will make easier the task processing
         """
         bcftools +split-vep {input} -f '%ID\t%Consequence\n' -d >{output}
@@ -49,9 +47,9 @@ rule subset_var_cat:
     # Get a list of the SNPs that are from
     # the given category
     input:
-        "data/variants-csq.txt"
+        "data/variants-cats/variants-csq-chr{chrn}.txt"
     output:
-        "data/var-{cat}.txt"
+        "data/variants-cats/csq-{cat}-chr{chrn}.txt"
     params:
         cat = get_var_from_cat
     shell:
@@ -60,28 +58,59 @@ rule subset_var_cat:
             cut -f1 |\
             sort |\
             uniq > {output}
-            
-        """
-
-
-rule concat_ancestral_allel:
-    input:
-        expand("../../../analysis-doc/210506-AncestralAlleleData/data/aa-chr{chrn}.csv", chrn=CHROMOSOMES)
-    output:
-        "data/all-ancestral-allel.csv"
-    shell:
-        """
-        awk '(NR == 1) || (FNR > 1)' {input} >{output}
         """
 
 
 rule subset_vcf_vars:
     input:
-        vcf = "data/all-biallelicSnps.vcf.gz",
-        ids_type = "data/var-{cat}.txt"
+        vcf = "../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz",
+        ids_type = "data/variants-cats/csq-{cat}-chr{chrn}.txt"
     output:
-        "data/vcf-{cat}.vcf.gz"
+        "data/vcfs/Snps-csq-{cat}-chr{chrn}.vcf.gz",
     shell:
         """
-        bcftools view -i 'ID=@{input.ids_type}' {input.vcf} -Oz -o {output}
+        bcftools view -i 'ID=@{input.ids_type}' {input.vcf} |\
+            bcftools view -m2 -M2 -v snps |\
+            bcftools annotate --remove INFO -Oz -o {output}
         """
+
+rule merge_vcf_cat:
+    input:
+        expand("data/vcfs/Snps-csq-{{cat}}-chr{chrn}.vcf.gz", chrn=CHROMOSOMES)
+    output:
+        "vcf-{cat}.txt"
+    shell:
+        """
+        touch {output}
+        """
+
+
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## ANCESTRAL GENOME
+
+rule ancestal_genome:
+    # NOTE:
+    #   ancestral genome GRCh38 can be found here: ftp://ftp.ensembl.org/pub/current_fasta/ancestral_alleles/homo_sapiens_ancestor_GRCh38.tar.gz
+    input:
+        expand("../../../../gene-genealogies-mxb/resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38/homo_sapiens_ancestor_{chrn}.fa", chrn=CHROMOSOMES)
+    output:
+        "data/ancestral-genome/ancestral-genome-autosomes.fasta"
+    shell: "python concat-ancestral-chromosomes.py"
+
+
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## Populations to use for SFS
+
+rule define_pops:
+    # for each population I sample
+    # 40 individuals
+    output:
+        "data/populations/pops-five.csv",
+        "data/populations/pops-single.csv"
+    shell: "python makepopsinfo.py"
+
+
