@@ -22,13 +22,17 @@ CATEGORIES = {
 #             bcftools view -m2 -M2 -v snps -Oz -o {output}
 #         """
 
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## Variants: VCFs
 
 rule var_id_to_vep_consequences:
     input:
         # A vcf that has VEP annotation in the INFO field
         "../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz"
     output:
-        "data/variants-cats/variants-csq-chr{chrn}.txt"
+        temp("data/variants-cats/variants-csq-chr{chrn}.txt")
     shell:
         # The -d option in the bcftools command is to
         # To print each consequence on a separate line,
@@ -49,7 +53,7 @@ rule subset_var_cat:
     input:
         "data/variants-cats/variants-csq-chr{chrn}.txt"
     output:
-        "data/variants-cats/csq-{cat}-chr{chrn}.txt"
+        temp("data/variants-cats/csq-{cat}-chr{chrn}.txt")
     params:
         cat = get_var_from_cat
     shell:
@@ -66,7 +70,7 @@ rule subset_vcf_vars:
         vcf = "../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz",
         ids_type = "data/variants-cats/csq-{cat}-chr{chrn}.txt"
     output:
-        "data/vcfs/Snps-csq-{cat}-chr{chrn}.vcf.gz",
+        temp("data/vcfs/Snps-csq-{cat}-chr{chrn}.vcf.gz")
     shell:
         """
         bcftools view -i 'ID=@{input.ids_type}' {input.vcf} |\
@@ -78,10 +82,10 @@ rule merge_vcf_cat:
     input:
         expand("data/vcfs/Snps-csq-{{cat}}-chr{chrn}.vcf.gz", chrn=CHROMOSOMES)
     output:
-        "vcf-{cat}.txt"
+        temp("data/vcfs/Allchroms-SNPs-csq-{cat}.vcf.gz")
     shell:
         """
-        touch {output}
+        bcftools concat {input} -Oz -o {output}
         """
 
 
@@ -96,7 +100,7 @@ rule ancestal_genome:
     input:
         expand("../../../../gene-genealogies-mxb/resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38/homo_sapiens_ancestor_{chrn}.fa", chrn=CHROMOSOMES)
     output:
-        "data/ancestral-genome/ancestral-genome-autosomes.fasta"
+        temp("data/ancestral-genome/ancestral-genome-autosomes.fasta")
     shell: "python concat-ancestral-chromosomes.py"
 
 
@@ -107,10 +111,66 @@ rule ancestal_genome:
 
 rule define_pops:
     # for each population I sample
-    # 40 individuals
+    # 25 individuals
     output:
         "data/populations/pops-five.csv",
         "data/populations/pops-single.csv"
     shell: "python makepopsinfo.py"
 
 
+
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## Compuete Spectrums
+
+# rule sfs_1d_MXL:
+#     input:
+#         vcf = "data/vcfs/Allchroms-SNPs-csq-{cat}.vcf.gz",
+#         ancgenome = "data/ancestral-genome/ancestral-genome-autosomes.fasta",
+#         poplabs = "data/populations/pops-single.csv"
+#     output:
+#         "data/spectrums/1d-csq-{cat}-stats.txt",
+#         "data/spectrums/1d-csq-{cat}-spectrum.pkl"
+#     params:
+#         out = "data/spectrums/1d-csq-{cat}"
+#     shell:
+#         """
+#         python ../../../scripts/jsfs.py -vcf {input.vcf} \
+#             -poplabs {input.poplabs} \
+#             -ancgenome {input.ancgenome} \
+#             -out {params.out}
+#         """
+
+
+
+rule jsfs:
+    input:
+        vcf = "data/vcfs/Allchroms-SNPs-csq-{cat}.vcf.gz",
+        ancgenome = "data/ancestral-genome/ancestral-genome-autosomes.fasta",
+        poplabs = "data/populations/pops-five.csv"
+    output:
+        "data/spectrums/5d-csq-{cat}-stats.txt",
+        "data/spectrums/5d-csq-{cat}-spectrum.pkl"
+    params:
+        out = "data/spectrums/5d-csq-{cat}"
+    shell:
+        """
+        python ../../../scripts/jsfs.py -vcf {input.vcf} \
+            -poplabs {input.poplabs} \
+            -ancgenome {input.ancgenome} \
+            -out {params.out}
+        """
+
+rule compress_jsj:
+    input:
+        "data/spectrums/5d-csq-{cat}-spectrum.pkl"
+    output:
+        "data/spectrums/5d-csq-{cat}-spectrum.pkl.gz"
+    shell: "gzip {input}"
+
+
+rule all:
+    input:
+        expand("data/spectrums/5d-csq-{cat}-spectrum.pkl", cat=CATEGORIES.keys()),
+        expand("data/spectrums/5d-csq-{cat}-spectrum.pkl.gz", cat=CATEGORIES.keys())

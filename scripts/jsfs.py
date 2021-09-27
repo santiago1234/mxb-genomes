@@ -266,6 +266,7 @@ def run(args):
     pop_ids = [index_to_pops[i] for i in range(len(index_to_pops))]
     spectrum = moments.Spectrum(sfs, pop_ids=pop_ids, data_folded=False)
 
+    print('saving output file ...')
     # save output
     stats_file = open(outprefix + '-stats.txt', "w")
     stats_file.write(stats)
@@ -274,6 +275,7 @@ def run(args):
     spec_file = open(outprefix + '-spectrum.pkl', 'wb')
     pickle.dump(spectrum, spec_file)
     spec_file.close()
+    print('done ...')
 
 
 def main():

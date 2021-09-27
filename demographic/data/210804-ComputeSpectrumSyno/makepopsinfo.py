@@ -32,7 +32,7 @@ dims = {
 
 # sample individuals
 
-pops = pops.groupby('Population').sample(n=40, random_state=42)
+pops = pops.groupby('Population').sample(n=25, random_state=42)
 
 subset = lambda dim: pops[pops.Population.isin(dims[dim])]
 
