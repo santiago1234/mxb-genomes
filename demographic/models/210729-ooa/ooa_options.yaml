@@ -18,8 +18,80 @@ parameters:
   values:
   - demes:
       OOA:
+       epochs:
+         0: end_time
+- name: Ne
+  description: ancestral effective population size
+  values:
+  - demes:
+      ancestral:
         epochs:
-          0: end_time
+          0: start_size
+- name: NA
+  description: expansion size in AMH and YRI
+  values:
+  - demes:
+      AMH:
+        epochs:
+          0: start_size
+      YRI:
+        epochs:
+          0: start_size
+- name: NB
+  description: AMH bottleneck size
+  values:
+  - demes:
+      OOA:
+        epochs:
+          0: start_size
+- name: NEu0
+  description: initial IBS size
+  values:
+  - demes:
+      IBS:
+        epochs:
+          0: start_size
+- name: NEuF
+  description: final IBS size
+  values:
+  - demes:
+      IBS:
+        epochs:
+          0: end_size
+- name: NAs0
+  description: initial CHB size
+  values:
+  - demes:
+      CHB:
+        epochs:
+          0: start_size
+- name: NAsF
+  description: final CHB size
+  values:
+  - demes:
+      CHB:
+        epochs:
+          0: end_size
+- name: mAfB
+  description: migration rate between Africa and OOA bottleneck
+  values:
+  - migrations:
+      0: rate
+- name: mAfEu
+  description: migration rate between Africa and Europe
+  values:
+  - migrations:
+      1: rate
+- name: mAfAs
+  description: migration rate between Africa and E Asia
+  values:
+  - migrations:
+      2: rate
+- name: mEuAs
+  description: migration rate between Europe and E Asia
+  values:
+  - migrations:
+      3: rate
 constraints:
 - params: [TA, TB]
   constraint: greater_than
