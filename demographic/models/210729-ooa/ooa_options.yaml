@@ -1,4 +1,17 @@
 parameters:
+- name: N_B
+  description: Bottleneck size for Eurasian populations
+  values:
+  - demes:
+      OOA:
+        epochs:
+          0: start_size
+- name: m_Af_Eu
+  description: Symmetric migration rate between Afr and Eur populations
+  upper_bound: 1e-3
+  values:
+  - migrations:
+      1: rate
 - name: TA
   description: Time before present of ancestral expansion
   values:
