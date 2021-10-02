@@ -38,9 +38,7 @@ demes:
   ancestors: [CHB]
   start_time: 20000
   epochs:
-  - {end_time: 10000, start_size: 1000}
-  - {end_time: 400, end_size: 30000}
-  - {end_time: 0, end_size: 2000}
+  - {end_time: 0, start_size: 10000}
 
 migrations:
 - demes: [YRI, IBS]
