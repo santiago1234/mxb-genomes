@@ -124,23 +124,23 @@ rule define_pops:
 ## -> -> -> -> -> -> -> -> -> -> -> ->
 ## Compuete Spectrums
 
-# rule sfs_1d_MXL:
-#     input:
-#         vcf = "data/vcfs/Allchroms-SNPs-csq-{cat}.vcf.gz",
-#         ancgenome = "data/ancestral-genome/ancestral-genome-autosomes.fasta",
-#         poplabs = "data/populations/pops-single.csv"
-#     output:
-#         "data/spectrums/1d-csq-{cat}-stats.txt",
-#         "data/spectrums/1d-csq-{cat}-spectrum.pkl"
-#     params:
-#         out = "data/spectrums/1d-csq-{cat}"
-#     shell:
-#         """
-#         python ../../../scripts/jsfs.py -vcf {input.vcf} \
-#             -poplabs {input.poplabs} \
-#             -ancgenome {input.ancgenome} \
-#             -out {params.out}
-#         """
+rule sfs_1d_MXL:
+    input:
+        vcf = "data/vcfs/Allchroms-SNPs-csq-{cat}.vcf.gz",
+        ancgenome = "data/ancestral-genome/ancestral-genome-autosomes.fasta",
+        poplabs = "data/populations/pops-single.csv"
+    output:
+        "data/spectrums/1d-csq-{cat}-stats.txt",
+        "data/spectrums/1d-csq-{cat}-spectrum.pkl"
+    params:
+        out = "data/spectrums/1d-csq-{cat}"
+    shell:
+        """
+        python ../../../scripts/jsfs.py -vcf {input.vcf} \
+            -poplabs {input.poplabs} \
+            -ancgenome {input.ancgenome} \
+            -out {params.out}
+        """
 
 
 
@@ -172,5 +172,5 @@ rule compress_jsj:
 
 rule all:
     input:
-        expand("data/spectrums/5d-csq-{cat}-spectrum.pkl", cat=CATEGORIES.keys()),
-        expand("data/spectrums/5d-csq-{cat}-spectrum.pkl.gz", cat=CATEGORIES.keys())
+        #expand("data/spectrums/5d-csq-{cat}-spectrum.pkl", cat=CATEGORIES.keys()),
+        expand("data/spectrums/1d-csq-{cat}-spectrum.pkl", cat=CATEGORIES.keys())
