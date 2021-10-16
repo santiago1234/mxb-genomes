@@ -7,9 +7,7 @@ parameters:
   upper_bound: 44748.24
   values:
   - demes:
-      MXB:
-        epochs:
-          0: end_time
+      MXB: start_time
 - name: NCmxb
   description: Population size for MXB (Native American) populations
   values:
