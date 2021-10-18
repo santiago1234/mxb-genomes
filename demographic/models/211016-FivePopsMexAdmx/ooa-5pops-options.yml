@@ -1,0 +1,18 @@
+# Parametrization for OOA model with Native American expansion
+# and Mexican admixture
+
+parameters:
+- name: Nmxl0
+  description: initial MXL size
+  values:
+  - demes:
+      MXL:
+        epochs:
+          0: start_size
+- name: NmxlF
+  description: final MXL size
+  values:
+  - demes:
+      MXL:
+        epochs:
+          0: end_size
