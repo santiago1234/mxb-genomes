@@ -60,10 +60,5 @@ migrations:
 pulses:
 - source: YRI
   dest: MXL
-  proportion: 0.063
+  proportion: 0.0913
   time: 319
-- source: YRI
-  dest: MXL
-  proportion: 0.0298
-  time: 290
-  
