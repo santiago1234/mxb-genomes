@@ -20,6 +20,8 @@ nat_p$Population <- factor(nat_p$Population, levels = pops)
 dev_counts <- read_csv("results/derived_counts.csv")
 dev_counts <- inner_join(dev_counts, nat_p)
 
+dev_counts$VarFreq <- factor(dev_counts$VarFreq, levels = c("Rare (DAF <= 5%)", "Common (DAF <= 100%)"))
+
 
 # plots -------------------------------------------------------------------
 
@@ -33,7 +35,7 @@ make_plot <- function(CAT) {
     ggplot(aes(x = NAT_p, y = derived_count)) +
     ggpubr::stat_cor(color = "black", size = 2) +
     geom_smooth(method = "lm") +
-    geom_point(color="grey30") +
+    geom_point(color="grey20") +
     facet_wrap(Region~VarFreq, scales = "free_y") +
     theme_bw() +
     labs(
@@ -46,8 +48,15 @@ make_plot <- function(CAT) {
 }
 
 
-plots <- map(c("INTERGENIC", "SYNONYMOUS", "DELETERIOUS"), make_plot)
+plots <- map(c("INTERGENIC", "SYNONYMOUS", "MISSENSE"), make_plot)
 
-pdf("plots/mutation-burden-mxl.pdf", height = 5, width = 14)
+pdf("plots/mutation-burden-mxl.pdf", height = 4.5, width = 14)
 plot_grid(plots[[1]], plots[[2]], plots[[3]], nrow = 1)
+dev.off()
+
+
+plots <- map(c("INTERGENIC", "SYNONYMOUS", "MISSENSE", "DELETERIOUS"), make_plot)
+
+pdf("plots/mutation-burden-mxl-all.pdf", height = 4.5, width = 18)
+plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 1)
 dev.off()
