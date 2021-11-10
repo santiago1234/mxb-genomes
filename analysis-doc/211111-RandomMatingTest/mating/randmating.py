@@ -13,7 +13,7 @@ mom, dad = random.sample(population, 2)
 
 # for each chromosome we randomnly choose one haplotype.
 
-def parental_inherited_chromo(parent_data, chromosomes):
+def parental_passed_genome(parent_data, chromosomes):
     """
     Args:
         parent_data: tracts data with haplotype information. This
@@ -31,11 +31,10 @@ def parental_inherited_chromo(parent_data, chromosomes):
 
     inherited_chrs = pd.merge(inherited_chrs, parent_data)
     # elimina la columna haplo
-    inherited_chrs.drop(['haplo'], axis=1)
-    return inherited_chrs
+    return inherited_chrs.drop(['haplo'], axis=1)
 
 
-def newborn(tractspop):
+def newborn(tractspop, chromosomes=list(range(1, 23))):
     """
     Args:
         tractspop: dict mapping individuals to tracts dta.
@@ -43,7 +42,12 @@ def newborn(tractspop):
     # make a random id
     id_new = ''.join(random.choices([str(x) for x in range(9)], k=4))
     # select parents at random
+    mom, dad = random.sample(tractspop.keys(), 2)
+    id_new = 'id' + id_new + '_' + mom + '_X_' + dad
 
+    # recombination and mating
+    retrive_tracts = lambda x: pd.concat(tractspop[x])
+    mom_genome = parental_passed_genome(retrive_tracts(mom), chromosomes)
+    dad_genome = parental_passed_genome(retrive_tracts(dad), chromosomes)
 
-
-
+    return id_new, mom_genome, dad_genome
