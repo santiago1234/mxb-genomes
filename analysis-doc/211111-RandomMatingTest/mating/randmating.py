@@ -1,17 +1,6 @@
 import pandas as pd
 import random
 
-mxl = load_tracts_pop('../../210514-ProcessXGMixOutForTracts/data/3-pops/tracts/MXL/')
-
-population = mxl.keys()
-chromosomes = list(range(1, 23))
-## create a newborn sample
-
-## sample parents without replacement
-
-mom, dad = random.sample(population, 2)
-
-# for each chromosome we randomnly choose one haplotype.
 
 def parental_passed_genome(parent_data, chromosomes):
     """
