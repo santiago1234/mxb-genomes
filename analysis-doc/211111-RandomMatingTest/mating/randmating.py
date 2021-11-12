@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import random
 
@@ -26,7 +27,7 @@ def parental_passed_genome(parent_data, chromosomes):
 def newborn(tractspop, chromosomes=list(range(1, 23))):
     """
     Args:
-        tractspop: dict mapping individuals to tracts dta.
+        tractspop: dict mapping individuals to tracts data.
     """
     # make a random id
     id_new = ''.join(random.choices([str(x) for x in range(9)], k=4))
@@ -40,3 +41,31 @@ def newborn(tractspop, chromosomes=list(range(1, 23))):
     dad_genome = parental_passed_genome(retrive_tracts(dad), chromosomes)
 
     return id_new, mom_genome, dad_genome
+
+
+def save_individual_tracts_to_file(id_new, mom_genome, dad_genome, outdir):
+    """
+    Save the data of an individual to a tracts (bed) format.
+    """
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
+    file_A = os.path.join(outdir, id_new + '_anc_A_cM.bed')
+    file_B = os.path.join(outdir, id_new + '_anc_B_cM.bed')
+
+    mom_genome.to_csv(file_A, header=False, index=False, sep='\t')
+    dad_genome.to_csv(file_B, header=False, index=False, sep='\t')
+    pass
+
+
+def simulate_random_maiting_pop(tractspop, outdir, n, seed):
+    """
+    Args:
+        tractspop: dict mapping individuals to tracts data.
+        seed: seed for random generation
+    """
+    random.seed(int(seed))
+    [save_individual_tracts_to_file(*newborn(tractspop), outdir) for i in range(n)]
+    pass
+
+
+
