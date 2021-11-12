@@ -1,0 +1,20 @@
+# GLOBLA VARIABLES
+N_IND = 64  # number of individuals to simulate
+N_BOOTSTRAP = 1000
+
+
+rule simulate:
+    input:
+        parental_pop = "../210514-ProcessXGMixOutForTracts/data/3-pops/tracts/MXL/"
+    output:
+        directory('data/simulations/sim-{seed}')
+    shell:
+        """
+        python simulate.py {input} {N_IND} {wildcards.seed} {output}
+        """
+
+
+rule simulations:
+    input:
+        expand('data/simulations/sim-{seed}/', seed=list(range(N_BOOTSTRAP)))
+
