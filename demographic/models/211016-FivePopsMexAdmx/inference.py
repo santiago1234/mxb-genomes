@@ -19,7 +19,7 @@ print(sf.pop_ids)
 
 
 
-## project and fold
+## project an fold
 ## We project to a sample size
 ## such that the MXL population has more samples
 projection = [8, 8, 8, 15, 8]
@@ -37,7 +37,7 @@ ret = moments.Demes.Inference.optimize(
     inference_options=options_params,
     data=sf,
     verbose=1,
-    maxiter=1000,
+    maxiter=300,
     uL=uL,
     overwrite=True
 )

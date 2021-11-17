@@ -45,7 +45,7 @@ demes:
   proportions: [0.4908, 0.5092]  # Obtained from Tracts
   start_time: 435
   epochs:
-  - {end_time: 0, start_size: 5000, end_size: 15000}
+  - {end_time: 0, start_size: 20000}
 migrations: 
 - demes: [YRI, IBS]
   rate: 3.256463068676266e-05
