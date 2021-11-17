@@ -1,62 +1,85 @@
 library(tidyverse)
 library(gridExtra)
 library(cowplot)
-# get the native american ancestry ----------------------------------------
+## make plot for MXBiobank paper
 
-admxt <- read_csv("../210310-AdmixurePCA-merged-data-with-1TGP/results/admixture.csv")
+## there are two parameters the variant category and the ancestry
 
-nat_p <- 
+admxt <- read_csv("../210310-AdmixurePCA-merged-data-with-1TGP/results/admixture.csv") %>% 
+  rename(Samplename = Sample)
+
+
+ancestry_data <- function(ancestry) {
+  # we are using the admixture results
+  # with K = 3
+  # we only want the MXL samples
   admxt %>% 
-  filter(
-    K == "K = 3"
-  ) %>% 
-  filter(cluster_grp == "MXB", Superpopulation == "AMR") %>% 
-  select(Sample, p, Population) %>% 
-  rename(Samplename = Sample, NAT_p = p)
+    filter(
+      K == 'K = 3',
+      cluster_grp == ancestry,
+      Population == 'MXL'
+    )
+  
+}
 
-pops <- c("PEL", "CLM", "PUR", "MXL")
-nat_p$Population <- factor(nat_p$Population, levels = pops)
+
+## Variant counts data
 
 dev_counts <- read_csv("results/derived_counts.csv")
-dev_counts <- inner_join(dev_counts, nat_p)
+#dev_counts <- inner_join(dev_counts, nat_p)
 
 dev_counts$VarFreq <- factor(dev_counts$VarFreq, levels = c("Rare (DAF <= 5%)", "Common (DAF <= 100%)"))
 
 
-# plots -------------------------------------------------------------------
+# plotting function -------------------------------------------------------
 
-
-make_plot <- function(CAT) {
+make_plot <- function(CAT, ancestry) {
   
-  mxl <- dev_counts %>% 
-    filter(Population == "MXL")
+  mxl <- ancestry_data(ancestry) %>% 
+    inner_join(dev_counts)
+  
+  
+  x_pos <- if_else(ancestry == "MXB", 0.01, 0.25)
   mxl %>% 
     filter(variant == CAT) %>% 
-    ggplot(aes(x = NAT_p, y = derived_count)) +
-    ggpubr::stat_cor(color = "black", size = 2) +
-    geom_smooth(method = "lm") +
-    geom_point(color="grey20") +
+    ggplot(aes(x = p, y = derived_count)) +
+    geom_smooth(method = "lm", color = "grey50") +
+    geom_point(color="grey70") +
+    ggpubr::stat_cor(
+      color = "firebrick",
+      size = 3.5,
+      label.x.npc  = x_pos,
+      label.y.npc = 0.1,
+      p.accuracy = 0.001,
+      p.digits = 3,
+      r.accuracy = 0.01
+    ) +
     facet_wrap(Region~VarFreq, scales = "free_y") +
     theme_bw() +
     labs(
       title = CAT,
-      x = "NAT ancestry proportion",
+      x = paste(str_replace(ancestry, "MXB", "NAT"), "ancestry proportion"),
       y = "# Derived variants per individual"
     ) +
     theme(legend.position = "none") 
   
 }
 
+plot_ancestry <- function(ancestry) {
+  map(c("INTERGENIC", "SYNONYMOUS", "MISSENSE"), function(x) make_plot(x, ancestry))
+  
+}
 
-plots <- map(c("INTERGENIC", "SYNONYMOUS", "MISSENSE"), make_plot)
 
-pdf("plots/mutation-burden-mxl.pdf", height = 4.5, width = 14)
-plot_grid(plots[[1]], plots[[2]], plots[[3]], nrow = 1)
+pdf("plots/mutation-burden-mxl.pdf", height = 12, width = 14)
+plt_mxb <- plot_ancestry('MXB')
+plt_eur <- plot_ancestry('EUR')
+plt_afr <- plot_ancestry('AFR')
+plot_grid(
+  plt_mxb[[1]], plt_mxb[[2]], plt_mxb[[3]],
+  plt_eur[[1]], plt_eur[[2]], plt_eur[[3]],
+  plt_afr[[1]], plt_afr[[2]], plt_afr[[3]],
+  nrow = 3
+)
 dev.off()
 
-
-plots <- map(c("INTERGENIC", "SYNONYMOUS", "MISSENSE", "DELETERIOUS"), make_plot)
-
-pdf("plots/mutation-burden-mxl-all.pdf", height = 4.5, width = 18)
-plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 1)
-dev.off()
