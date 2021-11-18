@@ -1,85 +1,90 @@
 library(tidyverse)
 library(gridExtra)
 library(cowplot)
+library(ggthemes)
 ## make plot for MXBiobank paper
 
 ## there are two parameters the variant category and the ancestry
+theme_set(theme_base(base_family = "Helvetica"))
 
 admxt <- read_csv("../210310-AdmixurePCA-merged-data-with-1TGP/results/admixture.csv") %>% 
-  rename(Samplename = Sample)
+  rename(Samplename = Sample) %>% 
+  filter(
+    K == 'K = 3', # Using 3 clusters with ADMIXTURE
+    Population == 'MXL'
+  )
 
-
-ancestry_data <- function(ancestry) {
-  # we are using the admixture results
-  # with K = 3
-  # we only want the MXL samples
-  admxt %>% 
-    filter(
-      K == 'K = 3',
-      cluster_grp == ancestry,
-      Population == 'MXL'
-    )
-  
-}
-
-
-## Variant counts data
-
+# dev counts contains data for AMR samples (i.e MXL, CLM, PEL, PUR)
 dev_counts <- read_csv("results/derived_counts.csv")
-#dev_counts <- inner_join(dev_counts, nat_p)
-
 dev_counts$VarFreq <- factor(dev_counts$VarFreq, levels = c("Rare (DAF <= 5%)", "Common (DAF <= 100%)"))
 
 
-# plotting function -------------------------------------------------------
+dat <- dev_counts %>% 
+  inner_join(admxt)
 
-make_plot <- function(CAT, ancestry) {
-  
-  mxl <- ancestry_data(ancestry) %>% 
-    inner_join(dev_counts)
-  
-  
-  x_pos <- if_else(ancestry == "MXB", 0.01, 0.25)
-  mxl %>% 
-    filter(variant == CAT) %>% 
-    ggplot(aes(x = p, y = derived_count)) +
-    geom_smooth(method = "lm", color = "grey50") +
-    geom_point(color="grey70") +
-    ggpubr::stat_cor(
-      color = "firebrick",
-      size = 3.5,
-      label.x.npc  = x_pos,
-      label.y.npc = 0.1,
-      p.accuracy = 0.001,
-      p.digits = 3,
-      r.accuracy = 0.01
-    ) +
-    facet_wrap(Region~VarFreq, scales = "free_y") +
-    theme_bw() +
-    labs(
-      title = CAT,
-      x = paste(str_replace(ancestry, "MXB", "NAT"), "ancestry proportion"),
-      y = "# Derived variants per individual"
-    ) +
-    theme(legend.position = "none") 
-  
-}
-
-plot_ancestry <- function(ancestry) {
-  map(c("INTERGENIC", "SYNONYMOUS", "MISSENSE"), function(x) make_plot(x, ancestry))
-  
-}
+# order variables
+dat$variant <- factor(dat$variant, levels = c("INTERGENIC", "SYNONYMOUS", "MISSENSE", "DELETERIOUS"))
+dat$cluster_grp <- factor(dat$cluster_grp, levels = c("MXB", "EUR", "AFR"))
 
 
-pdf("plots/mutation-burden-mxl.pdf", height = 12, width = 14)
-plt_mxb <- plot_ancestry('MXB')
-plt_eur <- plot_ancestry('EUR')
-plt_afr <- plot_ancestry('AFR')
-plot_grid(
-  plt_mxb[[1]], plt_mxb[[2]], plt_mxb[[3]],
-  plt_eur[[1]], plt_eur[[2]], plt_eur[[3]],
-  plt_afr[[1]], plt_afr[[2]], plt_afr[[3]],
-  nrow = 3
-)
-dev.off()
+dat %>% 
+  filter(Region == 'GENOME') %>% 
+  ggplot(aes(x = p, y = derived_count, color = cluster_grp)) +
+  geom_point(alpha = 0.8) +
+  geom_smooth(method = "lm", size = 1/3, alpha = 0.8, se = FALSE) +
+  ggpubr::stat_cor(
+    size = 3,
+    label.x.npc = 0.45,
+    label.y.npc = 1,
+    method = "spearman",
+    p.accuracy = 0.001,
+    p.digits = 3,
+    r.accuracy = 0.01
+  ) +
+  facet_wrap(VarFreq ~ variant, scales = "free", ncol = 4) +
+  scale_color_manual(values = c("yellow3", "purple", "grey50")) +
+  theme_classic() +
+  theme(
+    panel.grid = element_blank(),
+    axis.line = element_line(size = 1/5),
+    strip.background = element_blank(),
+    legend.position = "none"
+  ) +
+  labs(
+    title = "MEGA array SNPs",
+    y = "Number of derived alleles carried by an individual",
+    x = "Ancestry from Americas, Europe or Africa quantified using ADMIXTURE"
+  )
+ggsave("plots/array-variants.pdf", height = 5, width = 11)
+
+
+dat %>% 
+  filter(Region == 'GENOME') %>% 
+  ggplot(aes(x = p, y = derived_count, color = cluster_grp)) +
+  geom_point(alpha = 0.8) +
+  geom_smooth(method = "lm", size = 1/3, alpha = 0.8, se = FALSE) +
+  ggpubr::stat_cor(
+    size = 3,
+    label.x.npc = 0.45,
+    label.y.npc = 1,
+    method = "spearman",
+    p.accuracy = 0.001,
+    p.digits = 3,
+    r.accuracy = 0.01
+  ) +
+  facet_wrap(VarFreq ~ variant, scales = "free", ncol = 4) +
+  scale_color_manual(values = c("yellow3", "purple", "grey50")) +
+  theme_classic() +
+  theme(
+    panel.grid = element_blank(),
+    axis.line = element_line(size = 1/5),
+    strip.background = element_blank(),
+    legend.position = "none"
+  ) +
+  labs(
+    title = "All SNPs (Genome)",
+    y = "Number of derived alleles carried by an individual",
+    x = "Ancestry from Americas, Europe or Africa quantified using ADMIXTURE"
+  )
+ggsave("plots/genome-variants.pdf", height = 5, width = 11)
 
