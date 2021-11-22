@@ -40,5 +40,5 @@ migrations:
   rate: 1.6414195981495537e-05
 - demes: [IBS, CHB]
   rate: 7.69081279717762e-05
-- {source: YRI, dest: OOA, rate: 9.885227357176779e-05}
-- {source: OOA, dest: YRI, end_time: 44748.23862033427, rate: 9.885227357176779e-05}
+- demes: [YRI, OOA]
+  rate: 9.885227357176779e-05

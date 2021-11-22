@@ -19,11 +19,14 @@ with gzip.open(sf, "rb") as f:
 print(sf.pop_ids)
 
 
+## marginalize to the three populations
+sf = sf.marginalize([2, 3])
+print("marginalizing to: ", sf.pop_ids)
 
 ## project an fold
 ## We project to a sample size
 ## such that the MXL population has more samples
-n = 60
+n = 49
 projection = [n, n, n]
 sf = sf.project(projection)
 ## 
