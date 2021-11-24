@@ -1,0 +1,29 @@
+parameters:
+- name: TN
+  description: Time of MXB branching from CHB.
+  upper_bound: 44748.24
+  values:
+  - demes:
+      MXB: start_time
+- name: NCmxI
+  description: Population size for the first Epoch in MXB
+  values:
+  - demes:
+      MXB:
+        epochs:
+          0: start_size
+- name: TNe1
+  description: End time of 1st epoch in MXB
+  upper_bound: 44748.24
+  values:
+  - demes:
+      MXB:
+        epochs:
+          0: end_time
+- name: NCmxF
+  description: Final population size in MXB
+  values:
+  - demes:
+      MXB:
+        epochs:
+          1: start_size

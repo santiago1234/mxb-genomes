@@ -1,0 +1,17 @@
+# Parametrization for OOA model with Native American expansion
+# OOA 3 pop model parameters have been fixed. Here, we only include
+# the new parameters for the Native American expansion
+parameters:
+- name: TN
+  description: Time of MXB branching from CHB.
+  upper_bound: 44748.24
+  values:
+  - demes:
+      MXB: start_time
+- name: NCmxb
+  description: Population size for MXB (Native American) populations
+  values:
+  - demes:
+      MXB:
+        epochs:
+          0: start_size
