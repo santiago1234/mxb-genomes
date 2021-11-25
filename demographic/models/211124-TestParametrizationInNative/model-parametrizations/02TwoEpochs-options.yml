@@ -27,3 +27,6 @@ parameters:
       MXB:
         epochs:
           1: start_size
+constraints:
+- params: [TN, TNe1]
+  constraint: greater_than
