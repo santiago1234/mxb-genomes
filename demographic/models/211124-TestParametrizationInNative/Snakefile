@@ -1,0 +1,21 @@
+# helper runall
+MODELS = [
+    '01ConstantSize',
+    '02TwoEpochs',
+    '03ExponentialChange',
+    '04ThreeEpochs'
+]
+
+rule inference:
+    input:
+        sfs = "../../data/210804-Compute-jSFS/data/spectrums/5d-csq-synonymous-spectrum.pkl.gz",
+        model_yml = "model-parametrizations/{model}.yml",
+        options = "model-parametrizations/{model}-options.yml"
+    output:
+        inferredmodel = "results/{model}-best.yml",
+        lkl = "results/{model}-lkl.txt"
+    shell:
+        """
+        python inference.py {input.model_yml} {input.options} {output.inferredmodel} {output.lkl}
+        """
+
