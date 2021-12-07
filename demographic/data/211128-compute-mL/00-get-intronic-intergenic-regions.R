@@ -1,7 +1,7 @@
 library(GenomicRanges)
 library(magrittr)
 library(TxDb.Hsapiens.UCSC.hg38.knownGene)
-library(BSgenome.Hsapiens.UCSC.hg38)
+library(BSgenome.Hsapiens.UCSC.hg38.masked)
 library(rtracklayer)
 library(Biostrings)
 
@@ -9,7 +9,7 @@ library(Biostrings)
 # load genomi data --------------------------------------------------------
 
 txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
-hs_genome <- BSgenome.Hsapiens.UCSC.hg38
+hs_genome <- BSgenome.Hsapiens.UCSC.hg38.masked
 
 # we want only the autosomes
 
