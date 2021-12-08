@@ -11,7 +11,6 @@ import functools
 from collections import Counter
 import pandas as pd
 from Bio import SeqIO
-from countmers import count_3mers_in_record
 
 
 def get_kmers(aseq, k):

@@ -1,0 +1,26 @@
+"""
+Driver script to compute mutation rate mL in introns and integenic regions.
+"""
+
+
+rule obtain_intronic_and_intergenic_seqs:
+    output:
+        'data/regions/itergenic.bed',
+        'data/regions/intergenic.fasta',
+        'data/regions/introns.bed',
+        'data/regions/introns.fasta'
+    shell:
+        "Rscript 00-get-intronic-intergenic-regions.R"
+
+
+rule count_aggregated_kmers:
+    input:
+        'data/regions/{region}.fasta'
+    output:
+        "data/counts/{region}.csv"
+    threads: 4
+    shell:
+        """
+         python count-3mers-in-seqs.py {input}  {output} {threads}
+        """
+

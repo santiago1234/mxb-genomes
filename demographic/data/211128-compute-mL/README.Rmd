@@ -1,0 +1,101 @@
+---
+title: "Computing the mutation rate in intronic and intergenic sequences"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, mmessage = FALSE, warning = FALSE)
+library(tidyverse)
+mercounts <- read_csv("data/counts/introns.csv")
+mutrate <- read_tsv("data/mutation_rate_methylation_bins.txt")
+```
+## Overview
+
+We want to estimate the mutation rate parameter $mL$ for the human genome in **intronic** and **intergenic** sequences. Later we will use these mutation rates to infer the demographic model with intronic and intergenic SNPs.
+
+In these notes, I will show the procedure to get $mL$ for the intronic genome.
+
+## Step 1: Get intronic sequences
+
+I used the human genome annotation data [hg38](https://bioconductor.org/packages/release/data/annotation/html/TxDb.Hsapiens.UCSC.hg38.knownGene.html) to obtain the regions that are intronic in bed format. This is the same genome build that we've been using in the proyect. Then I used the [masked genome](https://www.bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg38.masked/) to obtain the sequences.
+
+[Script](00-get-intronic-intergenic-regions.R)
+
+```{r}
+Biostrings::readDNAStringSet("data/regions/intergenic.fasta")
+```
+
+## Step 2: Count 3-mers in sequences
+
+The next step is to count each 3-mer sequence (there are 64 3-mers plus the masked 3-mers, e.g. **NNN**). To get the total count I aggregate across all sequences.
+
+```{r, echo=FALSE, fig.height=6, fig.width=4}
+
+mercounts %>% 
+  filter(!str_detect(kmer, "N")) %>% 
+  ggplot(aes(x = count, y = reorder(kmer, count))) +
+  geom_point() +
+  ggrepel::geom_text_repel(aes(label = kmer), color = "grey40") +
+  labs(
+    x = "Counts",
+    y = "3-mer",
+    title = "3-mers frequency in\nintronic human genome"
+  )
+
+```
+
+[Script](count-3mers-in-seqs.py)
+
+## Step 3: Compute the mutation rate
+
+We have the following table with the mutation rate obtained from the paper ["The mutational constraint spectrum quantified from variation in 141,456 humans"](https://www.nature.com/articles/s41586-020-2308-7).
+
+```{r, echo=FALSE}
+head(mutrate)
+```
+
+There are 3 methylation levels 0, 1, and/or 2. All the 3-mers have the level 0 while other only have 1 and 2.
+
+#### Q1: ?
+
+I have filter to only keep the data for methylation level 0.
+
+
+#### Q2: ?
+
+Also, there 32 3-mers. We have half because each sequence represents the sequence and its complement. For example, *TCA* represents *TCA* and *AGT*.
+
+#### Q3: ?
+
+
+```{r, echo=FALSE}
+filter(mutrate, context == "TCA") 
+```
+
+For each 3-mer we have 3 possible mutations, each one has its own $\mu_{SNP}$, to get 
+the total for each 3-mer I sum those 3 values for each 3-mer.
+
+```{r, message=FALSE, echo=FALSE}
+mutrate %>% 
+  group_by(context) %>% 
+  summarise(mu_snp = sum(mu_snp)) %>% 
+  filter(context == "TCA")
+```
+
+
+Finally, to get the total mutation rate I multiply the 3-mer frequencies by the mutation rate and then add all 3-mers.
+
+$$
+\mu_L = \sum_{i} F_i * \mu_{i}
+$$
+
+
+Where:
+
+- $F_i$ frequency of k-mer i.
+- $\mu_i$ mutation rate for k-mer i.
+
+
+For intronic SNPs we get: $mL = 19.31141233597438$
+
+And for intergenic SNPs $mL = 12.0854257446005$ 
