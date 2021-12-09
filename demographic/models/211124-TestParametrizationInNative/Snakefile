@@ -19,3 +19,8 @@ rule inference:
         python inference.py {input.model_yml} {input.options} {output.inferredmodel} {output.lkl}
         """
 
+
+rule all:
+    input:
+        expand("results/{model}-best.yml", model=MODELS)
+    
