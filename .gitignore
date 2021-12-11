@@ -47,6 +47,13 @@ analysis-doc/*/*/*.png
 analysis-doc/*/*/*.pdf
 analysis-doc/*/*/plots/*
 
+demographic/models/*/README.docx
+demographic/models/*/README.html
+demographic/models/*/*.png
+demographic/models/*/*.pdf
+demographic/models/*/*/*.png
+demographic/models/*/*/*.pdf
+demographic/models/*/*/plots/*
 # for R
 # History files
 .Rhistory

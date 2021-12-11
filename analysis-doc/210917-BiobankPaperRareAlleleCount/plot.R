@@ -30,8 +30,8 @@ dat$cluster_grp <- factor(dat$cluster_grp, levels = c("MXB", "EUR", "AFR"))
 dat %>% 
   filter(Region == 'GENOME') %>% 
   ggplot(aes(x = p, y = derived_count, color = cluster_grp)) +
+  geom_smooth(aes(fill = cluster_grp), method = "lm", size = 1/3, alpha = 0.2) +
   geom_point(alpha = 0.8) +
-  geom_smooth(method = "lm", size = 1/3, alpha = 0.8, se = FALSE) +
   ggpubr::stat_cor(
     size = 3,
     label.x.npc = 0.45,
@@ -42,7 +42,8 @@ dat %>%
     r.accuracy = 0.01
   ) +
   facet_wrap(VarFreq ~ variant, scales = "free", ncol = 4) +
-  scale_color_manual(values = c("yellow3", "purple", "grey50")) +
+  scale_color_manual(values = c("#E04B4B", "#63BC6A", "#6094C3")) +
+  scale_fill_manual(values = c("#E04B4B", "#63BC6A", "#6094C3")) +
   theme_classic() +
   theme(
     panel.grid = element_blank(),
@@ -61,8 +62,8 @@ ggsave("plots/array-variants.pdf", height = 5, width = 11)
 dat %>% 
   filter(Region == 'GENOME') %>% 
   ggplot(aes(x = p, y = derived_count, color = cluster_grp)) +
+  geom_smooth(aes(fill = cluster_grp), method = "lm", size = 1/3, alpha = 0.2) +
   geom_point(alpha = 0.8) +
-  geom_smooth(method = "lm", size = 1/3, alpha = 0.8, se = FALSE) +
   ggpubr::stat_cor(
     size = 3,
     label.x.npc = 0.45,
@@ -73,7 +74,8 @@ dat %>%
     r.accuracy = 0.01
   ) +
   facet_wrap(VarFreq ~ variant, scales = "free", ncol = 4) +
-  scale_color_manual(values = c("yellow3", "purple", "grey50")) +
+  scale_color_manual(values = c("#E04B4B", "#63BC6A", "#6094C3")) +
+  scale_fill_manual(values = c("#E04B4B", "#63BC6A", "#6094C3")) +
   theme_classic() +
   theme(
     panel.grid = element_blank(),
