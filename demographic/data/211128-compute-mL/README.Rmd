@@ -13,7 +13,7 @@ mutrate <- read_tsv("data/mutation_rate_methylation_bins.txt")
 
 We want to estimate the mutation rate parameter $mL$ for the human genome in **intronic** and **intergenic** sequences. Later we will use these mutation rates to infer the demographic model with intronic and intergenic SNPs.
 
-In these notes, I will show the procedure to get $mL$ for the intronic genome.
+In these notes, I will show the procedure to get $mL$ for the intergenic genome.
 
 ## Step 1: Get intronic sequences
 
@@ -48,6 +48,22 @@ mercounts %>%
 
 ## Step 3: Compute the mutation rate
 
+The following CpG sites will be excluded from the mutation rate computation:
+
+```{r, echo=FALSE}
+nucs <- c("A", "T", "G", "C")
+codons <- 
+  expand.grid(nucs, nucs, nucs) %>% 
+  mutate(
+    codon = paste0(Var1, Var2, Var3)
+  ) %>% 
+  pull(codon)
+codons[str_detect(codons, "(.*CG|CG.*)")]
+```
+
+
+[See this note](https://github.com/santiago1234/mxb-genomes/issues/4#issuecomment-992912675).
+
 We have the following table with the mutation rate obtained from the paper ["The mutational constraint spectrum quantified from variation in 141,456 humans"](https://www.nature.com/articles/s41586-020-2308-7).
 
 ```{r, echo=FALSE}
@@ -63,7 +79,7 @@ I have filter to only keep the data for methylation level 0.
 
 #### Q2: ?
 
-Also, there 32 3-mers. We have half because each sequence represents the sequence and its complement. For example, *TCA* represents *TCA* and *AGT*.
+Also, there 32 3-mers. We have half because each sequence represents the sequence and its reverse complement. For example, *TCA* represents *TCA* and *TGA*.
 
 #### Q3: ?
 

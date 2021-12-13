@@ -8,8 +8,8 @@ genome in **intronic** and **intergenic** sequences. Later we will use
 these mutation rates to infer the demographic model with intronic and
 intergenic SNPs.
 
-In these notes, I will show the procedure to get *m**L* for the intronic
-genome.
+In these notes, I will show the procedure to get *m**L* for the
+intergenic genome.
 
 ## Step 1: Get intronic sequences
 
@@ -52,6 +52,14 @@ across all sequences.
 [Script](count-3mers-in-seqs.py)
 
 ## Step 3: Compute the mutation rate
+
+The following CpG sites will be excluded from the mutation rate
+computation:
+
+    ## [1] "CGA" "CGT" "CGG" "ACG" "TCG" "GCG" "CCG" "CGC"
+
+[See this
+note](https://github.com/santiago1234/mxb-genomes/issues/4#issuecomment-992912675).
 
 We have the following table with the mutation rate obtained from the
 paper [“The mutational constraint spectrum quantified from variation in
