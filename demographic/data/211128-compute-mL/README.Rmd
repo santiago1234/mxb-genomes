@@ -112,6 +112,6 @@ Where:
 - $\mu_i$ mutation rate for k-mer i.
 
 
-For intronic SNPs we get: $mL = 19.31141233597438$
+For intronic SNPs we get: $mL = 17.036568409994402$
 
-And for intergenic SNPs $mL = 12.0854257446005$ 
+And for intergenic SNPs $mL = 10.733330628762701$ 

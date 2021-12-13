@@ -24,3 +24,19 @@ rule count_aggregated_kmers:
          python count-3mers-in-seqs.py {input}  {output} {threads}
         """
 
+
+rule get_mL:
+    input:
+        "data/counts/{region}.csv",
+        'data/mutation_rate_methylation_bins.txt'
+    output:
+        'results/mL-{region}.txt'
+    shell:
+        """
+        python mutation-rate.py {input[1]} {input[0]} >{output}
+        """
+
+
+rule all:
+    input:
+        expand("results/mL-{region}.txt", region=['introns', 'intergenic'])

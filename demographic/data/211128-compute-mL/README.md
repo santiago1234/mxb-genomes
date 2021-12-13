@@ -85,8 +85,8 @@ I have filter to only keep the data for methylation level 0.
 #### Q2: ?
 
 Also, there 32 3-mers. We have half because each sequence represents the
-sequence and its complement. For example, *TCA* represents *TCA* and
-*AGT*.
+sequence and its reverse complement. For example, *TCA* represents *TCA*
+and *TGA*.
 
 #### Q3: ?
 
@@ -116,6 +116,6 @@ Where:
 -   *F*<sub>*i*</sub> frequency of k-mer i.
 -   *μ*<sub>*i*</sub> mutation rate for k-mer i.
 
-For intronic SNPs we get: *m**L* = 19.31141233597438
+For intronic SNPs we get: *m**L* = 17.036568409994402
 
-And for intergenic SNPs *m**L* = 12.0854257446005
+And for intergenic SNPs *m**L* = 10.733330628762701
