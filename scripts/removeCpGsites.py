@@ -1,15 +1,25 @@
 """
 Remove CpG sites from VCF.
-"""
 
+usage:
+    python removeCpGsites.py <input.vcf> <refgenome.fasta> <output.vcf> <stats.txt> 
+
+Important:
+    - vcf file and reference genome must be in the same assembly
+    - vcf chromosome names should match the names in the reference genome
+"""
+import sys
 from Bio import SeqIO
 from cyvcf2 import VCF, Writer
-import warnings
 
 
-# NOTE: I am not using the correct reference genome.
-# ref_genome = "/data/users/smedina/data-resources/genomes/human_g1k_v37.fasta"
-ref_genome = 'GRCh38-chr22.fasta'
+vcf_file, ref_genome, out_vcf, stats = sys.argv[1:]
+
+genome = SeqIO.to_dict(SeqIO.parse(ref_genome, "fasta"))
+vcf = VCF(vcf_file)
+
+# create a new vcf Writer using the input vcf as a template.
+w = Writer(out_vcf, vcf)
 
 CpGsites = [
     'ACG', 'CGT',
@@ -18,42 +28,68 @@ CpGsites = [
     'TCG', 'CGA'
 ]
 
-genome = SeqIO.to_dict(SeqIO.parse(ref_genome, "fasta"))
+
+######################### FUNCTIONS #################################
+
+def reverse_complement(seq):
+    pairings = {
+        'A': 'T',
+        'G': 'C',
+        'C': 'G',
+        'T': 'A',
+        'N': 'N'
+    }
+    return ''.join([pairings[x] for x in seq])[::-1]
 
 
-# Let's print the focal SNP and the REF SNP
-
-vcf_file = '../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr22-snps-vep-mask-HW-GRCh38.vcf.gz'
-
-match_ref = 0
-not_match_ref = 0
-is_N_in_ref = 0
-i = 0
-
-
-for variant in VCF(vcf_file):
-    i += 1
-    if i > 100:
-        break
-    ##
-    ref_genome = genome[variant.CHROM][variant.start]
+def get_focal_snp(genome, variant):
+    """
+    returns *X* where X is the focal SNP and
+    * are the sourrounding nucleotides.
+    For examples, if the focal snp is A,
+    the output could be CAG if C and G surround A.
+    Args:
+        genome: dict mapping chromosme names to sequences (SeqRecord)
+    """
     focal_snp = genome[variant.CHROM][variant.start - 1: variant.start + 2].seq
-    ref_allel = variant.REF
-    print(focal_snp, ref_allel)
+    return focal_snp
 
-    if ref_genome == 'N':
-        is_N_in_ref += 1
-    elif ref_genome != ref_allel:
-        not_match_ref += 1
-        warnings.warn(
+
+def is_CpG(focal_snp):
+    '''
+    is the given focal mutation (or the reverse complement)
+    a CpG site?
+    '''
+    if focal_snp in CpGsites:
+        return True
+    if reverse_complement(focal_snp) in CpGsites:
+        return True
+    return False
+
+
+########################### DONE FUNCTIONS ###########################
+
+
+n_CpGs = 0
+for variant in vcf:
+    ##
+    focal_snp = get_focal_snp(genome, variant)
+
+    # Sanity check
+    if focal_snp[1:2] != variant.REF:
+        raise ValueError(
             f'REF allel does not match REF-GENOME at position {variant.start}')
-    else:
-        match_ref += 1
+    if is_CpG(focal_snp):
+        n_CpGs += 1
+    if not is_CpG(focal_snp):
+        w.write_record(variant)
 
 
-stats = {
-    'no_match_ref': not_match_ref,
-    'match_ref': match_ref,
-    'is_N_in_ref': is_N_in_ref
-}
-print(stats)
+CpGs_stats = f'CpG variants removed: {n_CpGs}\n'
+stats_file = open(stats, 'w')
+stats_file.write(CpGs_stats)
+stats_file.close()
+
+
+vcf.close()
+w.close()
