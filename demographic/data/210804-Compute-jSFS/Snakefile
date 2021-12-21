@@ -10,19 +10,20 @@ CATEGORIES = {
 }
 
 
-# rule concat_vcfs_and_extract_biallelic:
-#     # Concat all the vcfs into one and
-#     # extract only the biallelic SNPs.
-#     input:
-#         expand("../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz", chrn=CHROMOSOMES)
-#     output:
-#         temp("data/all-biallelicSnps.vcf.gz")
-#     shell:
-#         """
-#         bcftools concat {input} |\
-#             bcftools view -m2 -M2 -v snps -Oz -o {output}
-#         """
-
+rule exclude_CpGs:
+    input:
+        # A vcf that has VEP annotation in the INFO field
+        vcf = "../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz",
+        refgenome = '/data/users/smedina/data-resources/genomes/GRCh38.primary_assembly.genome-nochrprefix.fasta'
+    output:
+        "data/vcfs/SNPs-noCpGs-chr{chrn}.vcf.gz",
+        "data/stats/removed-CpGs-chr{chrn}.txt"
+    shell:
+        """
+        python ../../../scripts/removeCpGsites.py \
+            {input.vcf} {input.refgenome} \
+            {output[0]} {output[1]}
+        """
 ## -> -> -> -> -> -> -> -> -> -> -> ->
 ## -> -> -> -> -> -> -> -> -> -> -> ->
 ## -> -> -> -> -> -> -> -> -> -> -> ->
@@ -31,9 +32,9 @@ CATEGORIES = {
 rule var_id_to_vep_consequences:
     input:
         # A vcf that has VEP annotation in the INFO field
-        "../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz"
+        "data/vcfs/SNPs-noCpGs-chr{chrn}.vcf.gz"
     output:
-        temp("data/variants-cats/variants-csq-chr{chrn}.txt")
+        "data/variants-cats/variants-csq-chr{chrn}.txt"
     shell:
         # The -d option in the bcftools command is to
         # To print each consequence on a separate line,
@@ -54,7 +55,7 @@ rule subset_var_cat:
     input:
         "data/variants-cats/variants-csq-chr{chrn}.txt"
     output:
-        temp("data/variants-cats/csq-{cat}-chr{chrn}.txt")
+        "data/variants-cats/csq-{cat}-chr{chrn}.txt"
     params:
         cat = get_var_from_cat
     shell:
@@ -68,10 +69,10 @@ rule subset_var_cat:
 
 rule subset_vcf_vars:
     input:
-        vcf = "../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz",
+        vcf = "data/vcfs/SNPs-noCpGs-chr{chrn}.vcf.gz",
         ids_type = "data/variants-cats/csq-{cat}-chr{chrn}.txt"
     output:
-        temp("data/vcfs/Snps-csq-{cat}-chr{chrn}.vcf.gz")
+        "data/vcfs/Snps-csq-{cat}-chr{chrn}.vcf.gz"
     shell:
         """
         bcftools view -i 'ID=@{input.ids_type}' {input.vcf} |\
@@ -83,7 +84,7 @@ rule merge_vcf_cat:
     input:
         expand("data/vcfs/Snps-csq-{{cat}}-chr{chrn}.vcf.gz", chrn=CHROMOSOMES)
     output:
-        temp("data/vcfs/Allchroms-SNPs-csq-{cat}.vcf.gz")
+        "data/vcfs/Allchroms-SNPs-csq-{cat}.vcf.gz"
     shell:
         """
         bcftools concat {input} -Oz -o {output}
@@ -101,7 +102,7 @@ rule ancestal_genome:
     input:
         expand("../../../../gene-genealogies-mxb/resources/210719-ancestral-genome/homo_sapiens_ancestor_GRCh38/homo_sapiens_ancestor_{chrn}.fa", chrn=CHROMOSOMES)
     output:
-        temp("data/ancestral-genome/ancestral-genome-autosomes.fasta")
+        "data/ancestral-genome/ancestral-genome-autosomes.fasta"
     shell: "python concat-ancestral-chromosomes.py"
 
 
@@ -173,5 +174,5 @@ rule compress_jsj:
 
 rule all:
     input:
-        #expand("data/spectrums/5d-csq-{cat}-spectrum.pkl", cat=CATEGORIES.keys()),
+        expand("data/spectrums/5d-csq-{cat}-spectrum.pkl.gz", cat=CATEGORIES.keys()),
         expand("data/spectrums/1d-csq-{cat}-spectrum.pkl", cat=CATEGORIES.keys())
