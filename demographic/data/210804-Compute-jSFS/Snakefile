@@ -5,7 +5,8 @@ CATEGORIES = {
     'synonymous': 'synonymous_variant',
     'missense': 'missense_variant',
     'lof': '(stop_gained|frameshift_variant|stop_lost|start_lost|inframe_insertion|inframe_deletion)', # loss of function
-    'intergenic': 'intergenic_variant'
+    'intergenic': 'intergenic_variant',
+    'intronic': 'intron_variant'
 }
 
 
