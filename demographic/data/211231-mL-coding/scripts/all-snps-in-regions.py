@@ -1,11 +1,27 @@
 """
-Parse data to use with VEP
+Generate a bed file with all posible biallelic variants for each position in the
+given bed file.
+The output file is meant to be annotated with VEP.
+
+usage:
+    python scripts/all-snps-in-regions.py <regions.bed> <refgenome.fa> <all-variants-in-regions.txt>
+
+Args:
+    - regions.bed: Input bed file containing regions (for example exons).
+    - refgenome.fa: The reference genome, same build as regions.bed. Also, chromosme names
+        should not include the 'chr' prefix.
+    - all-variants-in-regions.tx: file path for output data. The output has the VEP
+        input format: https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#default
 """
+import sys
 from Bio import SeqIO
 
-NUCS = set('ACGT')
-gfile = '/Users/santiagomedina/tmp/GRCh38-chr22.fasta'
+
+fexons, gfile, outvariants = sys.argv[1:]
+
+
 genome = SeqIO.to_dict(SeqIO.parse(gfile, 'fasta'))
+NUCS = set('ACGT')
 
 
 def get_seq(genome, chrom, start_pos, end_pos):
@@ -15,6 +31,7 @@ def get_seq(genome, chrom, start_pos, end_pos):
 
 
 def variants(ref):
+    """List of possible variant alleles"""
     variantes = NUCS - set(ref)
     return [f'{ref}/{x}' for x in variantes]
 
@@ -26,7 +43,7 @@ def process_exon(exon, genome):
     chrom = chrom.replace('chr', '')
     start = int(start)
     end = int(end)
-    exon_region = range(start, end + 1)
+    exon_region = range(start - 1, end + 1)
 
     data = list()
 
@@ -43,10 +60,9 @@ def process_exon(exon, genome):
     return data
 
 
-oufile = open('data/exon-snps.txt', 'w')
+oufile = open(outvariants, 'w')
 
 
-fexons = 'data/regions/exones.bed'
 fexons = open(fexons, 'r')
 
 for exon in fexons.readlines():

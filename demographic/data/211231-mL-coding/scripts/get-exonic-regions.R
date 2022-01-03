@@ -13,7 +13,7 @@ hs_genome <- BSgenome.Hsapiens.UCSC.hg38.masked
 
 # we want only the autosomes
 
-autosomes <- paste0("chr", 22:22)
+autosomes <- paste0("chr", 1:22)
 seqlevels(txdb) <- autosomes
 
 

@@ -1,0 +1,26 @@
+"""
+Pipeline to compute mutation rates in coding regions.
+"""
+
+CHROM = list(range(1, 23))
+
+rule get_exonic_regions:
+    """
+    First we obtain the exonic regions of the human genome. Autosomes only.
+    """
+    output: 'data/regions/exones.bed'
+    shell: 'Rscript scripts/get-exonic-regions.R'
+
+
+rule separate_coding_region_by_chromosome:
+    """
+    I do this to run the pipeline in parallel (by chromosome).
+    """
+    input:
+        "data/regions/exones.bed"
+    output:
+        'data/tmp/regions/chr{chrn}-exons.bed'
+    shell:
+        '''
+        grep -E "^chr{wildcards.chrn}\t" {input} >{output}
+        '''
