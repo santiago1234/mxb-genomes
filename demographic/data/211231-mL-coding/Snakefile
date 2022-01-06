@@ -20,12 +20,26 @@ rule get_exonic_regions:
     shell: 'Rscript scripts/get-exonic-regions.R'
 
 
+rule masked_exons:
+    """
+    apply the mask we used for the vcfile
+    """
+    input:
+        exons = 'data/regions/exones.bed',
+        mask = '/data/users/smedina/data-resources/genome-masks/20160622.allChr.mask.bed'
+    output:
+        "data/regions/exones-mask.bed"
+    shell:
+        """
+        bedtools intersect -a {input.exons} -b {input.mask} >{output}
+        """
+
 rule separate_coding_region_by_chromosome:
     """
     I do this to run the pipeline in parallel (by chromosome).
     """
     input:
-        "data/regions/exones.bed"
+        "data/regions/exones-mask.bed"
     output:
         'data/tmp/regions/chr{chrn}-exons.bed'
     shell:
