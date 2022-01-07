@@ -31,7 +31,8 @@ rule masked_exons:
         "data/regions/exones-mask.bed"
     shell:
         """
-        bedtools intersect -a {input.exons} -b {input.mask} >{output}
+        bedtools intersect -a {input.exons} -b {input.mask} |\
+            sortBed >{output}
         """
 
 rule separate_coding_region_by_chromosome:
