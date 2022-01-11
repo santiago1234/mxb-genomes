@@ -60,7 +60,10 @@ rule get_all_possible_variants_in_Regions:
     shell:
         '''
         python scripts/all-snps-in-regions.py {input.bed} {input.genome} {params.outbed}
-        gzip {params.outbed}
+        # we need to sort this file
+        sort -k 2,2 {params.outbed} |\
+            gzip >{output}
+        rm -f {params.outbed}
         '''
 
 
