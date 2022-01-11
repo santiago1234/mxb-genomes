@@ -61,7 +61,7 @@ rule get_all_possible_variants_in_Regions:
         '''
         python scripts/all-snps-in-regions.py {input.bed} {input.genome} {params.outbed}
         # we need to sort this file
-        sort -k 2,2 {params.outbed} |\
+        sort -k 2,2n {params.outbed} |\
             gzip >{output}
         rm -f {params.outbed}
         '''
