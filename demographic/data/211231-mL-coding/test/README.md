@@ -1,11 +1,11 @@
 # Test
 
-In this take I look at only chr22.
+I run the test in chr22.
 
 # Test 1: Non-overlapping variants.
 
-First, I make sure in my variants file (universe) I do not have repeated variants. In case,
-there are repeated variants we could count them twice, for mL calculation, which we do not want.
+First, I check that the are not repeated variants, in the universe of all possible biallelic variants. In case,
+o repeated variants, we could count them twice for mL calculation, which we do not want.
 
 ```bash
 python test-not-overlaping.py
@@ -19,9 +19,9 @@ The number **3** says that each position is represented three times. The number 
 The numer 3 is the only number that I expect to observe. The test is sucessful.
 
 
-# Test 2: Variants observed in the genotypes are a subset of all possible variants.
+# Test 2: Variants observed in the genotypes are a subset of all possible variants (universe).
 
-* I took all variants, in the genotypes, that are synonymous in chr22.
+* I took all variants, in the genotypes, that are missense in chr22.
 * Then I generete a list with all the possible variants (universe) that were annotated as missense.
 
 The test consists in checking that the genotypes (missense) variants are a subset of the universe (missense) variants.
@@ -74,8 +74,8 @@ I looked more into this, I generated the following bedfile, representing the not
 22	50705396	50705398
 ```
 
-I took the intersection of this file with the exons file (bed). This after masking.
+I took the intersection of this file with the exons file (this after masking).
 The intersection was empty which indicates that these variants were not in my starting
-exons list. I think this is a good indication.
+exons list. This is a good indication.
 
 
