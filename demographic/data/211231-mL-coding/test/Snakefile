@@ -1,0 +1,28 @@
+"""
+Test: that variants in the VCF (genotypes) are a subset
+of the variants univers.
+I will use chr22 for this test. And check missense variants.
+"""
+
+
+rule get_missense_variants:
+    input:
+        '../../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr22-snps-vep-mask-HW-GRCh38.vcf.gz'
+    output:
+        temp('tmp/missense-variants.vcf.gz')
+    shell:
+        '''
+        python ../../../../scripts/subset-vcf-by-variant-category.py {input} missense_variant {output}
+        '''
+
+rule variant_info_only:
+    # Extract only the data we need
+    input:
+        'tmp/missense-variants.vcf.gz'
+    output:
+        'tmp/genotypes-variants.txt'
+    shell:
+        """
+        bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\n' {input} >{output}
+        """
+
