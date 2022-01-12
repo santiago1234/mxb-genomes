@@ -3,14 +3,40 @@ Driver script to compute mutation rate mL in introns and integenic regions.
 """
 
 
-rule obtain_intronic_and_intergenic_seqs:
+#rule obtain_intronic_and_intergenic_seqs:
+#    output:
+#        'data/regions/itergenic.bed',
+#        'data/regions/introns.bed'
+#    shell:
+#        "Rscript 00-get-intronic-intergenic-regions.R"
+
+
+rule masked_region:
+    # We want to compute tje mL in the same
+    # regions where we have the variants. I applied the masking
+    # filter to the vcf files, hence, i also have to do it here.
+    input:
+        bed = 'data/regions/{region}.bed',
+        mask = '/data/users/smedina/data-resources/genome-masks/20160622.allChr.mask.bed'
     output:
-        'data/regions/itergenic.bed',
-        'data/regions/intergenic.fasta',
-        'data/regions/introns.bed',
-        'data/regions/introns.fasta'
+        'data/regions/{region}-masked.bed'
     shell:
-        "Rscript 00-get-intronic-intergenic-regions.R"
+        '''
+        bedtools intersect -a {input.bed} -b {input.mask} |\
+            awk '{{if($3-$2 > 2) print}}' >{output}
+        '''
+
+rule get_seq:
+    input:
+        regions = 'data/regions/{region}-masked.bed',
+        genome = '/data/users/smedina/data-resources/genomes/GRCh38.primary_assembly.genome.fa'
+    output:
+        'data/regions/{region}.fasta'
+    shell:
+        '''
+        bedtools getfasta -fi {input.genome} -bed {input.regions} >{output}
+        '''
+        
 
 
 rule count_aggregated_kmers:
