@@ -60,8 +60,12 @@ rule get_all_possible_variants_in_Regions:
     shell:
         '''
         python scripts/all-snps-in-regions.py {input.bed} {input.genome} {params.outbed}
-        # we need to sort this file
-        sort -k 2,2n {params.outbed} |\
+        # I run a sort to make sure
+        # we have only unique variants, so we are not counting overlapping regions twice
+        # Then i sort the file by position.
+        sort {params.outbed} |\
+            uniq |\
+            sort -k 2,2n |\
             gzip >{output}
         rm -f {params.outbed}
         '''
