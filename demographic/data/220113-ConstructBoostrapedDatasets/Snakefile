@@ -1,4 +1,4 @@
-N_BOOSTRAPS = 478
+N_BOOSTRAPS = 384
 CHROM = list(range(1, 23))
 
 include: 'rules/Define-Boostraped-Regions.smk'

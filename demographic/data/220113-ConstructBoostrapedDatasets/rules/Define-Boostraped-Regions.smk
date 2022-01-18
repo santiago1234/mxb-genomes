@@ -10,7 +10,7 @@ rule make_genome_windows:
         "data/chunks/genome-in-1MB-non-overlaping-windows.bed"
     shell:
         """
-        bedtools makewindows -g {input} -w 1000001 >{output}
+        bedtools makewindows -g {input} -w 100000 >{output}
         """
 
 
