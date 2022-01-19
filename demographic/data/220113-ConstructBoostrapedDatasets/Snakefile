@@ -1,4 +1,29 @@
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## HELPER FUNCTIONS AND GLOBAL BARS
+## -> -> -> -> -> -> -> -> -> -> -> ->
 N_BOOSTRAPS = 384
 CHROM = list(range(1, 23))
 
+CATEGORIES = {
+    'synonymous': 'synonymous_variant',
+    'missense': 'missense_variant',
+	'lof': 'stop_gained,stop_lost,start_lost',
+    'intergenic': 'intergenic_variant',
+    'intronic': 'intron_variant'
+}
+
+
+def vep_get_consequence_SO_term(wildcards):
+    """
+    The SO term is use to annotate the variant consequence.
+    See: https://m.ensembl.org/info/genome/variation/prediction/predicted_data.html
+    """
+    return CATEGORIES[wildcards.varcat]
+
+
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## RULES
+## -> -> -> -> -> -> -> -> -> -> -> ->
 include: 'rules/Define-Boostraped-Regions.smk'
+include: 'rules/BoostrapedJointSpectrums.smk'
+
