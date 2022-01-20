@@ -16,33 +16,38 @@ rule merge_all_chroms:
         '''
 
 
+rule remove_CpGs_sites:
+    input:
+        vcf = 'data/jSFS/tmp/all-variants.vcf.gz',
+        genome = '/data/users/smedina/data-resources/genomes/GRCh38.primary_assembly.genome-nochrprefix.fasta'
+    output:
+        'data/jSFS/tmp/allNoCpGs.vcf.gz',
+        'data/jSFS/tmp/allNoCpGs_remove_sites.txt',
+        'data/jSFS/tmp/allNoCpGs.vcf.gz.tbi'
+    threads: 10
+    shell:
+        '''
+        python ../../../scripts/removeCpGsites.py \
+            {input.vcf} {input.genome} {output[0]} {output[1]}
+        bcftools index --threads {threads} -t {output[0]}
+        '''
+
+
 rule vcf_by_boostrap_region:
     input:
-        'data/jSFS/tmp/all-variants.vcf.gz',
+        'data/jSFS/tmp/allNoCpGs.vcf.gz',
         'data/chunks/chunk_{i}.bed'
     output:
-        temp('data/jSFS/tmp/boostraped_vcfs/all_chunk_{i}.vcf.gz')
+        'data/jSFS/tmp/boostraped_vcfs/all_chunk_{i}.vcf.gz'
     shell:
         '''
         bcftools view -R {input[1]} {input[0]} -Oz -o {output}
         '''
 
-rule remove_CpGs_sites:
-    input:
-        vcf = 'data/jSFS/tmp/boostraped_vcfs/all_chunk_{i}.vcf.gz',
-        genome = '/data/users/smedina/data-resources/genomes/GRCh38.primary_assembly.genome-nochrprefix.fasta'
-    output:
-        'data/jSFS/tmp/boostraped_vcfs/allNoCpGs_chunk_{i}.vcf.gz',
-        'data/jSFS/tmp/boostraped_vcfs/allNoCpGs_chunk_{i}_remove_sites.txt'
-    shell:
-        '''
-        python ../../../scripts/removeCpGsites.py \
-            {input.vcf} {input.genome} {output[0]} {output[1]}
-        '''
 
 rule get_var_cat_genotypes:
     input:
-        'data/jSFS/tmp/boostraped_vcfs/allNoCpGs_chunk_{i}.vcf.gz',
+        'data/jSFS/tmp/boostraped_vcfs/all_chunk_{i}.vcf.gz'
     output:
         'data/jSFS/tmp/boostraped_vcfs/all_chunk_{i}_cat_{varcat}.vcf.gz'
     params:
