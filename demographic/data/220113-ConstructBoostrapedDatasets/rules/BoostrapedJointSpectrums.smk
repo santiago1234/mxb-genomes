@@ -53,3 +53,33 @@ rule get_var_cat_genotypes:
             {input} {params.v_category} {output}
         '''
 
+
+rule define_pops_to_compute_jSFS:
+    output:
+        'data/popsinfo.csv'
+    shell:
+        'python scripts/define-pops.py'
+
+
+rule compute_jSFS:
+    # NOTE: The jSFS is not polarized.
+    input:
+        vcf = 'data/jSFS/tmp/boostraped_vcfs/all_chunk_{i}_cat_{varcat}.vcf.gz',
+        poplabs = 'data/popsinfo.csv'
+    output:
+        'data/jSFS/spectrums/spectrum_chunk_{i}_cat_{varcat}.pkl'
+    shell:
+        '''
+        python ../../../scripts/jsfs-nonPolarized.py {input.vcf} {input.poplabs} {output}
+        '''
+
+
+rule compress_jSFS:
+    # To save disk space.
+    input:
+        'data/jSFS/spectrums/spectrum_chunk_{i}_cat_{varcat}.pkl'
+    output:
+        'data/jSFS/spectrums/spectrum_chunk_{i}_cat_{varcat}.pkl.gz'
+    shell: 'gzip {input}'
+
+

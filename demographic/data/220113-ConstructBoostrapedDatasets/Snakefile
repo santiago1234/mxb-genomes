@@ -21,6 +21,11 @@ def vep_get_consequence_SO_term(wildcards):
     return CATEGORIES[wildcards.varcat]
 
 
+rule all_spectrums:
+    input:
+        expand('data/jSFS/spectrums/spectrum_chunk_{i}_cat_{varcat}.pkl.gz', i=range(1, N_BOOSTRAPS + 1), varcat=CATEGORIES)
+
+
 ## -> -> -> -> -> -> -> -> -> -> -> ->
 ## RULES
 ## -> -> -> -> -> -> -> -> -> -> -> ->
