@@ -35,10 +35,8 @@ rule merge:
         '''
         bedtools merge -i {input} >{output}
         '''
-
+        
 
 rule all_define_boostraps:
     input:
         expand('data/chunks/chunk_{i}.bed', i=BOOSTRAPS)
-        
-

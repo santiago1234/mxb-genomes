@@ -1,7 +1,7 @@
 ## -> -> -> -> -> -> -> -> -> -> -> ->
 ## HELPER FUNCTIONS AND GLOBAL BARS
 ## -> -> -> -> -> -> -> -> -> -> -> ->
-N_BOOSTRAPS = 384
+N_BOOSTRAPS = 288
 CHROM = list(range(1, 23))
 
 CATEGORIES = {

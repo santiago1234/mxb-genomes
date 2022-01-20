@@ -12,7 +12,7 @@ d = pd.read_csv('data/chunks/genome-in-1MB-non-overlaping-windows.bed', sep='\t'
 outpath = 'data/chunks/'
 d['width'] = d.epos - d.spos
 
-max_length = 7500000
+max_length = 10000000
 length_chunk = 0
 chunks = list()
 chunks.append([])
