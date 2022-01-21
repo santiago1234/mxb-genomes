@@ -1,12 +1,35 @@
 ## -> -> -> -> -> -> -> -> -> -> -> ->
 ## HELPER FUNCTIONS AND GLOBAL BARS
 ## -> -> -> -> -> -> -> -> -> -> -> ->
-N_BOOSTRAPS = 288
 CHROM = list(range(1, 23))
+N_BOOSTRAPS = 288
+
+# These spectrums are empty for some categories (i.e. there are not variants there)
+# they will be excluded.
+BOOSTRAPs_TO_DROP = [
+	12,
+	13,
+	14,
+	56,
+	159,
+	160,
+	209,
+	217,
+	220,
+	221,
+	231,
+	270,
+	279,
+	284
+]
+BOOSTRAPS = list(range(1, N_BOOSTRAPS + 1))
+for x in BOOSTRAPs_TO_DROP: BOOSTRAPS.remove(x)
+
 
 CATEGORIES = {
     'synonymous': 'synonymous_variant',
     'missense': 'missense_variant',
+	'lof': 'stop_gained,stop_lost,start_lost',
     'intergenic': 'intergenic_variant',
     'intronic': 'intron_variant'
 }
@@ -22,7 +45,7 @@ def vep_get_consequence_SO_term(wildcards):
 
 rule all_spectrums:
     input:
-        expand('data/jSFS/spectrums/spectrum_chunk_{i}_cat_{varcat}.pkl.gz', i=range(1, N_BOOSTRAPS + 1), varcat=CATEGORIES)
+        expand('data/jSFS/spectrums/spectrum_chunk_{i}_cat_{varcat}.pkl.gz', i=BOOSTRAPS, varcat=CATEGORIES.keys())
 
 
 ## -> -> -> -> -> -> -> -> -> -> -> ->
