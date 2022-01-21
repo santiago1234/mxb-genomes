@@ -7,7 +7,6 @@ CHROM = list(range(1, 23))
 CATEGORIES = {
     'synonymous': 'synonymous_variant',
     'missense': 'missense_variant',
-	'lof': 'stop_gained,stop_lost,start_lost',
     'intergenic': 'intergenic_variant',
     'intronic': 'intron_variant'
 }
