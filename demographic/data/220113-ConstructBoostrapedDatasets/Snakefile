@@ -54,4 +54,5 @@ rule all_spectrums:
 include: 'rules/MergeDataWholeGenome.smk'
 include: 'rules/Define-Boostraped-Regions.smk'
 include: 'rules/BoostrapedJointSpectrums.smk'
+include: 'rules/Bootstraped-mL-non-coding.smk'
 
