@@ -1,4 +1,4 @@
-BOOSTRAPS = list(range(1, N_BOOSTRAPS + 1))
+DEFINED_BOOSTRAPS = list(range(1, N_BOOSTRAPS + 1))
 
 rule make_genome_windows:
     """
@@ -18,7 +18,7 @@ rule bootstrap_windows:
     input:
         "data/chunks/genome-in-1MB-non-overlaping-windows.bed"
     output:
-        temp(expand('data/chunks/chunk_{i}', i=BOOSTRAPS))
+        temp(expand('data/chunks/chunk_{i}', i=DEFINED_BOOSTRAPS))
     shell:
         """
         python scripts/define-windows.py {input}
@@ -39,4 +39,4 @@ rule merge:
 
 rule all_define_boostraps:
     input:
-        expand('data/chunks/chunk_{i}.bed', i=BOOSTRAPS)
+        expand('data/chunks/chunk_{i}.bed', i=DEFINED_BOOSTRAPS)
