@@ -51,6 +51,7 @@ rule all_spectrums:
 ## -> -> -> -> -> -> -> -> -> -> -> ->
 ## RULES
 ## -> -> -> -> -> -> -> -> -> -> -> ->
+include: 'rules/MergeDataWholeGenome.smk'
 include: 'rules/Define-Boostraped-Regions.smk'
 include: 'rules/BoostrapedJointSpectrums.smk'
 
