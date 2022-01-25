@@ -1,0 +1,29 @@
+'''
+Demographic inference pipeline
+'''
+
+def get_mL_file(wildcards):
+    if wildcards.varcat == 'intronic':
+        return '../../data/220113-ConstructBoostrapedDatasets/data/whole-genome/mL-introns.txt'
+    else:
+        return '../../data/220113-ConstructBoostrapedDatasets/data/whole-genome/mL-' + wildcards.varcat + '.txt'
+
+
+rule infer_OOA:
+    input:
+        model = 'data/OOA-model.yml',
+        parameters = 'data/OOA-parameters.yml',
+        mL = get_mL_file,
+        data = '../../data/220113-ConstructBoostrapedDatasets/data/whole-genome/spectrum-cat_{varcat}.pkl.gz'
+    output:
+        'results/best-guest-OOA-{varcat}.yml',
+        'results/best-guest-OOA-{varcat}-bestparameters.csv'
+    params:
+        outprefix = 'results/best-guest-OOA-{varcat}'
+    shell:
+        '''
+        python scripts/infere-ooa-model.py \
+            {input.model} {input.parameters} \
+            {input.mL} {input.data} \
+            {params.outprefix}
+        '''
