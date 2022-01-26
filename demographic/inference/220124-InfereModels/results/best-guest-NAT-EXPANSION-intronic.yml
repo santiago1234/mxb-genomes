@@ -1,0 +1,50 @@
+description: The Gutenkunst et al. (2009) three-population model of human history,
+  modified by replacing CEU with IBS.
+time_units: years
+generation_time: 29
+doi: ['https://doi.org/10.1371/journal.pgen.1000695']
+demes:
+- name: ancestral
+  description: Equilibrium/root population
+  epochs:
+  - {end_time: 483457.24308765423, start_size: 13580.373657849503}
+- name: AMH
+  description: Anatomically modern humans
+  ancestors: [ancestral]
+  epochs:
+  - {end_time: 88347.64825867464, start_size: 27142.07281765073}
+- name: OOA
+  description: Bottleneck out-of-Africa population
+  ancestors: [AMH]
+  epochs:
+  - {end_time: 51166.128542006336, start_size: 1834.8116479610317}
+- name: YRI
+  description: Yoruba in Ibadan, Nigeria
+  ancestors: [AMH]
+  epochs:
+  - {end_time: 0, start_size: 27142.07281765073}
+- name: IBS
+  description: Iberian populations in Spain (IBS).
+  ancestors: [OOA]
+  epochs:
+  - {end_time: 0, start_size: 2761.3347067250797, end_size: 26462.05884107293}
+- name: CHB
+  description: Han Chinese in Beijing, China
+  ancestors: [OOA]
+  epochs:
+  - {end_time: 0, start_size: 1954.52946761033, end_size: 15363.53634144032}
+- name: MXB
+  description: Native American,  Mexico.
+  start_time: 32555.12765744615
+  ancestors: [CHB]
+  epochs:
+  - {end_time: 0, start_size: 1312.8044812722449, end_size: 38461.62164227266}
+migrations:
+- demes: [YRI, IBS]
+  rate: 2.501606466512543e-05
+- demes: [YRI, CHB]
+  rate: 3.2948319408915263e-06
+- demes: [IBS, CHB]
+  rate: 6.62400743683469e-05
+- demes: [YRI, OOA]
+  rate: 0.00015859499514691533
