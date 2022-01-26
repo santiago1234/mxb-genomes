@@ -20,7 +20,7 @@ model, parameters, mL_file, sfs_data, outprefix = sys.argv[1:]
 best_model = outprefix + '.yml'
 best_parameters = outprefix + '-bestparameters.csv'
 
-PROJECT_TO_SIZE = [35] * 4
+PROJECT_TO_SIZE = [35, 10, 55, 10]
 
 def read_mL_from_file(mL_file):
     '''Read mL from file'''
@@ -46,6 +46,7 @@ print(sf.pop_ids)
 print('Projecting and folding data...')
 sf = sf.project(PROJECT_TO_SIZE)
 sf = sf.fold()
+print(sf.shape)
 
 
 ret = moments.Demes.Inference.optimize(
