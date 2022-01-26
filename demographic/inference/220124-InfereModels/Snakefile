@@ -27,3 +27,44 @@ rule infer_OOA:
             {input.mL} {input.data} \
             {params.outprefix}
         '''
+
+
+rule make_NAT_EXPANSION_FILES:
+    input:
+        ooa_best = 'results/best-guest-OOA-{varcat}.yml',
+        nat_specific_mdl = 'data/NAT-EXPANSION-files/NatExpansion-params.txt',
+        nat_parameters = 'data/NAT-EXPANSION-files/NatExpansion-options.yml'
+    output:
+        model = 'data/NAT-EXPANSION-MODELS/NAT-EXPANSION-model-{varcat}.yml',
+        parameters = 'data/NAT-EXPANSION-MODELS/NAT-EXPANSION-parameters-{varcat}.yml'
+    shell:
+        '''
+		#Make model yml file
+		sed -n "1,35p" {input.ooa_best} >{output.model}
+		cat {input.nat_specific_mdl} >>{output.model}
+		sed -n "36,44p" {input.ooa_best} >>{output.model}
+		#Make params file
+		sed -n "1,3p" {input.nat_parameters} >{output.parameters} 
+		python scripts/get-CHB-start-time.py {input.ooa_best} >>{output.parameters}
+		sed -n "5,21p" {input.nat_parameters} >>{output.parameters}
+        '''
+
+
+rule infer_NAT_EXPANSION:
+    input:
+        model = 'data/NAT-EXPANSION-MODELS/NAT-EXPANSION-model-{varcat}.yml',
+        parameters = 'data/NAT-EXPANSION-MODELS/NAT-EXPANSION-parameters-{varcat}.yml',
+        mL = get_mL_file,
+        data = '../../data/220113-ConstructBoostrapedDatasets/data/whole-genome/spectrum-cat_{varcat}.pkl.gz'
+    output:
+        'results/best-guest-NAT-EXPANSION-{varcat}.yml',
+        'results/best-guest-NAT-EXPANSION-{varcat}-bestparameters.csv'
+    params:
+        outprefix = 'results/best-guest-NAT-EXPANSION-{varcat}'
+    shell:
+        '''
+        python scripts/infere-NAT-EXPANSION-model.py \
+            {input.model} {input.parameters} \
+            {input.mL} {input.data} \
+            {params.outprefix}
+        '''

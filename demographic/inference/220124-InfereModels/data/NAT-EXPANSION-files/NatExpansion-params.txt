@@ -1,0 +1,8 @@
+# Parameters specific to the NAT population
+# See: https://github.com/santiago1234/mxb-genomes/blob/main/demographic/models/211124-TestParametrizationInNative/model-parametrizations/03ExponentialChange.yml
+- name: MXB
+  description: Native American,  Mexico.
+  start_time: 32384.645992816106
+  ancestors: [CHB]
+  epochs:
+  - {end_time: 0, start_size: 1000, end_size: 5000}
