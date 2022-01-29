@@ -79,18 +79,32 @@ rule infer_NAT_EXPANSION:
 ### *************************************************** ####
 
 
-rule FULL_model_paramters_file:
+#rule FULL_model_paramters_file:
+#    input:
+#        ooa_params = 'data/OOA-parameters.yml',
+#        nat_params = 'data/NAT-EXPANSION-MODELS/NAT-EXPANSION-parameters-{varcat}.yml'
+#    output:
+#        'data/FULL-MODEL-options/full-mdl-{varcat}.yml'
+#    shell:
+#        '''
+#        # Add OOA params
+#        sed -n "1,94p" {input.ooa_params} >{output}
+#        # Add NAT expansion params
+#        sed -n "2,21p" {input.nat_params} >>{output}
+#        # Add the constrains
+#        sed -n "95,99p" {input.ooa_params} >>{output}
+#        '''
+
+
+rule boostra_replicates:
     input:
-        ooa_params = 'data/OOA-parameters.yml',
-        nat_params = 'data/NAT-EXPANSION-MODELS/NAT-EXPANSION-parameters-{varcat}.yml'
+        sfs_path = directory('../../data/220113-ConstructBoostrapedDatasets/data/jSFS/spectrums/'),
+        mL_path = directory('../../data/220113-ConstructBoostrapedDatasets/data/mL-noncoding/mLs/')
     output:
-        'data/FULL-MODEL-options/full-mdl-{varcat}.yml'
+        'data/boostrap-replicates/{varcat}-breplicates.pkl'
     shell:
-        '''
-        # Add OOA params
-        sed -n "1,94p" {input.ooa_params} >{output}
-        # Add NAT expansion params
-        sed -n "2,21p" {input.nat_params} >>{output}
-        # Add the constrains
-        sed -n "95,99p" {input.ooa_params} >>{output}
-        '''
+        """
+        python scripts/construct-boostraped-replicates.py \
+            {input.sfs_path} {input.mL_path} \
+            {wildcards.varcat} {output}
+        """

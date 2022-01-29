@@ -1,7 +1,12 @@
 """
 usage:
     python construct-boostraped-replicates.py <PATH_TO_SPECTRUMS> <PATH_TO_MLS> <VARCAT> <OUTPUT_FILE>
-CHUNKS: List of chunks ids.
+Args:
+    PATH_TO_SPECTRUMS: path to spectrum chunks
+    PATH_TO_MLS: path to mLs chunks
+    VARCAT: one of: synonymous, introns, intergenic, missense, or lof.
+    OUTPUT_FILE: Filename for python object with boostrap replicates.
+
 """
 import moments
 import functools
@@ -14,13 +19,9 @@ import re
 import sys
 
 
-PATH_TO_SPECTRUMS = 'spectrums/'
-PATH_TO_MLS = 'mLs/'
-VARCAT = 'intergenic'
-OUT_REPLICATES = 'out.pkl'
+PATH_TO_SPECTRUMS, PATH_TO_MLS, VARCAT, OUT_REPLICATES = sys.argv[1:]
 
-VARCAT = 'intronic' if VARCAT == 'introns' else VARCAT
-
+print(f'CATEGORY={VARCAT}')
 # I assume the file name has the following format.
 pattern = f'spectrum_chunk_*_cat_{VARCAT}.pkl.gz'
 fls = path.join(PATH_TO_SPECTRUMS, pattern)
@@ -33,8 +34,10 @@ def make_chunk_filenames(chunk_id):
     # Generate file names for a given category and chunk
     spec_file = f'spectrum_chunk_{chunk_id}_cat_{VARCAT}.pkl.gz'
     spec_file = path.join(PATH_TO_SPECTRUMS, spec_file)
-
-    mL_file = f'mL_{VARCAT}_chunk_{chunk_id}.txt'
+    
+    # mL files for intronic are named introns.
+    vc = 'introns' if VARCAT == 'intronic' else VARCAT
+    mL_file = f'mL_{vc}_chunk_{chunk_id}.txt'
     mL_file = path.join(PATH_TO_MLS, mL_file)
 
     return spec_file, mL_file
