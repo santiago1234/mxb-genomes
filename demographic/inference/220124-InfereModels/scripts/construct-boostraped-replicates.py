@@ -7,6 +7,7 @@ Args:
     VARCAT: one of: synonymous, introns, intergenic, missense, or lof.
     OUTPUT_FILE: Filename for python object with boostrap replicates.
 
+The spectrums will be folded and projected to a size of [40] * 4
 """
 import moments
 import functools
@@ -21,13 +22,14 @@ import sys
 
 PATH_TO_SPECTRUMS, PATH_TO_MLS, VARCAT, OUT_REPLICATES = sys.argv[1:]
 
-print(f'CATEGORY={VARCAT}')
+
+sys.stderr.write(f'CATEGORY={VARCAT}\n')
 # I assume the file name has the following format.
 pattern = f'spectrum_chunk_*_cat_{VARCAT}.pkl.gz'
 fls = path.join(PATH_TO_SPECTRUMS, pattern)
 fls = glob.glob(fls)
 chunk_ids = [re.search('chunk_(\d*)_', x).group(1) for x in fls]
-print(f'processing {len(chunk_ids)} chunks.')
+sys.stderr.write(f'processing {len(chunk_ids)} chunks.\n')
 
 
 def make_chunk_filenames(chunk_id):
@@ -64,7 +66,7 @@ def read_mL_file(mL_file):
 
 def load_chunk_data(chunk_id):
 
-    print(f'Loading data in chunk {chunk_id} ...')
+    sys.stderr.write(f'Loading data in chunk {chunk_id} ...\n')
     spec_file, mL_file = make_chunk_filenames(chunk_id)
 
     spec_chunk = read_spectrum_file(spec_file)
@@ -92,7 +94,7 @@ def combine_spectrums(spec1, spec2):
 
     for x, y in zip(spec1.shape, spec2.shape):
         if x != y:
-            print(x, y)
+            sys.stderr.write(x, y)
             raise ValueError(
                 'Number of samples in each dimension should match.')
 
@@ -124,7 +126,7 @@ def get_bootstrap_replicate(CHUNKS):
 
     boostrap_rep_id = '*'.join(str(x[0]) for x in boostrap_rep)
 
-    print(f'Replicate: {boostrap_rep_id}')
+    sys.stderr.write(f'Replicate: {boostrap_rep_id}\n')
     return boostrap_rep_id, boostrap_rep_sfs, boostrap_rep_mL
 
 
@@ -141,7 +143,7 @@ def get_boostraps(CHUNKS):
 #
 CHUNKS = get_genome_chunks(chunk_ids)
 boostraps = get_boostraps(CHUNKS)
-print('saving data')
+sys.stderr.write('saving data\n')
 boot_file = open(OUT_REPLICATES, 'wb')
 pickle.dump(boostraps, boot_file)
 boot_file.close()

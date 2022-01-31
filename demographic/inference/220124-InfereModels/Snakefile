@@ -102,9 +102,10 @@ rule boostra_replicates:
         mL_path = directory('../../data/220113-ConstructBoostrapedDatasets/data/mL-noncoding/mLs/')
     output:
         'data/boostrap-replicates/{varcat}-breplicates.pkl'
+    log: 'logs/boostrap-replicates-{varcat}.log'
     shell:
         """
         python scripts/construct-boostraped-replicates.py \
             {input.sfs_path} {input.mL_path} \
-            {wildcards.varcat} {output}
+            {wildcards.varcat} {output} 2>{log}
         """
