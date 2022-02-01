@@ -14,6 +14,7 @@ import sys
 # Initialize global variables
 PATH_TO_SPECTRUMS, PATH_TO_MLS, VARCAT, CORES, OUTFILE = sys.argv[1:]
 CORES = int(CORES)
+PROJECT_TO_SIZE = [30, 30, 30, 30]
 
 
 def make_chunk_filenames(chunk_id):
@@ -34,6 +35,7 @@ def read_spectrum_file(spec_file):
     with gzip.open(spec_file, "rb") as f:
         sf = pickle.load(f)
 
+    sf = sf.project(PROJECT_TO_SIZE)
     return sf
 
 

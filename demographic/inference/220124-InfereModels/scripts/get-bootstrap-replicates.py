@@ -50,6 +50,7 @@ def get_bootstrap_replicate(CHUNKS, seed):
         ml: added ml
     """
     # sample with replacement
+    sys.stderr.write('Generating boostrap replicate ...\n')
     random.seed(seed)
     boostrap_rep = random.choices(CHUNKS, k=len(CHUNKS))
 
@@ -61,7 +62,7 @@ def get_bootstrap_replicate(CHUNKS, seed):
 
     boostrap_rep_id = '*'.join(str(x[0]) for x in boostrap_rep)
 
-    sys.stderr.write(f'Replicate: {boostrap_rep_id}\n')
+    sys.stderr.write(f'Done: {boostrap_rep_id}\n')
     return boostrap_rep_id, boostrap_rep_sfs, boostrap_rep_mL
 
 
@@ -72,11 +73,15 @@ if __name__ == '__main__':
         CHUNKS = pickle.load(f)
     print('Generating bootstrap replicates...')
 
+    print('Making sharable object ...')
     N_REPS = len(CHUNKS)
+    manager = multiprocessing.Manager()
+    CHUNKS2 = manager.list(CHUNKS)
+    print('Starting parallel processsiong ...')
     pool = multiprocessing.Pool(CORES)
 
     BOOT_REP = pool.starmap(get_bootstrap_replicate, [
-                            (CHUNKS, s) for s in range(N_REPS)])
+                            (CHUNKS2, s) for s in range(N_REPS)])
     pool.close()
     print([x[0] for x in BOOT_REP])
 

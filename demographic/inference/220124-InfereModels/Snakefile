@@ -79,33 +79,36 @@ rule infer_NAT_EXPANSION:
 ### *************************************************** ####
 
 
-#rule FULL_model_paramters_file:
-#    input:
-#        ooa_params = 'data/OOA-parameters.yml',
-#        nat_params = 'data/NAT-EXPANSION-MODELS/NAT-EXPANSION-parameters-{varcat}.yml'
-#    output:
-#        'data/FULL-MODEL-options/full-mdl-{varcat}.yml'
-#    shell:
-#        '''
-#        # Add OOA params
-#        sed -n "1,94p" {input.ooa_params} >{output}
-#        # Add NAT expansion params
-#        sed -n "2,21p" {input.nat_params} >>{output}
-#        # Add the constrains
-#        sed -n "95,99p" {input.ooa_params} >>{output}
-#        '''
-
-
-rule boostra_replicates:
+rule put_genome_chunks_in_file:
+    # I have a file for each genome chunk
+    # here i put them together in a python list object
     input:
         sfs_path = directory('../../data/220113-ConstructBoostrapedDatasets/data/jSFS/spectrums/'),
         mL_path = directory('../../data/220113-ConstructBoostrapedDatasets/data/mL-noncoding/mLs/')
+
     output:
-        'data/boostrap-replicates/{varcat}-breplicates.pkl'
-    log: 'logs/boostrap-replicates-{varcat}.log'
+        'data/boostrap-replicates/{varcat}-GENOME-CHUNKS.pkl.gz'
+    log: 'logs/{varcat}-GENOME-CHUNKS.log'
+    threads: 20
     shell:
         """
-        python scripts/construct-boostraped-replicates.py \
+        python scripts/put-genome-chunks-in-list.py \
             {input.sfs_path} {input.mL_path} \
-            {wildcards.varcat} {output} 2>{log}
+            {wildcards.varcat} {threads} {output} 2>{log}
         """
+
+
+rule get_bootstrap_replicates:
+    input:
+        'data/boostrap-replicates/{varcat}-GENOME-CHUNKS.pkl.gz'
+    output:
+        'data/boostrap-replicates/{varcat}-BOOTSTRAPS.pkl.gz'
+    log: 'logs/{varcat}-BOOTSTRAPS.log'
+    threads: 4
+    shell:
+        """
+        python scripts/get-bootstrap-replicates.py \
+            {input} {output} {threads} 2>{log}
+        """
+
+
