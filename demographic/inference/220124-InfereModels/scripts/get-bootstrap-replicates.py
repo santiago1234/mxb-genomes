@@ -50,7 +50,6 @@ def get_bootstrap_replicate(CHUNKS, seed):
         ml: added ml
     """
     # sample with replacement
-    sys.stderr.write('Generating boostrap replicate ...\n')
     random.seed(seed)
     boostrap_rep = random.choices(CHUNKS, k=len(CHUNKS))
 

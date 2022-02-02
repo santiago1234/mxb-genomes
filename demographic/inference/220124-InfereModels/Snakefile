@@ -104,7 +104,7 @@ rule get_bootstrap_replicates:
     output:
         'data/boostrap-replicates/{varcat}-BOOTSTRAPS.pkl.gz'
     log: 'logs/{varcat}-BOOTSTRAPS.log'
-    threads: 4
+    threads: 20
     shell:
         """
         python scripts/get-bootstrap-replicates.py \
