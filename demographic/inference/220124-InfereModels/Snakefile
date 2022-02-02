@@ -111,4 +111,43 @@ rule get_bootstrap_replicates:
             {input} {output} {threads} 2>{log}
         """
 
+### helper function to define input files
+
+
+def get_option_for_mdl(wildcards):
+    if wildcards.mdl == 'OOA':
+        return 'data/OOA-parameters.yml'
+    else:
+        # NAT expansion mdl
+        return 'data/NAT-EXPANSION-MODELS/NAT-EXPANSION-parameters-{varcat}.yml'
+
+def marginalize_nat(wildcards):
+    if wildcards.mdl == 'OOA':
+        return 'yes'
+    else:
+        return 'no'
+
+rule estimate_cofidence:
+    input:
+        data = '../../data/220113-ConstructBoostrapedDatasets/data/whole-genome/spectrum-cat_{varcat}.pkl.gz',
+        mL = get_mL_file,
+        bootstraps = 'data/boostrap-replicates/{varcat}-BOOTSTRAPS.pkl.gz',
+        optimized_model = 'results/best-guest-{mdl}-{varcat}.yml',
+        parameters = get_option_for_mdl
+    output:
+        'results/ConfidenceIntervals/{mdl}-{varcat}.tsv'
+    params:
+        marginalize = marginalize_nat,
+        project_size = 30
+    shell:
+        '''
+        python scripts/Estimate-CI.py \
+            {input.data} {input.mL} \
+            {input.bootstraps} \
+            {params.project_size} {params.marginalize} \
+            {input.optimized_model} {input.parameters} \
+            {output}
+        '''
+
+
 
