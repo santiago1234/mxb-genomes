@@ -31,12 +31,18 @@ rate_map = msprime.RateMap(position=position, rate=rate)
 print('setting genetic map')
 
 ## Simulation
-N = 20
+N_YRI = 108
+N_IBS = 107
+N_CHB = 103
+N_MXB = 50
+N_MXL = 64
+
 Samples = [
-    msprime.SampleSet(N, population='YRI'),
-    msprime.SampleSet(N, population='IBS'),
-    msprime.SampleSet(N, population='CHB'),
-    msprime.SampleSet(N, population='MXB')
+    msprime.SampleSet(N_YRI, population='YRI'),
+    msprime.SampleSet(N_IBS, population='IBS'),
+    msprime.SampleSet(N_CHB, population='CHB'),
+    msprime.SampleSet(N_MXB, population='MXB'),
+    msprime.SampleSet(N_MXL, population='MXL')
 ]
 
 print('running simulation ...')
@@ -44,7 +50,8 @@ print('running simulation ...')
 ts = msprime.sim_ancestry(
     samples=Samples,
     demography=demography,
-    recombination_rate=rate_map, 
+    recombination_rate=1e-8, 
+    sequence_length=45000000, # 100Mb
     model= evolution_model,
     ploidy=2,
     random_seed=42
@@ -52,15 +59,14 @@ ts = msprime.sim_ancestry(
 
 print('adding mutations ...')
 
-mts = msprime.sim_mutations(ts, rate=1e-6, random_seed=42)
-
+mts = msprime.sim_mutations(ts, rate=1e-8, random_seed=42)
 
 print('saving data ...')
 
-pops = ['YRI']*20 + ['IBS']*20 + ['CHB']*20 + ['MXB']*20
+pops = ['YRI']*N_YRI + ['IBS']*N_IBS + ['CHB']*N_CHB + ['MXB']*N_MXB + ['MXL']*N_MXL
 n_dip_indv = int(ts.num_samples / 2)
 indv_names = [f"{pops[i]}_{str(i)}indv" for i in range(n_dip_indv)]
 
-with open("simulated-genomes-chr22.vcf", "w") as vcf_file:
+with open("data/simulated-genomes-chr22.vcf", "w") as vcf_file:
     mts.write_vcf(vcf_file, individual_names=indv_names)
 
