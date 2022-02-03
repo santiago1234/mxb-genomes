@@ -91,6 +91,6 @@ std_err = moments.Demes.Inference.uncerts(
     bootstraps_uL=bootstraps_mL,
     method="GIM",
 	verbose=50,
-	output='results.tab'	
+	output=OUTPUT_TABLE
 )
 
