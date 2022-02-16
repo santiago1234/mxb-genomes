@@ -136,7 +136,10 @@ def ppx_xxp_fix(times, fracs):
     # should not be sensitive to this, but it's better to start with reasonable
     # parameter values.
     (prop3, prop1) = scipy.optimize.fsolve(fun, (.2, .2))
-    return ppx_xxp((prop1, tstart, prop3, t3))
+    # make sure funding generation sum to 1
+    mig = ppx_xxp((prop1, tstart, prop3, t3))
+    mig[-1, :] = mig[-1, :] / mig[-1, :].sum()
+    return mig
 
 
 def outofbounds_ppx_xxp_fix(params, fracs):
