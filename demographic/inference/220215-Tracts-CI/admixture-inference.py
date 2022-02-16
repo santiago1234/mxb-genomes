@@ -6,15 +6,16 @@ tracts_path = '../../../analysis-doc/src/tracts-python3'
 sys.path.append(tracts_path)
 import tracts
 
+
+dir_to_data, MODEL, BOOTNUM = sys.argv[1:]
+BOOTNUM = int(BOOTNUM)
+
 pops = ['PEL', 'MXL', 'CLM', 'PUR']
-dir_to_data = '../../../analysis-doc/210514-ProcessXGMixOutForTracts/data/3-pops/tracts/PEL/'
-MODEL = 'ppx_xxp'
-BOOTNUM = 0
 
 # Infere population name from dir_to_data
 POPULATION, *_ = [x for x in pops if x in dir_to_data] 
 func, bound, startparams = models.MODELS[MODEL]
-labels = utils.LABELS['PEL']
+labels = utils.LABELS[POPULATION]
 
 outf = f'results/inference/{POPULATION}-{MODEL}-boot{BOOTNUM}'
 
@@ -24,6 +25,10 @@ end = "_cM.bed"
 names = utils.list_individuals_in_dir(dir_to_data, inter, end)
 
 pop = tracts.population(names=names, fname=(dir_to_data, inter, end))
+
+# generate a boostrap replicate
+# when BOOTNUM is 0 we get back the same data (not a resample)
+pop = utils.get_bootstrap_replicata(pop, BOOTNUM)
 
 (bins, data) = pop.get_global_tractlengths(npts=50)
 data = [data[poplab] for poplab in labels]
@@ -40,12 +45,12 @@ xopt = tracts.optimize_cob_fracs2(startparams, bins, Ls, data, nind,
 
 print(xopt)
 
-if MODEL == 'ppx_xxp':
+if MODEL in ['ccx_xxp', 'ppx_ccx_xxp']:
     # I do this because we fix the ancestry
-    # proportions in the ppx_xxp model
-    optmod = tracts.demographic_model(func(xopt, props))
-else:
+    # proportions in the ppx_xxp and ppx_xxp_pxx models
     optmod = tracts.demographic_model(func(xopt))
+else:
+    optmod = tracts.demographic_model(func(xopt, props))
 
 
 optpars = xopt

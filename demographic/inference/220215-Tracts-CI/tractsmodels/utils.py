@@ -32,8 +32,19 @@ def list_individuals_in_dir(directory, inter='_anc', end='_cM.bed'):
     return ind_names
 
 
+def bootsamp(num):
+    '''generates a list of positions of the samples to pick in a bootstrap'''
+    return np.random.choice(range(num), replace=True, size=num)
+
+
 def get_bootstrap_replicata(pop, seed):
     if seed == 0:
         return pop
     else:
-        pass
+        np.random.seed(seed)
+        indivs = pop.indivs
+        bootorder = bootsamp(len(indivs))
+        indivs2 = [indivs[i] for i in bootorder]
+        pop.indivs = indivs2
+        return pop
+        
