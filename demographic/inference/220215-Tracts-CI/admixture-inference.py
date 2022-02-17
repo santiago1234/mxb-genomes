@@ -9,6 +9,7 @@ import tracts
 
 dir_to_data, MODEL, BOOTNUM = sys.argv[1:]
 BOOTNUM = int(BOOTNUM)
+dir_to_data = dir_to_data + '/' #We need the dir to end with /
 
 pops = ['PEL', 'MXL', 'CLM', 'PUR']
 

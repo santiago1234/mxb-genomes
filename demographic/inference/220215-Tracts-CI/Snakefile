@@ -1,0 +1,35 @@
+"""
+Pipeline to infere Admixture dynamics
+"""
+BOOTSTRAPS = list(range(0, 100))
+POPS = ['MXL', 'CLM', 'PUR', 'PEL']
+MDLS = [
+    'ppx_xxp',
+    'ppx_xxp_pxx',
+    'ccx_xxp',
+    'ppx_ccx_xxp'
+]
+
+#PUR-ppx_ccx_xxp-boot0_bins
+rule infere_admixture:
+    input:
+        tracts_dir = '../../../analysis-doc/210514-ProcessXGMixOutForTracts/data/3-pops/tracts/{population}/',
+    output:
+       #'results/inference/{population}-{mdl}-boot{BootN}_bins',
+       #'results/inference/{population}-{mdl}-boot{BootN}_dat',
+       #'results/inference/{population}-{mdl}-boot{BootN}_info.tsv',
+       #'results/inference/{population}-{mdl}-boot{BootN}_mig',
+       #'results/inference/{population}-{mdl}-boot{BootN}_pars',
+       #'results/inference/{population}-{mdl}-boot{BootN}_pred'
+       'results/tmp/{population}-{mdl}-boot{BootN}.tmp'
+    log:
+        'logs/{population}-{mdl}-boot{BootN}.log'
+    shell:
+        '''
+        echo 'python admixture-inference.py {input} {wildcards.mdl} {wildcards.BootN}' >>runall.sh
+        touch {output}
+        '''
+
+rule infere_all:
+    input:
+        expand('results/tmp/{population}-{mdl}-boot{BootN}.tmp', population=POPS, mdl=MDLS, BootN=BOOTSTRAPS)
