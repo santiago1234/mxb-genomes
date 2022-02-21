@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from tractsmodels import models, utils
+from tractsmodels.startparams import START_PARAMS
 import sys
 tracts_path = '../../../analysis-doc/src/tracts-python3'
 sys.path.append(tracts_path)
@@ -17,6 +18,8 @@ pops = ['PEL', 'MXL', 'CLM', 'PUR']
 POPULATION, *_ = [x for x in pops if x in dir_to_data] 
 func, bound, startparams = models.MODELS[MODEL]
 labels = utils.LABELS[POPULATION]
+
+startparams = START_PARAMS[MODEL][POPULATION]
 
 outf = f'results/inference/{POPULATION}-{MODEL}-boot{BOOTNUM}'
 
