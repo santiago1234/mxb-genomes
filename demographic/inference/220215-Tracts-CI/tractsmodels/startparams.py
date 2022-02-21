@@ -21,7 +21,7 @@ startparams_ppx_xxp_pxx = [
 ]
 
 
-STP_ppx_xxp_ppx = {x: startparams_ppx_xxp for x in POPS}
+STP_ppx_xxp_ppx = {x: startparams_ppx_xxp_pxx for x in POPS}
 
 # -------------------------------------------------------------------------
 
@@ -98,7 +98,7 @@ STP_ppx_ccx_xxp = {
 
 START_PARAMS = {
     'ppx_xxp': STP_ppx_xxp,
-    'ppx_xxp_pxx': STP_ppx_ccx_xxp,
+    'ppx_xxp_pxx': STP_ppx_xxp_ppx,
     'ccx_xxp': STP_ccx_xxp,
     'ppx_ccx_xxp': STP_ppx_ccx_xxp
     }
