@@ -1,6 +1,7 @@
 # Ignore specific files
 # data in resources
 *.pdf
+*.svg
 *.csv
 *.gz
 resources/*/*.gz
