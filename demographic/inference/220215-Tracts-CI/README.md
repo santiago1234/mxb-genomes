@@ -1,6 +1,18 @@
-# Estimate Tracts confidence intervals
+# Inference of admixture history
 
 
+Here, I infere the admixtur history for the populations: MXL, NAT, CLM, and PEL.
+
+I tested the following set of models:
+
+- ppx_xxp
+- ppx_xxp_pxx
+* ccx_xxp
+* ppx_ccx_xxp
+
+I run some tests before in [analysis-doc](`../../../analysis-doc), but here is the final inference.
+
+I have put these models in a module: [tractsmodels](tractsmodels/).
 
 
 **NOTES:**
