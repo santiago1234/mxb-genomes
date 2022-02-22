@@ -12,6 +12,8 @@ I tested the following set of models:
 
 I run some tests before in [analysis-doc](`../../../analysis-doc), but here is the final inference.
 
+The ancestry order is always EUR, NAT, and MXL. But in PUR it is AFR, EUR, and NAT.
+
 I have put these models in a module: [tractsmodels](tractsmodels/).
 
 

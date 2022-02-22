@@ -1,10 +1,6 @@
 library(tidyverse)
 library(ggthemes)
 library(ggridges)
-read_tsv('results/inference/CLM-ccx_xxp-boot0_info.tsv') %>% 
-  select(loglik:BOOT) %>% 
-  distinct()
-
 
 load_info_file <- function(fp) {
   read_tsv(fp) %>% 

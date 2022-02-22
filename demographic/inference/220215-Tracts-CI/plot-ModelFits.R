@@ -22,7 +22,7 @@ fits %>%
     breaks = 10^(-1:5),
     labels = trans_format("log10", math_format(10^.x))
   ) +
-  scale_x_continuous(expand = c(.03, 0)) +
+  scale_x_continuous(expand = c(.03, 0), breaks = c(0, 100, 200)) +
   coord_cartesian(ylim = c(1, 14000), xlim = c(-1, 250)) +
   facet_grid(mdl~Population) +
   scale_color_manual(
