@@ -30,6 +30,18 @@ rule infere_admixture:
         touch {output}
         '''
 
+rule infere_admixture_MXL_fourspops:
+    input:
+        tracts_dir = '../../../analysis-doc/210514-ProcessXGMixOutForTracts/data/4-pops/tracts/MXL/',
+    output:
+        'results/tmp2/{mdl}-boot{BootN}.tmp'
+    shell:
+        '''
+        echo 'python admixture-inference-4pops.py {wildcards.mdl} {wildcards.BootN}' >>runall2.sh
+        touch {output}
+        '''
+
 rule infere_all:
     input:
-        expand('results/tmp/{population}-{mdl}-boot{BootN}.tmp', population=POPS, mdl=MDLS, BootN=BOOTSTRAPS)
+        expand('results/tmp/{population}-{mdl}-boot{BootN}.tmp', population=POPS, mdl=MDLS, BootN=BOOTSTRAPS),
+        expand('results/tmp2/{mdl}-boot{BootN}.tmp', mdl=['ccxx_xxpp', 'ppxx_ccxx_xxpp'], BootN=BOOTSTRAPS)
