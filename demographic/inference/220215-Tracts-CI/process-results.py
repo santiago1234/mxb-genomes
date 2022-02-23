@@ -17,3 +17,15 @@ params = itertools.product([path_to_tracts_output], mdls, pops, [0])
 fits_and_data = pd.concat([utils.ancestry_data_with_fits(*x) for x in params])
 
 fits_and_data.to_csv('results/fits-data.csv', index=False)
+
+
+# *****************************************************
+# 4pops models
+# *****************************************************
+
+mdls = ['ccxx_xxpp', 'ppxx_ccxx_xxpp']
+params = itertools.product(['results/inference-MXL-4pops/'], mdls, [0])
+
+fits_and_data = pd.concat([utils.ancestry_data_with_fits_4pops(*x) for x in params])
+
+fits_and_data.to_csv('results/fits-data-4pops-MXL.csv', index=False)

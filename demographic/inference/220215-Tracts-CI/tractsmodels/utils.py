@@ -142,3 +142,30 @@ def ancestry_data_with_fits(path_to_files, mdl, population, bootstrap):
     fit_data['bootstrap'] = bootstrap
     return fit_data
 
+
+def _list_tracts_files4pops(path_to_files, mdl, bootstrap):
+    """
+    list tracts output files
+    """
+    file_basename = f'{path_to_files}/{mdl}-boot{bootstrap}'
+    tfs = glob.glob(file_basename + '*')
+    if len(tfs) == 0:
+        raise ValueError(
+            f'Files not found. Pattern: {file_basename} did not match anything.')
+
+    return tfs
+
+
+def ancestry_data_with_fits_4pops(path_to_files, mdl, bootstrap):
+    """
+    Returns a data frame with the following columns:
+        bins: bins (cM)
+        Ancestry: The Ancestry labels.
+    """
+    # tracts files list
+    tfs = _list_tracts_files4pops(path_to_files, mdl, bootstrap)
+    fit_data = load_boot_rest(tfs, _get_ancestries(tfs))
+    # Add the metadata to the table
+    fit_data['mdl'] = mdl
+    fit_data['bootstrap'] = bootstrap
+    return fit_data
