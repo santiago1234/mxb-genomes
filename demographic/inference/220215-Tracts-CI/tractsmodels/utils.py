@@ -169,3 +169,85 @@ def ancestry_data_with_fits_4pops(path_to_files, mdl, bootstrap):
     fit_data['mdl'] = mdl
     fit_data['bootstrap'] = bootstrap
     return fit_data
+
+
+# ----- Visualize ancestries fractions over time
+
+migmat = 'results/inference/PEL-ppx_ccx_xxp-boot0_mig'
+poplabels = ['EUR', 'NAT', 'AFR']
+migmat = np.loadtxt(migmat)
+
+# The next functions are helpfull for having a graphical representation
+# of the model. See figure 5 in Gravel 2012.
+
+def _ancestry_prop(pA_current, replacement, pA_r):
+    """
+    Args:
+        pA_current: np.array, the current ancestry proportions in the population.
+        replacement: fraction of new migrants entering the population. I assume
+            this fraction will replace the current population.
+        pA_r: np.array, propotion of migrants from each ancestry entering
+            into the population.
+    """
+    # this operation follows from the law of total probability
+    pA_new = pA_current * (1 - replacement) + replacement * pA_r
+    return pA_new
+
+
+def ancestry_prop_over_time(migmat, poplabels):
+    """
+    Reconstruct the ancestry proportion over time
+    from the migration matrix.
+    Args:
+        migmat: np.array migration matrix. This migration matix
+            is part of the Tracts output.
+        poplabels: The population labels, the order must
+            match the columns in the migration matrix.
+    Returns: pd.DataFrame with columns:
+        - ga: Generations ago from the present.
+        - ancestry:
+        - prop
+    """
+    # The last row of the migration matrix gives the initial
+    # ancestry proportions
+    current_p = migmat[-1, :]
+    generations = list(range(migmat.shape[0]))
+    generations = generations[::-1]
+
+    anc_pt = np.zeros_like(migmat)
+    anc_pt[generations[0], :] = current_p
+
+    for t in generations[1:]:
+        migrants = migmat[t, :]
+
+        # Does this generation have a pulse of migration?
+        # I do this to get the fraction of each ancestry
+        # entering into the population.
+        if migrants.sum() > 0:
+            migrants_fraction = migrants / migrants.sum()
+        else:
+            migrants_fraction = np.zeros_like(migrants)
+
+        current_p = _ancestry_prop(current_p, migrants.sum(), migrants_fraction)
+        anc_pt[t, :] = current_p
+
+    anc_pt = pd.DataFrame(anc_pt, columns=poplabels)
+    anc_pt['ga'] = generations[::-1]
+    return anc_pt
+
+
+def migration_pulses(migmat, poplabels):
+    """
+    Get a summary of the migration pulses.
+    Args:
+        migmat: np.array migration matrix. This migration matix
+            is part of the Tracts output.
+        poplabels: The population labels, the order must
+            match the columns in the migration matrix.
+    """
+    migmat = pd.DataFrame(migmat, columns=poplabels)
+    migmat['ga'] = range(migmat.shape[0])
+
+    pulses = migmat[migmat[poplabels].sum(axis=1) > 0.001]
+    pulses['fr'] = migmat[poplabels].sum(axis=1)
+    return pulses
