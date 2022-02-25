@@ -60,8 +60,8 @@ migrations:
 - {source: IBS, dest: MXL, rate: 0.0502, end_time: 58}
 - {source: MXB, dest: MXL, rate: 0.0573, end_time: 58}
 pulses:
-  - sources: [YRI]
+  - sources: [YRI, CHB]
     dest: MXL
-    proportions: [0.0913]
+    proportions: [0.0913, 0.007]
     time: 319
 
