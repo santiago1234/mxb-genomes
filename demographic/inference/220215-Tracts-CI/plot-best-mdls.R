@@ -80,10 +80,12 @@ ancfracs %>%
     x = 'Generations ago',
     y = 'Ancestry proportion'
   )
-ggsave('plots/mf-anctry-props-over-time.pdf', height = 2, width = 6)
+ggsave('plots/mf-anctry-props-over-time.pdf', height = 1.3, width = 6)
 
 
 # draw fist pulse ---------------------------------------------------------
+
+
 
 ancfracs %>% 
   group_by(Population) %>% 
@@ -98,3 +100,57 @@ ancfracs %>%
   ) +
   theme_void()
 ggsave('plots/mf-1st-pulses-pies.pdf', height = 1, width = 3)
+
+### continuous pulses
+
+
+tibble(x
+  
+)
+
+
+# get cont mig ------------------------------------------------------------
+
+ancfracs %>% 
+  group_by(Population) %>% 
+  filter(!ga == max(ga)) %>% 
+  filter(ga == max(ga)) %>% 
+  filter(!Frac == 0) %>% 
+  mutate(
+  )
+
+cont_pulses <- 
+  tribble(
+  ~Population, ~Ancestry, ~Frac,
+  'MXL', 'NAT', 0.0573,
+  'MXL', 'EUR', 0.0502,
+  
+  'CLM', 'NAT',  0.012,
+  'CLM', 'EUR', 0.0617,
+  
+  'PEL', 'NAT',  0.118,
+  'PEL', 'EUR', 0.014,
+  
+  'PUR', 'AFR',  0.005,
+  'PUR', 'EUR', 0.03
+  
+) %>% 
+  group_by(Population) %>% 
+  mutate(
+    Frac = Frac / sum(Frac)
+  )
+
+
+
+
+
+cont_pulses %>% 
+  ggplot(aes(x = "", y = Frac, fill = Ancestry)) +
+  geom_bar(stat = 'identity') +
+  coord_polar("y", start=0) +
+  facet_grid(~Population) +
+  scale_fill_manual(
+    values = c('#fde725', '#5ec962', '#3b528b')
+  ) +
+  theme_void()
+ggsave('plots/mf-continous-pulses-pies.pdf', height = 1, width = 3)
