@@ -40,11 +40,36 @@ demes:
   epochs:
   - {end_time: 0, start_size: 1312.8044812722449, end_size: 38461.62164227266}
 # Admixed populations
+# MXL
 - name: MXL
   description: Admixed population in Mexico
   ancestors: [MXB, IBS]
   proportions: [0.2492, 0.7508]
   start_time: 462
+  epochs:
+  - {end_time: 0, start_size: 20000}
+# CLM
+- name: CLM
+  description: Admixed population in Colombia
+  ancestors: [IBS, MXB]
+  proportions: [0.43658, 0.56342]
+  start_time: 409
+  epochs:
+  - {end_time: 0, start_size: 20000}
+# PEL
+- name: PEL
+  description: Admixed population in Peru
+  ancestors: [IBS, MXB]
+  proportions: [0.738, 0.262]
+  start_time: 416
+  epochs:
+  - {end_time: 0, start_size: 20000}
+# PUR
+- name: PUR
+  description: Admixed population in Puerto Rico
+  ancestors: [YRI, IBS]
+  proportions: [0.1824, 0.8176]
+  start_time: 431
   epochs:
   - {end_time: 0, start_size: 20000}
 migrations:
@@ -56,12 +81,36 @@ migrations:
   rate: 6.62400743683469e-05
 - demes: [YRI, OOA]
   rate: 0.00015859499514691533
-  # Admixed MXL
-- {source: IBS, dest: MXL, rate: 0.0502, end_time: 58}
-- {source: MXB, dest: MXL, rate: 0.0573, end_time: 58}
+# MXL
+- {source: MXB, dest: MXL, rate: 0.0502, end_time: 58}
+- {source: IBS, dest: MXL, rate: 0.0573, end_time: 58}
+# CLM
+- {source: IBS, dest: CLM, rate: 0.0617, end_time: 58}
+- {source: MXB, dest: CLM, rate: 0.0120, end_time: 58}
+# PEL
+- {source: MXB, dest: PEL, rate: 0.1184, end_time: 58}
+- {source: IBS, dest: PEL, rate: 0.0149, end_time: 58}
+# PUR
+- {source: YRI, dest: PUR, rate: 0.0058, end_time: 58}
+- {source: IBS, dest: PUR, rate: 0.0360, end_time: 58}
 pulses:
+  # MXL
   - sources: [YRI, CHB]
     dest: MXL
-    proportions: [0.0913, 0.007]
-    time: 319
-
+    proportions: [0.11178, 0.007422]
+    time: 372
+  # CLM
+  - sources: [YRI]
+    dest: CLM
+    proportions: [0.1177828]
+    time: 262
+  # PEL
+  - sources: [YRI]
+    dest: PEL
+    proportions: [0.04811]
+    time: 201
+  # PUR
+  - sources: [MXB]
+    dest: PUR
+    proportions: [0.19668]
+    time: 349
