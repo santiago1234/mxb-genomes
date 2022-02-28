@@ -50,7 +50,7 @@ pop_labs = {
     'CLM': default_labs,
     'PEL': default_labs,
     'PUR': ['AFR', 'EUR', 'NAT'],
-    'MXL': default_labs + ['EAS']
+    'MXL': ['EUR', 'NAT', 'AFR'] + ['EAS']
 }
 
 
