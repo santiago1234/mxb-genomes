@@ -7,7 +7,7 @@ import tskit
 
 print('loaded packages')
 
-graph = demes.load("Best-Model-Intronic.yml")
+graph = demes.load("../../inference/220225-Combine-Inferences/ADMIXTURE.yml")
 demography = msprime.Demography.from_demes(graph)
 
 print('setting demography')
@@ -36,13 +36,19 @@ N_IBS = 107
 N_CHB = 103
 N_MXB = 50
 N_MXL = 64
+N_PEL = 85
+N_CLM = 94
+N_PUR = 104
 
 Samples = [
     msprime.SampleSet(N_YRI, population='YRI'),
     msprime.SampleSet(N_IBS, population='IBS'),
     msprime.SampleSet(N_CHB, population='CHB'),
     msprime.SampleSet(N_MXB, population='MXB'),
-    msprime.SampleSet(N_MXL, population='MXL')
+    msprime.SampleSet(N_MXL, population='MXL'),
+    msprime.SampleSet(N_PEL, population='PEL'),
+    msprime.SampleSet(N_CLM, population='CLM'),
+    msprime.SampleSet(N_PUR, population='PUR')
 ]
 
 print('running simulation ...')
@@ -63,7 +69,7 @@ mts = msprime.sim_mutations(ts, rate=1e-8, random_seed=42)
 
 print('saving data ...')
 
-pops = ['YRI']*N_YRI + ['IBS']*N_IBS + ['CHB']*N_CHB + ['MXB']*N_MXB + ['MXL']*N_MXL
+pops = ['YRI']*N_YRI + ['IBS']*N_IBS + ['CHB']*N_CHB + ['MXB']*N_MXB + ['MXL']*N_MXL + ['PEL']*N_PEL + ['CLM']*N_CLM + ['PUR']*N_PUR
 n_dip_indv = int(ts.num_samples / 2)
 indv_names = [f"{pops[i]}_{str(i)}indv" for i in range(n_dip_indv)]
 
