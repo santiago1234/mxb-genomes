@@ -88,6 +88,17 @@ startparams_ppx_ccx_xxp_PUR = [
     0.120
 ]
 
+# -------------------------------------------------------------------------
+
+startparams_ppp_pxp = [
+        0.69,
+        0.11,
+        0.15,
+        0.04
+    ]
+
+STP_ppp_pxp = {x: startparams_ppp_pxp for x in POPS}
+# -------------------------------------------------------------------------
 
 STP_ppx_ccx_xxp = {
     'MXL': startparams_ppx_ccx_xxp,
@@ -100,5 +111,6 @@ START_PARAMS = {
     'ppx_xxp': STP_ppx_xxp,
     'ppx_xxp_pxx': STP_ppx_xxp_ppx,
     'ccx_xxp': STP_ccx_xxp,
-    'ppx_ccx_xxp': STP_ppx_ccx_xxp
+    'ppx_ccx_xxp': STP_ppx_ccx_xxp,
+    'ppp_pxp': STP_ppp_pxp
     }

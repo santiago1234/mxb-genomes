@@ -573,13 +573,178 @@ startparams_ppx_ccx_xxp = [
     0.0913,
     0.11673
 ]
-# => =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>
-# => =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>
 
+def ppp_pxp(*params):
+    """a simple model in which populations Eu and NAT arrive discretely at first generation, Af at a subsequent generation, 
+    and Eu discretely yet later. 
+    . If a time is not integer, the migration 
+    is divided between neighboring times proportional to the non-integer time fraction. 
+    We'll assume population 3 
+    replaces after the replacement from population 1 and 2 if they arrive at same generation. 
+    The first generation is equally composed of pops 1 and 2
+    order is ['CEU','NAT','YRI']"""
+
+    # afam_time is the time for arrival of Europeans and Africans in this model.
+    (init1, init3, tstart, afam_prop, Eur_prop, afam_time) = params[0]
+    tstart *= 100
+    afam_time *= 100
+
+    if afam_time > tstart or afam_time < 0 or init3 < 0 or init1 < 0:
+        # that should be caught by constraint. Return empty matrix
+        gen = int(numpy.ceil(max(tstart, 0)))+1
+        mig = numpy.zeros((gen+1, 3))
+        return mig
+
+    #	print "error, afam_time>tstart:", afam_time,">", tstart
+    #	raise()
+
+        #print (a,b)
+
+    # The parameters are lower than the actual starting time, since I add 1 twice. Was this to forbid a starting time at generations 1 and 2? This doesn't affect the outputs in the end since the actual matrix is the output...
+    gen = int(numpy.ceil(tstart))+1
+    frac = gen-tstart-1
+    mig = numpy.zeros((gen+1, 3))
+
+    # replace a fraction at second generation to ensure a continuous model distribution with generation
+    mig[-1, :] = numpy.array([init1, 1-init1-init3, init3])
+    # contents of the second generation
+
+    mig[-2, :] = frac*mig[-1, :]
+
+    afgen = int(numpy.ceil(afam_time))+1
+    # this is the fractional time for the second generation.
+    fracAf = afgen-afam_time-1
+
+    # we want the total african proportiuon replaced to be afam_prop. We therefore add a fraction
+    # f at generation gen-1, and (afam_prop-f)/(1-f) at generation gen.
+
+    mig[afgen-1, 2] = fracAf*afam_prop
+    mig[afgen, 2] = (afam_prop-fracAf*afam_prop)/(1-fracAf*afam_prop)
+
+    mig[afgen-1, 0] = fracAf*Eur_prop
+    mig[afgen, 0] = (Eur_prop-fracAf*Eur_prop)/(1-fracAf*Eur_prop)
+
+    return mig
+
+
+def outofbounds_ppp_pxp(*params):
+    # constraint function evaluating below zero when constraints not satisfied
+    # print "in constraint  outofbounds_211_cont_unif_params"
+    # (init1,init3,tstart,afam_prop,afam_time)
+    ret = 1
+    (init1, init3, tstart, afam_prop, Eur_prop, afam_time) = params[0]
+
+    # print params[0]
+    ret = min(ret, 1-afam_prop)
+    ret = min(ret, afam_prop)
+
+    ret = min(ret, 1-Eur_prop)
+    ret = min(ret, Eur_prop)
+
+    # print "ret0",  ret
+
+    # pedestrian way of testing for all possible issues
+    func = ppp_pxp
+
+    # check if t is crazy large. If so, we shouldn't evaluate function!
+    if tstart > 1:
+        print("time above 500 generations!")
+        return min(ret, (1-tstart))
+
+    mig = func(params[0])
+    totmig = mig.sum(axis=1)
+    # print  "ret1=",ret
+
+    # print  "ret2 ",ret
+    ret = min(ret, -abs(totmig[-1]-1)+1e-8)
+    ret = min(ret, -totmig[0], -totmig[1])
+    # print "ret3 " , ret
+    ret = min(ret, min(1-totmig), min(totmig))
+    # print "ret4 " , ret
+
+    # print "times ",afam_time,tstart
+    ret = min(ret, tstart-afam_time)
+
+    ret = min(ret, afam_time)
+
+    ret = min(ret, tstart)
+
+    # print "ret5 " , ret
+    if abs(totmig[-1]-1) > 1e-8:
+        # print mig
+        print("founding migration should sum up to 1. Now:")
+        print(abs(totmig[-1]-1))
+
+    if totmig[0] > 1e-10:
+        print("migrants at last generation should be removed from sample!")
+        #print("currently", self.totmig[0])
+
+    if totmig[1] > 1e-10:
+        print("migrants at penultimate generation should be removed from sample!")
+        #print("currently", self.totmig[1])
+
+    if ((totmig > 1).any() or (mig < 0).any()):
+        print("migration rates should be between 0 and 1")
+    # print "constraint ",ret
+    return ret
+
+
+def ppp_pxp_fix(params, fracs):
+    """a simple model in which populations Eu and NAT arrive discretely at first generation, Af at a subsequent generation, 
+    and Eu discretely yet later. 
+    . If a time is not integer, the migration 
+    is divided between neighboring times proportional to the non-integer time fraction. 
+    We'll assume population 3 
+    replaces after the replacement from population 1 and 2 if they arrive at same generation. 
+    The first generation is equally composed of pops 1 and 2
+    order is ['CEU','NAT','YRI']"""
+
+    # afam_time is the time for arrival of Europeans and Africans in this model.
+    (init1, init3, tstart, afam_time) = params
+
+    # which parameters do we fix?
+    # probably afam_prop and Eur_prop
+
+    def fun(xxx_todo_changeme2):
+        (afam_prop, Eur_prop) = xxx_todo_changeme2
+        return propfrommig(ppp_pxp((init1, init3, tstart, afam_prop, Eur_prop, afam_time)))[0:2]-fracs[0:2]
+
+    (afam_prop, Eur_prop) = scipy.optimize.fsolve(fun, (.2, .2))
+    #print (init1,init3,tstart,afam_prop,Eur_prop,afam_time)
+    return ppp_pxp((init1, init3, tstart, afam_prop, Eur_prop, afam_time))
+
+
+def outofbounds_ppp_pxp_fix(xxx_todo_changeme5, fracs):
+    # constraint function evaluating below zero when constraints not satisfied
+    # print "in constraint  outofbounds_211_cont_unif_params"
+    # (init1,init3,tstart,afam_prop,afam_time)
+
+    # check if t is crazy large. If so, we shouldn't evaluate function!
+    (init1, init3, tstart, afam_time) = xxx_todo_changeme5
+    if tstart > 1:
+        print("time above 500 generations!")
+        return (1-tstart)
+
+    def fun(xxx_todo_changeme3):
+        (afam_prop, Eur_prop) = xxx_todo_changeme3
+        return propfrommig(ppp_pxp((init1, init3, tstart, afam_prop, Eur_prop, afam_time)))[0:2]-fracs[0:2]
+    (afam_prop, Eur_prop) = scipy.optimize.fsolve(fun, (.2, .2))
+    return outofbounds_ppp_pxp((init1, init3, tstart, afam_prop, Eur_prop, afam_time))
+
+startparams_ppp_pxp_fix = [
+        0.69,
+        0.11,
+        0.15,
+        0.04
+    ]
+
+# => =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>
+# => =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>
 
 MODELS = {
     'ppx_xxp': (ppx_xxp_fix, outofbounds_ppx_xxp_fix, startparams_ppx_xxp),
     'ppx_xxp_pxx': (ppx_xxp_pxx_fix, outofbounds_ppx_xxp_pxx_fix, startparams_ppx_xxp_pxx),
     'ccx_xxp': (ccx_xxp, outofbounds_ccx_xxp, startparams_ccx_xxp),
-    'ppx_ccx_xxp': (ppx_ccx_xxp, outofbounds_ppx_ccx_xxp, startparams_ppx_ccx_xxp)
+    'ppx_ccx_xxp': (ppx_ccx_xxp, outofbounds_ppx_ccx_xxp, startparams_ppx_ccx_xxp),
+    'ppp_pxp': (ppp_pxp_fix, outofbounds_ppp_pxp_fix, startparams_ppp_pxp_fix)
 }
