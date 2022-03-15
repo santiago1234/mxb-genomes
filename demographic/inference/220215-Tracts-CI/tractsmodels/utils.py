@@ -171,12 +171,6 @@ def ancestry_data_with_fits_4pops(path_to_files, mdl, bootstrap):
     return fit_data
 
 
-# ----- Visualize ancestries fractions over time
-
-migmat = 'results/inference/PEL-ppx_ccx_xxp-boot0_mig'
-poplabels = ['EUR', 'NAT', 'AFR']
-migmat = np.loadtxt(migmat)
-
 # The next functions are helpfull for having a graphical representation
 # of the model. See figure 5 in Gravel 2012.
 
