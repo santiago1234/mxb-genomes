@@ -10,7 +10,7 @@ LABELS = {
     'CLM': _defaul_labs,
     'MXL': _defaul_labs,
     'PEL': _defaul_labs,
-    'PUR': ['AFR', 'EUR', 'NAT']
+    'PUR': ['EUR', 'NAT', 'AFR']
 }
 
 

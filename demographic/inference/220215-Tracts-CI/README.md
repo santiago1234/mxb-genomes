@@ -7,8 +7,9 @@ I tested the following set of models:
 
 - ppx_xxp
 - ppx_xxp_pxx
-* ccx_xxp
-* ppx_ccx_xxp
+- ccx_xxp
+- ppx_ccx_xxp
+- ppp_pxp  (This model is directed for PUR)
 
 I run some tests before in [analysis-doc](`../../../analysis-doc), but here is the final inference.
 
@@ -30,3 +31,6 @@ snakemake -j52 infere_all
 # this writes the python calls to the runall.sh file
 cat runall.sh |parallel -j22
 ```
+
+**IMPORTANT NOTE:** Check the order of the labels for the models, see [this script](tractsmodels/utils.py),
+where the labels order is defined.
