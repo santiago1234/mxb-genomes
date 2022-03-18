@@ -68,7 +68,7 @@ demes:
 - name: PUR
   description: Admixed population in Puerto Rico
   ancestors: [IBS, MXB, YRI]
-  proportions: [0.60074, 0.30223, 0.09702]
+  proportions: [0.6007, 0.3022, 0.0971]
   start_time: 344
   epochs:
   - {end_time: 0, start_size: 20000}
