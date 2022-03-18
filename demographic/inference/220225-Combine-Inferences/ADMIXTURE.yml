@@ -67,9 +67,9 @@ demes:
 # PUR
 - name: PUR
   description: Admixed population in Puerto Rico
-  ancestors: [YRI, IBS]
-  proportions: [0.1824, 0.8176]
-  start_time: 431
+  ancestors: [IBS, MXB, YRI]
+  proportions: [0.60074, 0.30223, 0.09702]
+  start_time: 344
   epochs:
   - {end_time: 0, start_size: 20000}
 migrations:
@@ -90,9 +90,6 @@ migrations:
 # PEL
 - {source: MXB, dest: PEL, rate: 0.1184, end_time: 58}
 - {source: IBS, dest: PEL, rate: 0.0149, end_time: 58}
-# PUR
-- {source: YRI, dest: PUR, rate: 0.0058, end_time: 58}
-- {source: IBS, dest: PUR, rate: 0.0360, end_time: 58}
 pulses:
   # MXL
   - sources: [YRI, CHB]
@@ -110,7 +107,7 @@ pulses:
     proportions: [0.04811]
     time: 201
   # PUR
-  - sources: [MXB]
+  - sources: [IBS, YRI]
     dest: PUR
-    proportions: [0.19668]
-    time: 349
+    proportions: [0.23411, 0.052969]
+    time: 122

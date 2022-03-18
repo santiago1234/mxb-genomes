@@ -15,6 +15,6 @@ Then I add manually the parameters.
 
 For the 3 pops models, the order is: NAT, EUR, & AFR.
 
-Only in PUR the order is AFR, EUR, NAT.
+Only in PUR the order is EUR, NAT, & AFR.
 
 In the 4 pops model the label order is EUR, NAT, AFR, & EAS.
