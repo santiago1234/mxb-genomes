@@ -99,7 +99,7 @@ pulses:
   # CLM
   - sources: [YRI]
     dest: CLM
-    proportions: [0.1177828]
+    proportions: [0.1183447]
     time: 262
   # PEL
   - sources: [YRI]
