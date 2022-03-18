@@ -4,15 +4,20 @@ library(ggthemes)
 
 theme_set(theme_tufte(base_family = 'Helvetica'))
 
+## best models
+
+best3pops <- tribble(
+  ~Population, ~mdl, ~bootstrap,
+  'CLM', 'ppx_ccx_xxp', 0,
+  'PEL', 'ppx_ccx_xxp', 0,
+  'PUR', 'ppp_pxp', 0
+  )
+
 # plot fits for best mdls -------------------------------------------------
 
 fits3pops <-
   read_csv('results/fits-data.csv') %>% 
-  filter(
-    mdl == 'ppx_ccx_xxp',
-    Population != 'MXL',
-    bootstrap == 0
-  )
+  inner_join(best3pops)
 
 fits4pops <- 
   read_csv('results/fits-data-4pops-MXL.csv') %>% 
@@ -34,7 +39,7 @@ fits %>%
   geom_ribbon(aes(ymin = ci_l, ymax = ci_u), alpha = 0.3, color = "black", show.legend=FALSE, size= 0.2) +
   geom_line(show.legend=FALSE) +
   geom_line(show.legend=FALSE, color = "black", size = 0.2) +
-  geom_point(aes(y=dat),shape = 21, size = 2, alpha = .7, color = "black") +
+  geom_point(aes(y=dat),shape = 21, size = 2, alpha = .9, color = "black") +
   scale_y_log10(
     oob = scales::squish_infinite,
     expand = c(0, 0),
@@ -51,6 +56,7 @@ fits %>%
     values = c('#fde725', '#21918c', '#5ec962', '#3b528b')
   ) +
   theme_bw() +
+  theme(panel.grid = element_blank()) +
   labs(
     y = 'Relative Frequency',
     x = 'Tract Length (cM)'
@@ -72,7 +78,7 @@ ancfracs %>%
   geom_bar(stat = "identity", width = 1.1) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) +
-  facet_grid(~Population) +
+  facet_grid(~Population, space = 'free_x', scales = 'free_x') +
   scale_fill_manual(
     values = c('#fde725', '#21918c', '#5ec962', '#3b528b')
   ) +

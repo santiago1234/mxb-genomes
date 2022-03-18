@@ -9,14 +9,18 @@ from tractsmodels import utils
 # *****************************************************
 
 pops = ['CLM', 'MXL', 'PEL', 'PUR']
-mdls = ['ppx_xxp', 'ppx_xxp_pxx', 'ccx_xxp', 'ppx_ccx_xxp']
+mdls = ['ppx_xxp', 'ppx_xxp_pxx', 'ccx_xxp', 'ppx_ccx_xxp', 'ppp_pxp']
 path_to_tracts_output = 'results/inference/'
 bootstrap = 0  # 0 means it is the data and not a bootstrap replicate
 
 params = itertools.product([path_to_tracts_output], mdls, pops, [0])
+params = list(params)
+
+# NOTE: There was a convergence issue and i could not fit this model
+params.remove(('results/inference/', 'ppp_pxp', 'CLM', 0))  
+params.remove(('results/inference/', 'ppp_pxp', 'MXL', 0))  
 
 fits_and_data = pd.concat([utils.ancestry_data_with_fits(*x) for x in params])
-
 fits_and_data.to_csv('results/fits-data.csv', index=False)
 
 
@@ -40,7 +44,7 @@ fits_and_data.to_csv('results/fits-data-4pops-MXL.csv', index=False)
 best_mdls = {
     'CLM': ('results/inference/CLM-ppx_ccx_xxp-boot0_mig', 'ppx_ccx_xxp'),
     'PEL': ('results/inference/PEL-ppx_ccx_xxp-boot0_mig', 'ppx_ccx_xxp'),
-    'PUR': ('results/inference/PUR-ppx_ccx_xxp-boot0_mig', 'ppx_ccx_xxp'),
+    'PUR': ('results/inference/PUR-ppp_pxp-boot0_mig', 'ppp_pxp'),
     'MXL': ('results/inference-MXL-4pops/ppxx_ccxx_xxpp-boot0_mig', 'ppxx_ccxx_xxpp')
 
 }
@@ -49,7 +53,7 @@ default_labs = ['NAT', 'EUR', 'AFR']
 pop_labs = {
     'CLM': default_labs,
     'PEL': default_labs,
-    'PUR': ['AFR', 'EUR', 'NAT'],
+    'PUR': ['EUR', 'NAT', 'AFR'],
     'MXL': ['EUR', 'NAT', 'AFR'] + ['EAS']
 }
 

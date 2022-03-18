@@ -8,13 +8,14 @@ get_time_pars <- function(mdl, parameters) {
     ppx_xxp_pxx = {parameters[c(2, 3)]},
     ccx_xxp = {parameters[c(3, 4)]},
     ppx_ccx_xxp = {parameters[c(4, 6)]},
+    ppp_pxp = {parameters[c(3, 4)]}
   )
   
 }
 
 
 load_time_pars <- function(fp) {
-  patern <- '(ppx_ccx_xxp|ppx_xxp_pxx|ccx_xxp|ppx_xxp)'
+  patern <- '(ppx_ccx_xxp|ppx_xxp_pxx|ccx_xxp|ppx_xxp|ppp_pxp)'
   
   pop <- str_extract(fp, '(CLM|PEL|PUR|MXL)')
   
@@ -62,7 +63,7 @@ d <- d %>%
   ) %>% 
   ungroup()
 
-order_mdls <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp") %>% rev()
+order_mdls <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp", 'ppp_pxp') %>% rev()
 d$mdl <- factor(d$mdl, levels = order_mdls)
 
 d %>% 
@@ -73,8 +74,7 @@ d %>%
   facet_grid(~Population) +
   theme_bw() +
   theme(
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank(),
+    panel.grid = element_blank(),
     legend.position = 'bottom'
   ) +
   labs(

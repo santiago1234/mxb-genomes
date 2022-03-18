@@ -3,14 +3,13 @@ library(scales)
 
 fits <- read_csv('results/fits-data.csv')
 
-model_order <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp")
+model_order <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp", 'ppp_pxp')
 
 fits$cM <- fits$bins * 100
 fits$mdl <- factor(fits$mdl, levels = model_order)
 
 
 fits %>% 
-  sample_frac(size = 1) %>% 
   ggplot(aes(x = cM, y = pred, color = Ancestry, fill = Ancestry)) +
   geom_ribbon(aes(ymin = ci_l, ymax = ci_u), alpha = 0.3, color = "black", show.legend=FALSE, size= 0.2) +
   geom_line(show.legend=FALSE) +
@@ -32,6 +31,7 @@ fits %>%
     values = c('#fde725', '#5ec962', '#3b528b')
   ) +
   theme_bw() +
+  theme(panel.grid = element_blank()) +
   labs(
     y = 'Relative Frequency',
     x = 'Tract Length (cM)'
@@ -71,6 +71,7 @@ fits %>%
     values = c('#fde725', '#21918c', '#5ec962', '#3b528b')
   ) +
   theme_bw() +
+  theme(panel.grid = element_blank()) +
   labs(
     y = 'Relative Frequency',
     x = 'Tract Length (cM)'
