@@ -91,7 +91,7 @@ migrations:
 - {source: MXB, dest: PEL, rate: 0.1236, end_time: 58}
 - {source: IBS, dest: PEL, rate: 0.0122, end_time: 58}
 # PUR
-- {source: AFR, dest: PUR, rate: 0.0103, end_time: 58}
+- {source: YRI, dest: PUR, rate: 0.0103, end_time: 58}
 pulses:
   # MXL
   - sources: [YRI, CHB]
