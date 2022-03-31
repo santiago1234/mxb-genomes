@@ -59,7 +59,7 @@ startparams_ppx_ccx_xxp = [
 ]
 
 
-startparams_ppx_ccx_xxp_PEL = [
+_startparams_ppx_ccx_xxp_PEL = [
     0.274,
     0.117,
     0.0175,
@@ -68,6 +68,15 @@ startparams_ppx_ccx_xxp_PEL = [
     0.070
 ]
 
+
+startparams_ppx_ccx_xxp_PEL = [
+    0.096,
+    0.118,
+    0.010,
+    0.147,
+    0.040,
+    0.087
+]
 
 startparams_ppx_ccx_xxp_CLM = [
     0.563,
