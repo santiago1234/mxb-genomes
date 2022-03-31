@@ -41,7 +41,7 @@ fits_and_data.to_csv('results/fits-data-4pops-MXL.csv', index=False)
 best_mdls = {
     'CLM': ('results/inference/CLM-ppx_ccx_xxp-boot0_mig', 'ppx_ccx_xxp'),
     'PEL': ('results/inference/PEL-ppx_ccx_xxp-boot0_mig', 'ppx_ccx_xxp'),
-    'PUR': ('results/inference/PUR-ppp_pxp-boot0_mig', 'ppp_pxp'),
+    'PUR': ('results/inference/PUR-ppc-boot0_mig', 'ppc'),
     'MXL': ('results/inference-MXL-4pops/ppxx_ccxx_xxpp-boot0_mig', 'ppxx_ccxx_xxpp')
 
 }

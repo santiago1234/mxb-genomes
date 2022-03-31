@@ -10,7 +10,7 @@ best3pops <- tribble(
   ~Population, ~mdl, ~bootstrap,
   'CLM', 'ppx_ccx_xxp', 0,
   'PEL', 'ppx_ccx_xxp', 0,
-  'PUR', 'ppp_pxp', 0
+  'PUR', 'ppc', 0
   )
 
 # plot fits for best mdls -------------------------------------------------
@@ -74,13 +74,16 @@ ancfracs <- ancfracs %>%
 
 
 ancfracs %>% 
+  mutate(
+    Ancestry = factor(Ancestry, levels = c('EAS', 'AFR', 'EUR', 'NAT'))
+  ) %>% 
   ggplot(aes(x = -ga, y = Frac, fill = Ancestry)) +
   geom_bar(stat = "identity", width = 1.1) +
   scale_x_continuous(expand = c(0, 0)) +
   scale_y_continuous(expand = c(0, 0)) +
   facet_grid(~Population, space = 'free_x', scales = 'free_x') +
   scale_fill_manual(
-    values = c('#fde725', '#21918c', '#5ec962', '#3b528b')
+    values = c('#21918c', '#fde725', '#5ec962', '#3b528b')
   ) +
   labs(
     x = 'Generations ago',
@@ -137,8 +140,7 @@ cont_pulses <-
   'PEL', 'NAT',  0.118,
   'PEL', 'EUR', 0.014,
   
-  'PUR', 'AFR',  0.005,
-  'PUR', 'EUR', 0.03
+  'PUR', 'AFR',  0.005
   
 ) %>% 
   group_by(Population) %>% 
