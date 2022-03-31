@@ -10,12 +10,12 @@ import tracts
 
 dir_to_data, MODEL, BOOTNUM = sys.argv[1:]
 BOOTNUM = int(BOOTNUM)
-dir_to_data = dir_to_data + '/' #We need the dir to end with /
+dir_to_data = dir_to_data + '/'  # We need the dir to end with /
 
 pops = ['PEL', 'MXL', 'CLM', 'PUR']
 
 # Infere population name from dir_to_data
-POPULATION, *_ = [x for x in pops if x in dir_to_data] 
+POPULATION, *_ = [x for x in pops if x in dir_to_data]
 func, bound, startparams = models.MODELS[MODEL]
 labels = utils.LABELS[POPULATION]
 
@@ -43,8 +43,12 @@ nind = pop.nind
 cutoff = 2  # ignore particular bins
 
 
-xopt = tracts.optimize_cob_fracs2(startparams, bins, Ls, data, nind,
-                                  func, props, outofbounds_fun=bound, cutoff=cutoff, epsilon=1e-2)
+if MODEL == 'ppc':
+    xopt = tracts.optimize_cob(startparams, bins, Ls, data, nind,
+                               func, outofbounds_fun=bound, cutoff=cutoff, epsilon=1e-2)
+else:
+    xopt = tracts.optimize_cob_fracs2(startparams, bins, Ls, data, nind,
+                                      func, props, outofbounds_fun=bound, cutoff=cutoff, epsilon=1e-2)
 
 
 print(xopt)

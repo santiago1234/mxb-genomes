@@ -8,7 +8,8 @@ MDLS = [
     'ppx_xxp_pxx',
     'ccx_xxp',
     'ppx_ccx_xxp',
-    'ppp_pxp'
+    'ppp_pxp',
+    'ppc'
 ]
 
 #PUR-ppx_ccx_xxp-boot0_bins

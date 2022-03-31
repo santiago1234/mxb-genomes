@@ -731,6 +731,7 @@ def outofbounds_ppp_pxp_fix(xxx_todo_changeme5, fracs):
     (afam_prop, Eur_prop) = scipy.optimize.fsolve(fun, (.2, .2))
     return outofbounds_ppp_pxp((init1, init3, tstart, afam_prop, Eur_prop, afam_time))
 
+
 startparams_ppp_pxp_fix = [
         0.69,
         0.11,
@@ -741,10 +742,107 @@ startparams_ppp_pxp_fix = [
 # => =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>
 # => =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>
 
+
+def ppc(parameters):
+    """model in which the three populations atart at the same time, 3 keeps going while 1 and 2 is a single pulse"""
+
+    frac1, frac3, t = parameters
+    t *= 100
+
+    if t < 0:
+        print("t<0:", " should be caught by outofbounds_func")
+
+        mig = numpy.zeros((2, 3))
+        return mig
+
+    gen = int(numpy.ceil(t))+1
+    frac = gen-t-1
+    # the relation matrix time and the parameter time is different in ppc than in the other models!
+    mig = numpy.zeros((gen, 3))
+    # replace a fraction at second generation to ensure a continuous model distribution with generation time. The first generation is always in complete replacement. The second generation must mostly replace to ensure continuity.
+    # frac=0 is exact at gen, so no correction needed at generation gen-1.
+    # gen-1 interpolates between the continuous fractions and the full replacement.
+
+    # frac3 is the proportion of population 3 at first two generations
+
+    mig[-1, :] = numpy.array([frac1*(1-frac3), (1-frac1)*(1-frac3), frac3])
+    mig[-1, :] = mig[-1, :]/mig[-1, :].sum()
+    a = mig[-1, :].sum()
+    if a > 1:
+        mig[-1, :] -= (a-1)/3
+
+    # contents of the second generation
+    inter1 = frac*mig[-1, 0]
+    inter2 = frac*mig[-1, 1]
+    inter3 = frac*mig[-1, 2]  # +(1-frac)*frac3
+    mig[-2, :] = numpy.array([inter1, inter2, inter3])
+    mig[3:-2, 2] = frac3
+    # mig[2:-2,1]=frac2
+
+    # print a,inter,mig
+
+    return mig
+
+
+def outofbounds_ppc(params):
+    # constraint function evaluating below zero when constraints not satisfied
+    # print "in constraint  outofbounds_211_cont_unif_params"
+
+    frac1, frac3, t = params
+    # ret=1-(frac2+frac1)*(1+frac3)
+    ret = min(frac1, frac3)
+    ret = min(1-frac1, 1-frac3)
+    ret = min(ret, t)
+    # print "ret0",  ret
+
+    # pedestrian way of testing for all possible issues
+    func = ppc
+    mig = func(params)
+    totmig = mig.sum(axis=1)
+    # print  "ret1=",ret
+
+    # print  "ret2 ",ret
+    ret = min(ret, -abs(totmig[-1]-1)+1e-8)
+    ret = min(ret, -totmig[0], -totmig[1])
+    # print "ret3 " , ret
+    ret = min(ret, min(1-totmig), min(totmig))
+    # print "ret4 " , ret
+
+    # print "times ",afam_time,tstart
+
+    # print "ret5 " , ret
+    if abs(totmig[-1]-1) > 1e-8:
+        print(mig)
+        print("founding migration should sum up to 1. Now:")
+        # print mig[-1,:],"sum up to ",self.totmig[-1])
+
+    if totmig[0] > 1e-10:
+        print("migrants at last generation should be removed from sample!")
+        #print("currently", self.totmig[0])
+
+    if totmig[1] > 1e-10:
+        print("migrants at penultimate generation should be removed from sample!")
+        #print("currently", self.totmig[1])
+
+    if ((totmig > 1).any() or (mig < 0).any()):
+        print("migration rates should be between 0 and 1")
+    # print "constraint ",ret
+    return ret
+
+
+startparams_ppc = [
+        0.847,
+        0.01,
+        0.15
+        ]
+# => =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>
+# => =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>=> =>
+
 MODELS = {
     'ppx_xxp': (ppx_xxp_fix, outofbounds_ppx_xxp_fix, startparams_ppx_xxp),
     'ppx_xxp_pxx': (ppx_xxp_pxx_fix, outofbounds_ppx_xxp_pxx_fix, startparams_ppx_xxp_pxx),
     'ccx_xxp': (ccx_xxp, outofbounds_ccx_xxp, startparams_ccx_xxp),
     'ppx_ccx_xxp': (ppx_ccx_xxp, outofbounds_ppx_ccx_xxp, startparams_ppx_ccx_xxp),
-    'ppp_pxp': (ppp_pxp_fix, outofbounds_ppp_pxp_fix, startparams_ppp_pxp_fix)
+    'ppp_pxp': (ppp_pxp_fix, outofbounds_ppp_pxp_fix, startparams_ppp_pxp_fix),
+    'ppc': (ppc, outofbounds_ppc, startparams_ppc)
 }
