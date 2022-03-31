@@ -9,7 +9,9 @@ I tested the following set of models:
 - ppx_xxp_pxx
 - ccx_xxp
 - ppx_ccx_xxp
-- ppp_pxp  (This model is directed for PUR)
+- ppp_pxp  (This model is directed for PUR). NOTE: This model wont
+be shown. It does not captures well the historical records.
+- ppc. This is the model that i decided to use for PUR.
 
 I run some tests before in [analysis-doc](`../../../analysis-doc), but here is the final inference.
 
