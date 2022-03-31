@@ -53,7 +53,7 @@ else:
 
 print(xopt)
 
-if MODEL in ['ccx_xxp', 'ppx_ccx_xxp']:
+if MODEL in ['ccx_xxp', 'ppx_ccx_xxp', 'ppc']:
     # I do this because we fix the ancestry
     # proportions in the ppx_xxp and ppx_xxp_pxx models
     optmod = tracts.demographic_model(func(xopt))
