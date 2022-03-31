@@ -3,7 +3,7 @@ library(scales)
 
 fits <- read_csv('results/fits-data.csv')
 
-model_order <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp", 'ppp_pxp')
+model_order <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp", 'ppc')
 
 fits$cM <- fits$bins * 100
 fits$mdl <- factor(fits$mdl, levels = model_order)

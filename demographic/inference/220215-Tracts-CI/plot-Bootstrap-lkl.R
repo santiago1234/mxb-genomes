@@ -13,7 +13,7 @@ infos <-
   list.files("results/inference/", pattern = '*info.tsv', full.names = T) %>% 
   map_df(load_info_file)
 
-order_mdls <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp", 'ppp_pxp') %>% rev()
+order_mdls <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp", 'ppc') %>% rev()
 infos$mdl <- factor(infos$mdl, levels = order_mdls)
 
 ## get means to show in plot
@@ -64,7 +64,7 @@ k_params <- tribble(
   'ppx_xxp_pxx', 4,
   'ccx_xxp', 5,
   'ppx_ccx_xxp', 6,
-  'ppp_pxp', 4
+  'ppc', 3
 )
 
 
@@ -101,7 +101,7 @@ bic_d <- bic_d %>%
     bic_ci_l = bic(k, n, ci_l_lkl), 
   )
 
-order_mdls <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp", 'ppp_pxp') %>% rev()
+order_mdls <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp", 'ppc') %>% rev()
 bic_d$mdl <- factor(bic_d$mdl, levels = order_mdls)
 
 bic_d <- bic_d %>% 
@@ -112,12 +112,11 @@ bic_d <- bic_d %>%
 
 
 bic_d %>% 
-  ggplot(aes(x = bic, y = mdl, color = Best)) +
+  ggplot(aes(x = bic, y = mdl)) +
   geom_point() +
   geom_errorbarh(aes(xmin = bic_ci_l, xmax = bic_ci_h), height = 0) +
   facet_grid(~Population) +
   coord_cartesian(xlim = c(500, 1500)) +
-  scale_color_manual(values = c('grey', 'steelblue')) +
   theme_bw() +
   theme(
     panel.grid = element_blank(),

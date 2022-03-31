@@ -8,14 +8,14 @@ get_time_pars <- function(mdl, parameters) {
     ppx_xxp_pxx = {parameters[c(2, 3)]},
     ccx_xxp = {parameters[c(3, 4)]},
     ppx_ccx_xxp = {parameters[c(4, 6)]},
-    ppp_pxp = {parameters[c(3, 4)]}
+    ppc = {parameters[c(3)]}
   )
   
 }
 
 
 load_time_pars <- function(fp) {
-  patern <- '(ppx_ccx_xxp|ppx_xxp_pxx|ccx_xxp|ppx_xxp|ppp_pxp)'
+  patern <- '(ppx_ccx_xxp|ppx_xxp_pxx|ccx_xxp|ppx_xxp|ppc)'
   
   pop <- str_extract(fp, '(CLM|PEL|PUR|MXL)')
   
@@ -34,7 +34,13 @@ load_time_pars <- function(fp) {
   
   pars <- get_time_pars(mdl_name, parameters)
   
-  tibble(Time_pars = pars, Time = c('T1', 'T2')) %>% 
+  if (length(pars) == 1) {
+    Time = c('T1')
+  } else {
+    Time = c('T1', 'T2')
+  }
+  
+  tibble(Time_pars = pars, Time = Time) %>% 
     mutate(
       mdl = mdl_name,
       boot = boostrap,
@@ -63,7 +69,7 @@ d <- d %>%
   ) %>% 
   ungroup()
 
-order_mdls <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp", 'ppp_pxp') %>% rev()
+order_mdls <- c("ppx_xxp", "ppx_xxp_pxx", "ccx_xxp", "ppx_ccx_xxp", 'ppc') %>% rev()
 d$mdl <- factor(d$mdl, levels = order_mdls)
 
 d %>% 
