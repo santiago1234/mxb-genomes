@@ -60,16 +60,16 @@ demes:
 - name: PEL
   description: Admixed population in Peru
   ancestors: [IBS, MXB]
-  proportions: [0.738, 0.262]
-  start_time: 416
+  proportions: [0.893, 0.107]
+  start_time: 423
   epochs:
   - {end_time: 0, start_size: 20000}
 # PUR
 - name: PUR
   description: Admixed population in Puerto Rico
   ancestors: [IBS, MXB, YRI]
-  proportions: [0.6938, 0.1942, 0.112]
-  start_time: 344
+  proportions: [0.837,  0.151, 0.012]
+  start_time: 406
   epochs:
   - {end_time: 0, start_size: 20000}
 migrations:
@@ -88,8 +88,10 @@ migrations:
 - {source: IBS, dest: CLM, rate: 0.0617, end_time: 58}
 - {source: MXB, dest: CLM, rate: 0.0120, end_time: 58}
 # PEL
-- {source: MXB, dest: PEL, rate: 0.1184, end_time: 58}
-- {source: IBS, dest: PEL, rate: 0.0149, end_time: 58}
+- {source: MXB, dest: PEL, rate: 0.1236, end_time: 58}
+- {source: IBS, dest: PEL, rate: 0.0122, end_time: 58}
+# PUR
+- {source: AFR, dest: PUR, rate: 0.0103, end_time: 58}
 pulses:
   # MXL
   - sources: [YRI, CHB]
@@ -104,10 +106,5 @@ pulses:
   # PEL
   - sources: [YRI]
     dest: PEL
-    proportions: [0.04811]
-    time: 201
-  # PUR
-  - sources: [IBS, YRI]
-    dest: PUR
-    proportions: [0.23411, 0.052969]
-    time: 122
+    proportions: [0.0541]
+    time: 223
