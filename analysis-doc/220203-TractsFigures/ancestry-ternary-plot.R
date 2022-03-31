@@ -44,3 +44,16 @@ adx %>%
     fill = '#440154'
   )
 ggsave('plots/anc-p-ternary.pdf', height = 3, width = 4)
+
+adx %>% 
+  ggtern(aes(AFR, MXB, EUR)) +
+  geom_point(
+    data = select(adx, -Population),
+    color = 'grey', size = 0.5
+  ) +
+  geom_point(
+    aes(color = Population),
+    color = '#440154', size = 0.5
+  ) +
+  facet_wrap(~Population)
+ggsave('plots/anc-p-ternary-grid.pdf', height = 3, width = 4)

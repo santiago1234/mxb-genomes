@@ -29,9 +29,9 @@ plot_theme <-
 
 pr_12 <- admix_pc %>% 
   ggplot(aes(x = PC_1, y = PC_2)) +
-  geom_point(data = admix_pc_tmp, color = 'grey', shape = 4) +
+  geom_point(data = admix_pc_tmp, color = 'grey', shape = 4, size = 1.0) +
   geom_point(data = continental_pc, aes(fill = Subpopulation), shape = 21) +
-  geom_point(shape = 4, color = '#440154') +
+  geom_point(shape = 4, color = '#440154', size = 1.0) +
   scale_fill_manual(values = c('#21918c', '#5ec962', '#3b528b', '#fde725')) +
   facet_wrap(~ADMIX) +
   labs(
@@ -42,9 +42,9 @@ pr_12 <- admix_pc %>%
 
 pr_23 <- admix_pc %>% 
   ggplot(aes(x = PC_2, y = PC_3)) +
-  geom_point(data = admix_pc_tmp, color = 'grey', shape = 4) +
+  geom_point(data = admix_pc_tmp, color = 'grey', shape = 4, size = 1.0) +
   geom_point(data = continental_pc, aes(fill = Subpopulation), shape = 21) +
-  geom_point(shape = 4, color = '#440154') +
+  geom_point(shape = 4, color = '#440154', size = 1.0) +
   scale_fill_manual(values = c('#21918c', '#5ec962', '#3b528b', '#fde725')) +
   facet_wrap(~ADMIX) +
   labs(
@@ -76,10 +76,10 @@ admix_pc <-
 
 
 ps_12 <- admix_pc %>% 
-  ggplot(aes(x = PC_1, y = PC_2)) +
-  geom_point(data = admix_pc_tmp, color = 'grey', shape = 4) +
+  ggplot(aes(x = -PC_1, y = -PC_2)) +
+  geom_point(data = admix_pc_tmp, color = 'grey', shape = 4, size = 1.0) +
   geom_point(data = continental_pc, aes(fill = Subpopulation), shape = 21) +
-  geom_point(shape = 4, color = '#440154') +
+  geom_point(shape = 4, color = '#440154', size = 1.0) +
   scale_fill_manual(values = c('#21918c', '#5ec962', '#3b528b', '#fde725')) +
   facet_wrap(~ADMIX) +
   labs(
@@ -89,10 +89,10 @@ ps_12 <- admix_pc %>%
 
 
 ps_23 <- admix_pc %>% 
-  ggplot(aes(x = PC_2, y = -PC_3)) +
-  geom_point(data = admix_pc_tmp, color = 'grey', shape = 4) +
+  ggplot(aes(x = -PC_2, y = PC_3)) +
+  geom_point(data = admix_pc_tmp, color = 'grey', shape = 4, size = 1.0) +
   geom_point(data = continental_pc, aes(fill = Subpopulation), shape = 21) +
-  geom_point(shape = 4, color = '#440154') +
+  geom_point(shape = 4, color = '#440154', size = 1.0) +
   scale_fill_manual(values = c('#21918c', '#5ec962', '#3b528b', '#fde725')) +
   facet_wrap(~ADMIX) +
   labs(
@@ -100,6 +100,6 @@ ps_23 <- admix_pc %>%
   ) +
   plot_theme
 
-pdf('plots/PCAs.pdf', height = 6, width = 6)
+pdf('plots/PCAs.pdf', height = 5, width = 5)
 grid.arrange(pr_12, pr_23, ps_12, ps_23, ncol = 2)
 dev.off()
