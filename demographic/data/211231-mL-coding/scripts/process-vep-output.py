@@ -1,5 +1,6 @@
 """
-
+usage:
+    python process-vep-output.py <inputfile> <outputfile>
 VEP produces duplicated output. We do not want
 to double count mutations because it will produce an
 incorrect estimate.
@@ -8,17 +9,19 @@ Here, I remove duplicated elements. In case
 where a variant is assigned to multiple categories I pick
 the one with the highest impact (coding only).
 
-The idea is to have each position represented only once.
+The idea is to have each position and variant allele represented only once.
 """
 
+import sys
 import pandas as pd
 import itertools
 
-vep_fp = 'vep-chr22.txt'
+
+vep_fp, vep_uniq_out = sys.argv[1:]
 
 col_names = ['Uploaded_variation', 'Location', 'Allele', 'Gene', 'Feature_type', 'Consequence', 'Codons']
 vep = pd.read_csv(vep_fp, sep='\t', comment='#', names=col_names)
-
+print('done reading')
 
 # Remove duplicated columns
 
@@ -94,5 +97,5 @@ vep = pd.concat([vep_uniq, vep_m_msevere])
 vep['position'] = vep.Location.str.split(':').map(lambda x: int(x[1]))
 
 vep = vep.sort_values(by='position').drop(columns=['position'])
-vep.to_csv('vep-uniq-22.txt', sep='\t', index=False)
+vep.to_csv(vep_uniq_out, sep='\t', index=False)
 

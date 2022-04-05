@@ -32,7 +32,8 @@ rule masked_exons:
     shell:
         """
         bedtools intersect -a {input.exons} -b {input.mask} |\
-            sortBed >{output}
+            sortBed |\
+            bedtools merge >{output}
         """
 
 rule separate_coding_region_by_chromosome:
@@ -77,9 +78,11 @@ rule predict_variants:
     output:
         'data/tmp/variants/vep-chr{chrn}.txt.gz',
         'data/tmp/variants/vep-chr{chrn}.txt.gz_summary.html'
+    threads: 22
     shell:
         """
         ~/ensembl-vep/vep -i {input} --cache  \
+            --fork {threads} --verbose \
             --assembly GRCh38 --tab --output_file {output[0]} \
             --compress_output gzip  --fields \
             'Uploaded_variation,Location,Allele,Gene,Feature_type,Consequence,Codons'
