@@ -1,82 +1,46 @@
 library(tidyverse)
 library(scales)
 
-d <- read_csv('results/model.csv')
-d %>% 
-  ggplot(aes(Frq1, Frq2, fill= log10(Density))) +
-  geom_raster() +
-  scale_fill_viridis_c(limits=c(2, 4), oob=squish) 
+d <- read_csv('results/expected-observed-1dSFS.csv')
+d_background <- select(d, -Population)
 
+order_panel <- c('YRI', 'IBS', 'CHB', 'MXB')
+d$Population <- factor(d$Population, levels = order_panel)
 
-load_data <- function(df) {
-  
-  datype <- df %>% str_extract('(model|data|residuals)')
-  
-  read_csv(df) %>% 
-    select(-Pops) %>% 
-    pivot_longer(cols=-c(Pop1), values_to = 'Density', names_to='Pop2') %>% 
-    separate(Pop1, into=c('Pop_1', 'Frq1'), sep='_') %>% 
-    separate(Pop2, into=c('Pop_2', 'Frq2'), sep='_') %>% 
-    mutate(Comparison = paste0(Pop_1, '-',Pop_2)) %>% 
-    mutate(
-      Frq1 = as.integer(Frq1),
-      Frq2 = as.integer(Frq2),
-    ) %>% 
-    filter(
-      !(Frq1 == 0 & Frq2 == 0),
-      !(Frq1 == 20 & Frq2 == 20)
-    ) %>% 
-    mutate(
-      D_type = datype
-    )
-  
-}
+d_data <- filter(d, SF_from == 'Data')
+d_model <- filter(d, SF_from == 'Expected')
 
+d_background <- rename(d_model, p = Population)
 
-all_d <- list.files('results/', pattern = '*csv', full.names = T) %>% 
-  map_df(load_data)
-
-
-all_d %>% 
-  filter(
-    D_type != 'residuals'
-  ) %>% 
-  ggplot(aes(Frq1, Frq2, fill= log10(Density))) +
-  geom_raster() +
-  scale_x_continuous(expand = c(0, 0)) +
-  scale_y_continuous(expand = c(0, 0)) +
-  scale_fill_viridis_c(limits=c(2, 4), oob=squish, option = 'E') +
-  facet_grid(D_type~Comparison) +
-  theme(
-    panel.background = element_blank()
-  )
-  
-
-all_d %>% 
-  filter(
-    D_type == 'residuals'
-  ) %>% 
-  ggplot(aes(Frq1, Frq2, fill= Density)) +
-  geom_raster() +
-  scale_x_continuous(expand = c(0, 0)) +
-  scale_y_continuous(expand = c(0, 0)) +
-  scale_fill_gradient2(low = 'blue', high = 'red',mid = 'white', limits=c(-110, 110), oob=squish) +
-  facet_grid(D_type~Comparison) +
-  theme(
-    panel.background = element_blank()
-  )
-
-all_d %>% 
-  filter(
-    D_type == 'residuals'
-  ) %>% 
-  ggplot(
-    aes(x = Density)
+N <- 1.5
+d_data %>% 
+  ggplot(aes(x = Minor_allel_freq, y =  Frequency)) +
+  geom_line(
+    data = d_background,
+    aes(group = p),
+    color = 'grey',
+    size = 1 / 4
+    ) +
+  geom_point(size = 3.5 / N, color='dodgerblue4') +
+  geom_point(size = 1.2 / N, color='white') +
+  geom_line(
+    data = d_model,
+    color =  'darkorange',
+    linetype = 2,
+    size = 1 / 2
   ) +
-  geom_histogram(binwidth = 5) +
-  facet_wrap(.~Comparison, scales = 'free_y', nrow = 1) +
+  geom_point(
+    data = d_model,
+    color =  'darkorange',
+    size = 1.3 / N
+  ) +
+  scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x))) +
+  annotation_logticks(sides = 'l',size = 1 / 5) +
+  facet_wrap(~Population) +
+  theme_bw() +
   theme(
-    axis.ticks.y = element_blank(),
-    axis.text.y = element_blank(),
     panel.grid = element_blank()
   )
+ggsave('plots/obs-vs-exp.pdf', height = 3, width = 5)
+ 
