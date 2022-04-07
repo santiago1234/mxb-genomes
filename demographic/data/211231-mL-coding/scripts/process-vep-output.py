@@ -35,6 +35,7 @@ vep_multiple = vep_grp.filter(lambda x: len(x) > 1)
 vep_uniq = vep_grp.filter(lambda x: len(x) == 1)
 
 vep_multiple['csq_list'] = vep_multiple.Consequence.str.split(',')
+vep_uniq['csq_list'] = vep_uniq.Consequence.str.split(',')
 
 
 # We want the most severe consequences (when multiple) accoring to the next rank
@@ -71,6 +72,10 @@ def get_most_severq_seq(csq_list):
             most_sever = x
             return most_sever
     return most_sever
+
+
+vep_uniq['Consequence'] = vep_uniq.csq_list.apply(get_most_severq_seq)
+vep_uniq = vep_uniq.drop(columns=['csq_list'])
 
 
 vep_multiple['Consequence'] = vep_multiple.csq_list.apply(get_most_severq_seq)
