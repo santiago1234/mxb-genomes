@@ -84,8 +84,19 @@ rule predict_variants:
         ~/ensembl-vep/vep -i {input} --cache  \
             --fork {threads} --verbose \
             --assembly GRCh38 --tab --output_file {output[0]} \
-            --compress_output gzip  --fields \
+            --compress_output gzip --coding_only  --fields \
             'Uploaded_variation,Location,Allele,Gene,Feature_type,Consequence,Codons'
+        """
+
+rule process_vep_output:
+    """Remove repeated calls"""
+    input:
+        'data/tmp/variants/vep-chr{chrn}.txt.gz',
+    output:
+        'data/tmp/variants/vep-chr{chrn}-UNIQ.txt'
+    shell:
+        """
+        python scripts/process-vep-output.py {input} {output}
         """
 
 
@@ -103,14 +114,14 @@ rule get_variant_cat:
     and selects unqique rows. VEP sometimes duplicates rows.
     """
     input:
-        'data/tmp/variants/vep-chr{chrn}.txt.gz'
+        'data/tmp/variants/vep-chr{chrn}-UNIQ.txt'
     output:
         temp("data/tmp/varcat/chr{chrn}-{varcat}.txt")
     params:
         so_term = vep_get_consequence_SO_term
     shell:
         """
-        zcat {input} |\
+        cat {input} |\
             grep -E '{params.so_term}' |\
             cut -f1,2,3,4,7 |\
             sort |\
