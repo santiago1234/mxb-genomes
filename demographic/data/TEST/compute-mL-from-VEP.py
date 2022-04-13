@@ -1,14 +1,21 @@
 """
 Compute mL from vep output.
+
+usage: python compute-mL-from-VEP.py <vep-input> <mutations-rates-file> <chrn> <output>
+
+Args:
+    vep-input: The VEP input file.
+    mutations-rates-file: This file:
+        ../211128-compute-mL/data/mutation_rate_methylation_bins.txt
+    chrn: chromose
+    output: Output file to save mLs.
 """
+import sys
 import re
 import pandas as pd
 from Bio.Seq import Seq
 
-vep_file = 'vep-chr22-UNIQ.txt.gz'
-mus_file = '../211128-compute-mL/data/mutation_rate_methylation_bins.txt'
-chrn = 22
-output = 'mL-chr22.csv'
+vep_file, mus_file, chrn, output = sys.argv[1:]
 
 vep = pd.read_csv(vep_file, sep='\t')
 
