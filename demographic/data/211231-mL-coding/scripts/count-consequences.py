@@ -6,7 +6,7 @@ import re
 import sys
 
 vep_file, chrn, output = sys.argv[1:]
-vep = pd.read_csv('vep-chr22-UNIQ.txt.gz', sep='\t')
+vep = pd.read_csv(vep_file, sep='\t')
 
 cpgs = ["CGA", "CGT", "CGG", "ACG", "TCG", "GCG", "CCG", "CGC"]
 exclude_cpgs = True

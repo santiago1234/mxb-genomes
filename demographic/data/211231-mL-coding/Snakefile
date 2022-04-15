@@ -111,76 +111,15 @@ rule compute_mL:
         python scripts/compute-mL-from-VEP.py {input.vep} {input.mus} {wildcards.chrn} {output}
         """
 
-
-#def vep_get_consequence_SO_term(wildcards):
-#    """
-#    The SO term is use to annotate the variant consequence.
-#    See: https://m.ensembl.org/info/genome/variation/prediction/predicted_data.html
-#    """
-#    return CATEGORIES[wildcards.varcat]
-#
-#
-#rule get_variant_cat:
-#    """
-#    Filters the variants by category
-#    and selects unqique rows. VEP sometimes duplicates rows.
-#    """
-#    input:
-#        'data/tmp/variants/vep-chr{chrn}-UNIQ.txt'
-#    output:
-#        temp("data/tmp/varcat/chr{chrn}-{varcat}.txt")
-#    params:
-#        so_term = vep_get_consequence_SO_term
-#    shell:
-#        """
-#        cat {input} |\
-#            grep -E '{params.so_term}' |\
-#            cut -f1,2,3,4,7 |\
-#            sort |\
-#            uniq >{output}
-#        """
-#
-#
-#rule get_all_genome_vars:
-#    """
-#    One variant file for all the genome
-#    """
-#    input:
-#        expand("data/tmp/varcat/chr{chrn}-{{varcat}}.txt", chrn=CHROM)
-#    output:
-#        "data/tmp/varcat/all-{varcat}.txt"
-#    shell:
-#        """
-#        cat {input} >{output}
-#        """
-#
-#
-#rule count_variants:
-#    input:
-#        "data/tmp/varcat/all-{varcat}.txt"
-#    output:
-#        "data/variant-counts/all-{varcat}.tsv"
-#    shell:
-#        """
-#        python scripts/count-context-seqs.py {input} {output}
-#        """
-#
-#
-#rule compute_mL:
-#    input:
-#        "../211128-compute-mL/data/mutation_rate_methylation_bins.txt",
-#        "data/variant-counts/all-{varcat}.tsv"
-#    output:
-#        "results/mL-{varcat}.txt"
-#    shell:
-#        """
-#        python scripts/compute-mL.py {input[1]} {input[0]} {output}
-#        """
-#
-#
-#rule all:
-#    input:
-#        expand("results/mL-{varcat}.txt", varcat=CATEGORIES.keys())
-#        
-#    
-#
+rule count_variant_by_categories:
+    '''
+    How many variants are missense, etc.
+    '''
+    input:
+        vep = 'data/tmp/variants/vep-chr{chrn}-UNIQ.txt'
+    output:
+        'results/counts-chr{chrn}.csv'
+    shell:
+        """
+        python scripts/count-consequences.py {input.vep} {wildcards.chrn} {output}
+        """
