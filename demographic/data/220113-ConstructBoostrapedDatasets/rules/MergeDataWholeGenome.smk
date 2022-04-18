@@ -20,22 +20,33 @@ rule whole_genome_spectrum:
         gzip  {params.pklfile}
         '''
 
-rule whole_genome_mL_noncoding:
+
+def input_mL_files(wildcards):
+    if wildcards.funcat in ['introns', 'intergenic']:
+        begf = 'data/mL-noncoding/mLs/mL_' + wildcards.funcat + '_chunk_'
+        inputs = [begf + str(i) + '.txt' for i in BOOSTRAPS]
+        return inputs
+    if wildcards.funcat in ['synonymous', 'missense', 'LOF']:
+        begf = 'data/mL-coding/mLs/mL_' + wildcards.funcat + '_chunk_'
+        inputs = [begf + str(i) + '.txt' for i in BOOSTRAPS]
+        return inputs
+
+
+rule whole_genome_mL:
     input:
-        mls = expand('data/mL-noncoding/mLs/mL_{{ncregion}}_chunk_{i}.txt', i=BOOSTRAPS)
+        input_mL_files
     output:
-        'data/whole-genome/mL-{ncregion}.txt'
+        'data/whole-genome/mL-{funcat}.txt'
     shell:
         '''
         cat {input} |\
             cut -d' ' -f2 |\
             awk '{{sum+=$1;}} END{{print sum;}}' >{output}
         '''
-        
 
 
 rule all_whole_genome:
     input:
         expand('data/whole-genome/spectrum-cat_{varcat}.pkl.gz', varcat=CATEGORIES.keys()),
-        expand('data/whole-genome/mL-{ncregion}.txt', ncregion=['introns', 'intergenic'])
+        expand('data/whole-genome/mL-{funcat}.txt', funcat=['introns', 'intergenic', 'synonymous', 'missense', 'LOF'])
         
