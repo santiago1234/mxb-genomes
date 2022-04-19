@@ -1,0 +1,52 @@
+description: The Gutenkunst et al. (2009) three-population model of human history,
+  modified by replacing CEU with IBS.
+time_units: years
+generation_time: 29
+doi: ['https://doi.org/10.1371/journal.pgen.1000695']
+demes:
+- name: ancestral
+  description: Equilibrium/root population
+  epochs:
+  - {end_time: 369957.6889107653, start_size: 13410.865769706177}
+- name: AMH
+  description: Anatomically modern humans
+  ancestors: [ancestral]
+  epochs:
+  - {end_time: 105570.31831046475, start_size: 25782.15537813832}
+- name: OOA
+  description: Bottleneck out-of-Africa population
+  ancestors: [AMH]
+  epochs:
+  - {end_time: 51621.75648288937, start_size: 2247.4646383294776}
+- name: YRI
+  description: Yoruba in Ibadan, Nigeria
+  ancestors: [AMH]
+  epochs:
+  - {end_time: 0, start_size: 25782.15537813832}
+- name: IBS
+  description: Iberian populations in Spain (IBS).
+  ancestors: [OOA]
+  epochs:
+  - {end_time: 0, start_size: 2846.9974173132127, end_size: 31955.388865839224}
+- name: CHB
+  description: Han Chinese in Beijing, China
+  ancestors: [OOA]
+  epochs:
+  - {end_time: 0, start_size: 1840.4922606885295, end_size: 17037.50128023004}
+# Parameters specific to the NAT population
+# See: https://github.com/santiago1234/mxb-genomes/blob/main/demographic/models/211124-TestParametrizationInNative/model-parametrizations/03ExponentialChange.yml
+- name: MXB
+  description: Native American,  Mexico.
+  start_time: 32384.645992816106
+  ancestors: [CHB]
+  epochs:
+  - {end_time: 0, start_size: 1000, end_size: 5000}
+migrations:
+- demes: [YRI, IBS]
+  rate: 2.381732471977622e-05
+- demes: [YRI, CHB]
+  rate: 4.441393731814621e-06
+- demes: [IBS, CHB]
+  rate: 5.9481693974286696e-05
+- demes: [YRI, OOA]
+  rate: 0.00014321068257872624

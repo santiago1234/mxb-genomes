@@ -78,13 +78,19 @@ rule infer_NAT_EXPANSION:
 ### ************* MODEL UNCERTAINTY ******************* ####
 ### *************************************************** ####
 
+def get_bootstrap_mLs_path(wildcards):
+    if wildcards.varcat in ['intergenic', 'intronic']:
+        return '../../data/220113-ConstructBoostrapedDatasets/data/mL-noncoding/mLs/'
+    if wildcards.varcat in ['synonymous']:
+        return '../../data/220113-ConstructBoostrapedDatasets/data/mL-coding/mLs/'
+
 
 rule put_genome_chunks_in_file:
     # I have a file for each genome chunk
     # here i put them together in a python list object
     input:
-        sfs_path = directory('../../data/220113-ConstructBoostrapedDatasets/data/jSFS/spectrums/'),
-        mL_path = directory('../../data/220113-ConstructBoostrapedDatasets/data/mL-noncoding/mLs/')
+        sfs_path = '../../data/220113-ConstructBoostrapedDatasets/data/jSFS/spectrums/',
+        mL_path = get_bootstrap_mLs_path
 
     output:
         'data/boostrap-replicates/{varcat}-GENOME-CHUNKS.pkl.gz'
