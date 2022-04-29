@@ -53,6 +53,11 @@ print("Final population sizes =", pop.deme_sizes())
 
 # add neutral mutations
 # The mutation rate, per haploid genome per generation
+print('adding neutral mutations')
 u = 1e-8
 nmuts = fwdpy11.infinite_sites(rng, pop, u)
 print(f"{nmuts} neutral mutations added")
+
+# save the simulation results
+with gzip.open('data/sim-pop.gz', 'wb') as f:
+    pop.pickle_to_file(f)
