@@ -37,6 +37,10 @@ ts = msprime.sim_ancestry(
 
 print('adding mutations ...')
 # We set discrete_genome=False to use the infinite sites model
-mts = msprime.sim_mutations(ts, rate=1e-8, random_seed=42, discrete_genome=False)
+mts = msprime.sim_mutations(ts, rate=1e-8, random_seed=42)
+
 
 mts.dump('data/ts-msprime.ts')
+
+with open("data/simulated-genomes.vcf", "w") as vcf_file:
+    mts.write_vcf(vcf_file)
