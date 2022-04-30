@@ -9,7 +9,7 @@ rec_rate = 1e-8
 # the mutation rate
 u = 1e-8
 N_ind_per_deme = 50  #samples per population 
-L = 1e6
+L = 10 * 1e6
 
 
 graph = demes.load("ADMIXTURE-MXL.yml")

@@ -9,7 +9,7 @@ graph = demes.load('ADMIXTURE-MXL.yml')
 demog = fwdpy11.discrete_demography.from_demes(graph)
 
 # set up the region to simulate
-L = 1e6  # length in base pairs
+L = 10 * 1e6  # length in base pairs
 r = 1e-8  # the recombination rate per base pair
 print("r * L =", r * L)
 
@@ -55,7 +55,7 @@ print("Final population sizes =", pop.deme_sizes())
 # The mutation rate, per haploid genome per generation
 print('adding neutral mutations')
 u = 1e-8
-nmuts = fwdpy11.infinite_sites(rng, pop, u)
+nmuts = fwdpy11.infinite_sites(rng, pop, u*L)
 print(f"{nmuts} neutral mutations added")
 
 # save the simulation results
