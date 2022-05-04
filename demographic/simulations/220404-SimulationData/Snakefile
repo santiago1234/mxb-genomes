@@ -1,0 +1,24 @@
+
+## SET VARIABLES
+CHROM = list(range(1, 23))
+CHUNK_LENGTH = int(1e6)  # 1Mb regions
+# Bassed on the CHUNK_LENGTH there will be this number
+# of fragments
+N_CHUNKS = range(1, 2615 + 1)
+CATEGORIES = {
+    'synonymous': 'synonymous_variant',
+    'missense': 'missense_variant',
+	'lof': 'stop_gained,stop_lost,start_lost',
+    'intergenic': 'intergenic_variant',
+    'intronic': 'intron_variant'
+}
+
+def vep_get_consequence_SO_term(wildcards):
+    """
+    The SO term is use to annotate the variant consequence.
+    See: https://m.ensembl.org/info/genome/variation/prediction/predicted_data.html
+    """
+    return CATEGORIES[wildcards.varcat]
+
+
+include: 'rules/SampledRegions.smk'
