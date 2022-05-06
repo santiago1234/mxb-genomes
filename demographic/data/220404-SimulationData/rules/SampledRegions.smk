@@ -18,7 +18,7 @@ rule sample_regions:
             shuf -n {params.N} >tmp-sr.txt
         for i in {{1..{params.N}}}
         do
-            head -n {params.N} tmp.txt | tail -n1 |cut -f1,2,3 >data/samples/region_region_${{i}}.bed
+            head -n {params.N} tmp-sr.txt | tail -n1 |cut -f1,2,3 >data/samples/region_region_${{i}}.bed
         done
         rm -f tmp-sr.txt
         """
