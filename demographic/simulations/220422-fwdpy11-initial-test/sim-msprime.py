@@ -8,7 +8,7 @@ import gzip
 rec_rate = 1e-8
 # the mutation rate
 u = 1e-8
-N_ind_per_deme = 50  #samples per population 
+N_ind_per_deme = 25  #samples per population 
 L = 10 * 1e6
 
 
