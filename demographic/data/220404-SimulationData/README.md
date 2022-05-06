@@ -3,7 +3,9 @@
 We divided the genome in 1Mb chunks.
 
 NOTE: We wont simulate the whole genome, I will take samples of 1Mb size
-only from chromosome 1 and 2.
+only from.
+
+I will take 200 samples, meaning 200Mb.
 
 ## Input data
 
@@ -18,6 +20,15 @@ only from chromosome 1 and 2.
 
 - VEP
 - bedtools
+- pybedtools
+
+## What I do?
+
+0. Sample regions of the genome to simulate, I exclude region that have more than 20% masked sites.
+1. Compute mutation rates, here I use the pipeline to compute the mutation rates in coding and 
+non coding sequences.
+2. Generate bed intervals, in each region, for the exonic and non-coding (intronic and intergenic).
+3. Get the recombination map.
 
 
 NOTE: Recombination map.

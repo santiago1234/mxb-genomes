@@ -1,39 +1,24 @@
-rule sr_make_genome_windows:
-    input:
-        '../../data/220113-ConstructBoostrapedDatasets/data/human-autosomes.genome'
+rule define_regions:
     output:
-        'data/chunks/genome-in-1MB-non-overlaping-windows.bed'
+        'data/regions-to-sample.csv'
     shell:
-        '''
-        # bedtools complains for having column names
-        tail -n +2 {input} |\
-            bedtools makewindows -g - -w 100000 >{output}
-        '''
+        'python scripts/defined-sampled-regions.py'
 
 
-rule sr_region:
+rule sample_regions:
     input:
-        "data/chunks/genome-in-1MB-non-overlaping-windows.bed"
+        'data/regions-to-sample.csv'
     output:
-        temp(expand('data/chunks/chunk_{i}', i=N_CHUNKS))
+        expand('data/samples/region_region_{i}.bed', i=list(range(1, N_REGIONS + 1)))
+    params:
+        N = N_REGIONS
     shell:
         """
-        python scripts/define-windows.py {input}
+        sed '1d' {input} |\
+            shuf -n {params.N} >tmp-sr.txt
+        for i in {{1..{params.N}}}
+        do
+            head -n {params.N} tmp.txt | tail -n1 |cut -f1,2,3 >data/samples/region_region_${{i}}.bed
+        done
+        rm -f tmp-sr.txt
         """
-
-
-rule sr_merge_region:
-    # Merge, this is just for a nicer format in output files.
-    input:
-        'data/chunks/chunk_{i}'
-    output:
-        'data/regions/region_{i}.bed'
-    shell:
-        '''
-        bedtools merge -i {input} >{output}
-        '''
-
-
-rule sr_all:
-    input:
-        expand('data/regions/region_{i}.bed', i=N_CHUNKS)
