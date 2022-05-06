@@ -46,7 +46,7 @@ def region_percent_mask(chrn, start, end):
         
 
 ## TODO: Modigfy the number below to run all genome
-regions = pd.concat([make_1mb_windows_in_chr(i) for i in range(21, 23)])
+regions = pd.concat([make_1mb_windows_in_chr(i) for i in range(1, 23)])
 
 ## add a column with the percentage masked
 regions['masked_percent'] = regions.apply(lambda x: 

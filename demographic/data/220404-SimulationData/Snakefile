@@ -1,6 +1,16 @@
 ## SET VARIABLES
 # The number of regions I will sample
-N_REGIONS = 10
+N_REGIONS = 200
+
+SAMPLED_REG = list(range(1, N_REGIONS + 1))
+
+
+rule all:
+    input:
+        expand('data/samples/region_{xx}_{i}.bed', xx=['region', 'exons', 'intronANDinterg'], i=SAMPLED_REG),
+        expand('data/samples/region_mlcoding_{i}.csv', i=SAMPLED_REG),
+        expand('data/samples/region_mlnoncoding_{i}.txt', i=SAMPLED_REG)
+
 
 include: 'rules/SampledRegions.smk'
 include: 'rules/mlNonCoding.smk'
