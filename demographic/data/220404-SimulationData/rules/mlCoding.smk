@@ -7,10 +7,10 @@ rule cr_exons_in_region:
         'data/samples/region_exons_{i}.bed'
     shell:
         '''
-        bedtools intersect -a {input.exons} -b {input.regions} |\
-            sort -k 1,1 -k2,2n |\
-            bedtools merge -i - |\
-            sed 's/^chr//g' >{output}
+        sed 's/^chr//g' {input.exons} |\
+        bedtools intersect -a - -b {input.regions} |\
+            sort -k 1,1n -k2,2n |\
+            bedtools merge -i -  >{output}
         '''
 
 rule cr_all_possible_variants_in_reg:

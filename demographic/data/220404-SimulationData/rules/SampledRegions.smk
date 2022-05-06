@@ -15,6 +15,7 @@ rule sample_regions:
     shell:
         """
         sed '1d' {input} |\
+            sed 's/^chr//g' |\
             shuf -n {params.N} >tmp-sr.txt
         for i in {{1..{params.N}}}
         do
