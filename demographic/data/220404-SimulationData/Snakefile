@@ -4,6 +4,20 @@ N_REGIONS = 200
 
 SAMPLED_REG = list(range(1, N_REGIONS + 1))
 
+rule exonic_intervals:
+    output: 'data/exons.bed'
+    shell: 'Rscript scripts/Retrieve-exons-conding-gene-only.R'
+
+rule sort_exons_and_merge:
+    input: 'data/exons.bed'
+    output: 'data/exons-sorted-merged.bed'
+    shell:
+        '''
+         sort -k 1,1n -k2,2n {input} |\
+            bedtools merge -i - >{output}
+        '''
+
+
 
 rule all:
     input:

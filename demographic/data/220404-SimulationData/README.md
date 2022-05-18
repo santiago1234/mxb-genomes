@@ -11,10 +11,10 @@ I will take 200 samples, meaning 200Mb.
 
 - Chromosome size: [here](../220113-ConstructBoostrapedDatasets/data/human-autosomes.genome)
 - Recombination map: See note a the end
-- Exon bed intervals: [this script](../211231-mL-coding/data/regions/exones.bed)
 - Intronic and intergenic bed intervals: [this script](../211128-compute-mL/00-get-intronic-intergenic-regions.R)
 
-
+I use this [script](scripts/Retrieve-exons-conding-gene-only.R) to get the exonic intervals
+of the protein coding genes only.
 
 ## What do you need to run this pipeline?
 
@@ -24,7 +24,7 @@ I will take 200 samples, meaning 200Mb.
 
 ## What I do?
 
-0. Sample regions of the genome to simulate, I exclude region that have more than 20% masked sites.
+0. Sample regions of the genome to simulate, I sample from the top 3rd regions with higher exon content.
 1. Compute mutation rates, here I use the pipeline to compute the mutation rates in coding and 
 non coding sequences.
 2. Generate bed intervals, in each region, for the exonic and non-coding (intronic and intergenic).
