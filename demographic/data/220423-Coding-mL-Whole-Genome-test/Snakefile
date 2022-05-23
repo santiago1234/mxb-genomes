@@ -1,0 +1,5 @@
+
+rule get_coding_regions:
+    output:
+        'data/coding-regions.bed'
+    shell: 'Rscript scripts/get-coding-regions.R'
