@@ -44,6 +44,14 @@ vep = vep.drop(columns=['Gene', 'Feature_type'])  #We dont need this info
 # This function extracts the context sequence from the id
 get_context = lambda x: re.search(r'_[ACGT]{5}_', x).group(0)[2:-2]
 
+has_contex = lambda x: bool(re.search(r"_[ACGT]{5}_", x))
+
+# I added this line, because sometimes there are masked cites NN and the 
+# pattern above does not exists, I drop masked or unknow bases.
+# Which are just a few.
+vep = vep[vep.Uploaded_variation.map(has_contex)].copy()
+
+
 vep['context'] = vep.Uploaded_variation.map(get_context)
 
 
