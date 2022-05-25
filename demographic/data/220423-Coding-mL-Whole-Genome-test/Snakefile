@@ -3,3 +3,109 @@ rule get_coding_regions:
     output:
         'data/coding-regions.bed'
     shell: 'Rscript scripts/get-coding-regions.R'
+
+
+rule sort_merge_coding:
+    """
+    The regions must be sorted.
+    """
+    input:
+        'data/coding-regions.bed'
+    output:
+        'data/coding-regions-sorted.bed'
+    shell:
+        '''
+        sort -k1,1n -k2,2n {input} |\
+            bedtools merge -i - >{output}
+        '''
+
+rule coding_length:
+    '''
+    What is the total length of the non-coding intervals?
+    '''
+    input:
+        'data/coding-regions-sorted.bed'
+    output:
+        'data/coding-length.txt'
+    shell:
+        '''
+        awk '{{ $4 = $3 - $2 }} 1' {input} |\
+            awk '{{sum+=$4;}} END{{print sum;}}' >{output}
+        '''
+
+
+rule separate_coding_region_by_chromosome:
+    """
+    I do this to run the pipeline in parallel (by chromosome).
+    """
+    input:
+        'data/coding-regions-sorted.bed'
+    output:
+        'data/tmp/regions/chr{chrn}-exons.bed'
+    shell:
+        '''
+        grep -E "^{wildcards.chrn}\t" {input} >{output}
+        '''
+
+
+rule get_all_possible_variants_in_Regions:
+    input:
+        bed = 'data/tmp/regions/chr{chrn}-exons.bed',
+        genome = '/data/users/smedina/data-resources/genomes/GRCh38.primary_assembly.genome-nochrprefix.fasta'
+    output:
+        'data/tmp/variants/chr{chrn}.bed.gz'
+    params:
+        outbed = 'data/tmp/variants/chr{chrn}.bed'
+    shell:
+        '''
+        python ../211231-mL-coding/scripts/all-snps-in-regions.py {input.bed} {input.genome} {params.outbed}
+        # I run a sort to make sure
+        # we have only unique variants, so we are not counting overlapping regions twice
+        # Then i sort the file by position.
+        sort {params.outbed} |\
+            uniq |\
+            sort -k 2,2n |\
+            gzip >{output}
+        rm -f {params.outbed}
+        '''
+
+rule predict_variants:
+    input:
+        'data/tmp/variants/chr{chrn}.bed.gz'
+    output:
+        'data/tmp/variants/vep-chr{chrn}.txt.gz',
+        'data/tmp/variants/vep-chr{chrn}.txt.gz_summary.html'
+    threads: 10
+    shell:
+        """
+        ~/ensembl-vep/vep -i {input} --cache  \
+            --fork {threads} --verbose \
+            --assembly GRCh38 --tab --output_file {output[0]} \
+            --compress_output gzip --coding_only  --fields \
+            'Uploaded_variation,Location,Allele,Gene,Feature_type,Consequence,Codons'
+        """
+
+
+
+rule process_vep_output:
+    """Remove repeated calls"""
+    input:
+        'data/tmp/variants/vep-chr{chrn}.txt.gz',
+    output:
+        'data/tmp/variants/vep-chr{chrn}-UNIQ.txt'
+    shell:
+        """
+        python ../211231-mL-coding/scripts/process-vep-output.py {input} {output}
+        """
+
+
+rule compute_mL:
+    input:
+        vep = 'data/tmp/variants/vep-chr{chrn}-UNIQ.txt',
+        mus = '../211128-compute-mL/data/mutation_rate_methylation_bins.txt'
+    output:
+        'results/mLs-chr{chrn}.csv'
+    shell:
+        """
+        python scripts/compute-mL-from-VEP.py {input.vep} {input.mus} {wildcards.chrn} {output}
+        """
