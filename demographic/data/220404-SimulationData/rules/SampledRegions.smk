@@ -2,7 +2,7 @@ rule define_regions:
     output:
         'data/regions-to-sample.csv'
     shell:
-        'python scripts/defined-sampled-regions.py'
+        'python scripts/sample-exon-rich.py'
 
 
 rule sample_regions:

@@ -1,14 +1,13 @@
 rule cr_exons_in_region:
     input:
-        # NOTE: We are passing the non-masked exons
-        exons = '../211231-mL-coding/data/regions/exones.bed',
+        # NOTE: We are passing the non-masked coding regions of the genome
+        exons = '../220423-Coding-mL-Whole-Genome-test/data/coding-regions-sorted.bed',
         regions = 'data/samples/region_region_{i}.bed'
     output:
         'data/samples/region_exons_{i}.bed'
     shell:
         '''
-        sed 's/^chr//g' {input.exons} |\
-        bedtools intersect -a - -b {input.regions} |\
+        bedtools intersect -a {input.exons} -b {input.regions} |\
             sort -k 1,1n -k2,2n |\
             bedtools merge -i -  >{output}
         '''
