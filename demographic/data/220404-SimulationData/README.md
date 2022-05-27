@@ -12,9 +12,9 @@ I will take 200 samples, meaning 200Mb.
 - Chromosome size: [here](../220113-ConstructBoostrapedDatasets/data/human-autosomes.genome)
 - Recombination map: See note a the end
 - Intronic and intergenic bed intervals: [this script](../211128-compute-mL/00-get-intronic-intergenic-regions.R)
-
-I use this [script](scripts/Retrieve-exons-conding-gene-only.R) to get the exonic intervals
-of the protein coding genes only.
+- Interval for coding regions of the genome: [this script](../220423-Coding-mL-Whole-Genome-test/scripts/get-coding-regions.R)
+NOTE: I am ussing the intervals for the coding regions, before i used the intervals for the exonic regions, but
+exonic regions may contain non coding exons, for example long non coding rnas.
 
 ## What do you need to run this pipeline?
 
