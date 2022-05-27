@@ -23,7 +23,7 @@ def make_1mb_windows_in_chr(chro):
     return pd.DataFrame(regions, columns=['chrn', 'start', 'end'])
 
 
-exons = pybedtools.BedTool('data/exons-sorted-merged.bed')
+exons = pybedtools.BedTool('../220423-Coding-mL-Whole-Genome-test/data/coding-regions-sorted.bed')
 
 def region_exon_len(chrn, start, end):
     print(f'Getting {chrn} {start}, {end}')
