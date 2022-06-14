@@ -1,0 +1,5 @@
+rule run_simul:
+    output:
+        'results/simulations/sim-seed-{rseed}-pop.gz'
+    shell:
+        'python test-simulation.py {wildcards.rseed}'
