@@ -1,5 +1,5 @@
 rule run_simul:
     output:
-        'results/simulations/sim-seed-{rseed}-pop.gz'
+        'results/simulations/sim-seed-{rseed}-pop.bin'
     shell:
         'python test-simulation.py {wildcards.rseed}'
