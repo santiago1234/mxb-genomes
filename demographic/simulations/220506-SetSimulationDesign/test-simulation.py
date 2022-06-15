@@ -109,7 +109,7 @@ SIM_LEN = 10 * pop.N
 p = {
     # neutral mutations (none for now, can add after the fact)
     "nregions": nregions,
-    "gvalue": fwdpy11.Additive(2.0),  # fitness model
+    "gvalue": fwdpy11.Multiplicative(2.0),  # fitness model
     "sregions": sregions,
     "recregions": recregions,
     "rates": rates,
