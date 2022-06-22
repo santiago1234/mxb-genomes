@@ -16,10 +16,10 @@ print(f'simulation for: {out_file}')
 
 
 mut_labels = {
-    'neutral': 0,
-    'missense': 1,
-    'synonymous': 2,
-    'LOF': 3,
+    'neutral': 'intergenic_and_intronic',
+    'missense': 'missense',
+    'synonymous': 'synonymous',
+    'LOF': 'LOF',
 }
 
 # Make neutral geneic regions
@@ -59,7 +59,8 @@ for _, exon in sim_dat.coding_intervals.iterrows():
         fwdpy11.GammaS(
             beg=exon.start, end=exon.end,
             weight=sim_dat.m_missense,
-            mean=mean_s, shape_parameter=shape,
+            mean=-mean_s,  # NOTE: Mean is negative
+            shape_parameter=shape,
             h=1,
             label=mut_labels['missense'])
     )
@@ -68,7 +69,8 @@ for _, exon in sim_dat.coding_intervals.iterrows():
         fwdpy11.GammaS(
             beg=exon.start, end=exon.end,
             weight=sim_dat.m_LOF,
-            mean=mean_s_lof, shape_parameter=shape_lof,
+            mean=-mean_s_lof,  # NOTE: Mean is negative
+            shape_parameter=shape_lof,
             h=1,
             label=mut_labels['LOF'])
     )
@@ -97,7 +99,7 @@ rates = fwdpy11.MutationAndRecombinationRates(
     recombination_rate=None)
 
 
-Ne = 5000
+Ne = 10000
 pop = fwdpy11.DiploidPopulation(N=Ne, length=int(1e6))
 pop.N
 pop.tables.genome_length
