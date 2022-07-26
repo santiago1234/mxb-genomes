@@ -4,6 +4,7 @@ import time
 import gzip
 sys.path.append('../')
 from simutils import utils
+from simutils.utils import DFE_missense, DFE_lof
 
 # Load the test data
 
@@ -39,18 +40,7 @@ for _, exon in sim_dat.coding_intervals.iterrows():
                        weight=sim_dat.m_synonymous, label=mut_labels['synonymous'])
     )
 
-# DFEs and selected regions
-Ne = 11372.91
-shape = 0.1596
-scale = 2332.3
-mean_s = (shape * scale) / (2 * Ne)
-
-
-# DFE for LOF
-shape_lof = 0.3589
-scale_lof = 7830.5
-mean_s_lof = (shape_lof * scale_lof) / (2 * Ne)
-
+## SELECTED REGIONS
 
 sregions = []
 for _, exon in sim_dat.coding_intervals.iterrows():
@@ -59,8 +49,8 @@ for _, exon in sim_dat.coding_intervals.iterrows():
         fwdpy11.GammaS(
             beg=exon.start, end=exon.end,
             weight=sim_dat.m_missense,
-            mean=-mean_s,  # NOTE: Mean is negative
-            shape_parameter=shape,
+            mean=-DFE_missense.mean(),  # NOTE: Mean is negative
+            shape_parameter=DFE_missense.shape,
             h=1,
             label=mut_labels['missense'])
     )
@@ -69,8 +59,8 @@ for _, exon in sim_dat.coding_intervals.iterrows():
         fwdpy11.GammaS(
             beg=exon.start, end=exon.end,
             weight=sim_dat.m_LOF,
-            mean=-mean_s_lof,  # NOTE: Mean is negative
-            shape_parameter=shape_lof,
+            mean=-DFE_missense.mean(),  # NOTE: Mean is negative
+            shape_parameter=DFE_missense.shape,
             h=1,
             label=mut_labels['LOF'])
     )
