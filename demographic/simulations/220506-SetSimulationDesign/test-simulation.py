@@ -9,17 +9,17 @@ from simutils import utils
 
 sim_dat = utils.simuldata(path_to_samples='test-data/',
                           sample_id=23, path_to_genetic_maps='test-data/')
-random_seed = sys.arg[1:][0]
+random_seed = sys.argv[1:][0]
 random_seed = int(random_seed)
 out_file = f'results/simulations/sim-seed-{random_seed}-pop.bin'
 print(f'simulation for: {out_file}')
 
 
 mut_labels = {
-    'neutral': 'intergenic_and_intronic',
-    'missense': 'missense',
-    'synonymous': 'synonymous',
-    'LOF': 'LOF',
+    'neutral': 0,
+    'missense': 1,
+    'synonymous': 2,
+    'LOF': 3,
 }
 
 # Make neutral geneic regions
