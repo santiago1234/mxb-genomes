@@ -1,5 +1,8 @@
 """
-Helper functions to run the simulations
+Helper functions to run the simulations.
+
+Here I define a class SimData to keep
+the data needed to run one simulation.
 """
 
 from collections import namedtuple
@@ -8,6 +11,27 @@ import pandas as pd
 import numpy as np
 import msprime
 
+
+#### DFE
+### These DFEs were inferred by Aaron, in this paper: https://academic.oup.com/genetics/advance-article/doi/10.1093/genetics/iyac097/6613932?login=true
+
+_DFE_base = namedtuple('DFE', 'varian_class, shape, scale, h, Ne')
+
+class DFE(_DFE_base):
+    """
+    Distribution of Fitnest Effects
+    """
+    __slots__ = ()
+
+    def mean(self):
+        """
+        Get the mean of the distribution.
+        """
+        return (self.scale * self.shape) / (2 * self.Ne)
+
+
+DFE_missense = DFE(varian_class='missense', shape=0.147, scale=2117, h=0.5, Ne=12300)
+DFE_lof = DFE(varian_class='LOF', shape=0.188, scale=121419, h=0.5, Ne=12300)
 
 # test_data
 
@@ -34,6 +58,7 @@ _fields = [
 ]
 
 BaseSimData = namedtuple("SimData", _fields)
+
 
 
 class SimData(BaseSimData):
