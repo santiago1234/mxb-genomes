@@ -89,7 +89,7 @@ rates = fwdpy11.MutationAndRecombinationRates(
     recombination_rate=None)
 
 
-Ne = 10000
+Ne = 5000
 pop = fwdpy11.DiploidPopulation(N=Ne, length=int(1e6))
 pop.N
 pop.tables.genome_length
