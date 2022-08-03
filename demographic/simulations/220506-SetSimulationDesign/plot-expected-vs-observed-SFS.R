@@ -21,10 +21,10 @@ sfs_expected <- read_csv('results/expected-sfs/SFS_scaled_to_data.csv') %>%
 
 # combine results ---------------------------------------------------------
 
-sfs_expected <- sfs_expected %>% 
-  mutate(
-    MutType = if_else(MutType == 'noncoding', 'neutral', MutType)
-  )
+# sfs_expected <- sfs_expected %>% 
+#   mutate(
+#     MutType = if_else(MutType == 'noncoding', 'neutral', MutType)
+#   )
 
 sfs <- inner_join(sfs_expected, sfs_sim, by = c('DerivedFreq', 'MutType')) %>% 
   filter(
@@ -32,7 +32,7 @@ sfs <- inner_join(sfs_expected, sfs_sim, by = c('DerivedFreq', 'MutType')) %>%
   )
 
 
-sfs$MutType <- factor(sfs$MutType, levels = c('neutral', 'synonymous', 'missense', 'LOF'))
+sfs$MutType <- factor(sfs$MutType, levels = c('noncoding', 'synonymous', 'missense', 'LOF'))
 
 
 sfs %>% 
@@ -58,4 +58,5 @@ sfs %>%
     y = 'Frequency',
     title = 'Nsim = 100, L = 1Mb'
   )
-ggsave('plots/Expected-vs-observed-SFS.pdf')
+ggsave('plots/Expected-vs-observed-SFS.pdf',height = 3, width = 6.5)
+

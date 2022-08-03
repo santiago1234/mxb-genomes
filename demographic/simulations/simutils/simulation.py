@@ -90,3 +90,29 @@ def neutral_rate_maps(simdat):
 # *************** ========== ***************
 # NEUTRAL SIMULATION: SIM NEUTRAL MUTATIONS
 # *************** ========== ***************
+
+def simulate_neutral_variation(ts, simdat):
+    """
+    Simulate neutral genetic variation (noncoding and synonymous)
+    Args:
+        ts: tree sequence from forwar in time simulation
+        simdat: the simulation data used to generate ts
+    Returns:
+        (ts_noncoding, ts_synonymous): the tree sequences with the 
+            neutral mutations only
+    """
+    # get a dict with the rate maps for nuetral categories
+    # synonymous and noncoding
+    nr_maps = neutral_rate_maps(simdat)
+
+    # remove existing mutations (selected) from (ts)
+    # get the list of all ids
+    all_ids = [v.site.id for v in ts.variants()]
+    ts_clear = ts.delete_sites(all_ids)
+
+    ts_nocd = msprime.sim_mutations(
+        tree_sequence=ts_clear, rate=nr_maps['noncoding'])
+    ts_syn = msprime.sim_mutations(
+        tree_sequence=ts_clear, rate=nr_maps['synonymous'])
+
+    return ts_nocd, ts_syn
