@@ -1,0 +1,14 @@
+configfile: "config.yaml"
+
+rule forward_in_time_simulation:
+    input:
+        demography = config['LATAM_MODEL'],
+        genome_chunks_data = '../../data/220404-SimulationData/data/samples/' # this directory contains the simulation files
+    output:
+        'results/simulations/sim-{simid}-pop.bin'
+    log:
+        'logs/simulations/sim-{simid}.log'
+    shell:
+        """
+        python scripts/simulation.py {wildcards.simid} 2>{log}
+        """
