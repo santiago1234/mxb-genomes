@@ -8,22 +8,26 @@ from simutils import utils
 from simutils.utils import DFE_missense, DFE_lof
 
 
+sim_id = sys.argv[1:][0]
 ## Demographic model
 
 graph = '../220422-fwdpy11-initial-test/ADMIXTURE-MXL.yml'
 graph = demes.load(graph)
 demog = fwdpy11.discrete_demography.from_demes(graph)
 
-print('demography set ..')
+print('demography set ..', file = sys.stderr)
 
 # Load the test data
 
-sim_dat = utils.simuldata(path_to_samples='../220506-SetSimulationDesign/test-data/',
-                          sample_id=23, path_to_genetic_maps='../220506-SetSimulationDesign/test-data/')
+sim_dat = utils.simuldata(path_to_samples='../../data/220404-SimulationData/data/samples/',
+                          sample_id=sim_id, path_to_genetic_maps='../../../resources/genetic-maps/')
+
+print('Starting simulation for:', file = sys.stderr)
+print(sim_dat)
 
 random_seed = int(42)
-out_file = f'test-sim-pop.bin'
-print(f'simulation for: {out_file}')
+out_file = f'results/simulations/sim-{sim_id}-pop.bin'
+print(f'output file is: {out_file}', file = sys.stderr)
 
 
 mut_labels = {
@@ -33,24 +37,6 @@ mut_labels = {
     'LOF': 3,
 }
 
-# Make neutral geneic regions
-
-
-nregions = []
-for _, noexon in sim_dat.noncoding_intervals.iterrows():
-    nregions.append(
-        fwdpy11.Region(beg=noexon.start, end=noexon.end,
-                       weight=sim_dat.m_noncoding, label=mut_labels['neutral'])
-    )
-
-# synonymous we assume they are neutral
-for _, exon in sim_dat.coding_intervals.iterrows():
-    nregions.append(
-        fwdpy11.Region(beg=exon.start, end=exon.end,
-                       weight=sim_dat.m_synonymous, label=mut_labels['synonymous'])
-    )
-
-## SELECTED REGIONS
 
 sregions = []
 for _, exon in sim_dat.coding_intervals.iterrows():
@@ -101,46 +87,50 @@ rates = fwdpy11.MutationAndRecombinationRates(
 
 ## set the population
 
-print("Initial sizes =", demog.metadata["initial_sizes"])
+print("Initial sizes =", demog.metadata["initial_sizes"], file = sys.stderr)
 initial_sizes = [
     demog.metadata["initial_sizes"][i]
     for i in sorted(demog.metadata["initial_sizes"].keys())
 ]
-pop = fwdpy11.DiploidPopulation(initial_sizes, sim_dat.end - sim_dat.start)
+
+# genome length
+L = sim_dat.end - sim_dat.start
+
+pop = fwdpy11.DiploidPopulation(initial_sizes, L)
 
 
-print(f'Pop info N={pop.N}, genome length = {pop.tables.genome_length}')
+print(f'Pop info N={pop.N}, genome length = {pop.tables.genome_length}', file = sys.stderr)
 
-
-SIM_LEN = 10 * pop.N
-print(f'Simulation will run for {SIM_LEN} generations.')
 
 # the parameters that fwdpy11 needs to run the simulation
 p = {
     # neutral mutations (none for now, can add after the fact)
-    "nregions": nregions,
+    "nregions": [],
     "gvalue": fwdpy11.Multiplicative(2.0),  # fitness model
     "sregions": sregions,
     "recregions": recregions,
     "rates": rates,
     "prune_selected": True,
-    "demography": fwdpy11.DiscreteDemography(),  # pass the demographic model
-    "simlen": SIM_LEN
+    "demography": demog,
+    "simlen": demog.metadata["total_simulation_length"],  # the total time to simulate
 }
+
 params = fwdpy11.ModelParams(**p)
 # run the simulation
 # set up the random number generator
 rng = fwdpy11.GSLrng(random_seed)
 
 # run the simulation
-print('runnning simulation ...')
+print('runnning simulation ...', file = sys.stderr)
+print(f'Simulation lenght: {demog.metadata["total_simulation_length"]}')
+
 time1 = time.time()
 fwdpy11.evolvets(
     rng, pop, params, simplification_interval=100, suppress_table_indexing=True
 )
-print("Simulation took", int(time.time() - time1), "seconds")
+print("Simulation took", int(time.time() - time1), "seconds", file = sys.stderr)
 
 # simulation finished
-print("Final population sizes =", pop.deme_sizes())
+print("Final population sizes =", pop.deme_sizes(), file = sys.stderr)
 
 pop.dump_to_file(out_file)
