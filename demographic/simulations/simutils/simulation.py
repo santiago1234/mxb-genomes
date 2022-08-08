@@ -3,8 +3,11 @@ Helpfull code to set the simulation
 """
 import pybedtools
 import pandas as pd
+import numpy as np
 import msprime
-
+import fwdpy11
+import tskit
+import demes
 # *************** ========== ***************
 # NEUTRAL SIMULATION: RATE MAPS
 # *************** ========== ***************
@@ -101,7 +104,7 @@ def simulate_neutral_variation(ts, simdat):
         (ts_noncoding, ts_synonymous): the tree sequences with the 
             neutral mutations only
     """
-    # get a dict with the rate maps for nuetral categories
+    # get a dict with the rate maps for nuetral categories
     # synonymous and noncoding
     nr_maps = neutral_rate_maps(simdat)
 
@@ -116,3 +119,55 @@ def simulate_neutral_variation(ts, simdat):
         tree_sequence=ts_clear, rate=nr_maps['synonymous'])
 
     return ts_nocd, ts_syn
+
+
+# *************** ========== ***************
+# SIMULATION OUTPUT
+# *************** ========== ***************
+
+def load_sim_as_ts(popbin, graph):
+    """
+    Loads the simulation output as a tree sequence
+    Args:
+        popbin: str, path to simulation output
+        graph: str, path to demes model graph
+    Returns:
+        treesequence
+    """
+    pop = fwdpy11.DiploidPopulation.load_from_file(popbin)
+    # we load the model to include this info in the tree sequence
+    graph = demes.load(graph)
+    pop_md = {}
+    for i, deme in enumerate(graph.demes):
+        pop_md[i] = {'name': deme.name, "description": deme.description}
+    ts = pop.dump_tables_to_tskit(
+        demes_graph=graph, population_metadata=pop_md)
+    return ts
+
+
+def subsample_individuals_pop(ts, N):
+    """
+    Take a random sample of N individuals from each deme in the tree
+    """
+    # group indivuals by population
+    inds_by_pop = dict()
+
+    for ind in ts.individuals():
+        current_deme = ind.metadata['deme']
+        if current_deme in inds_by_pop.keys():
+            inds_by_pop[current_deme].append(ind)
+        else:
+            inds_by_pop[current_deme] = [ind]
+
+    # take the random sample, no replacement
+    sampled_inds = []
+
+    for x in inds_by_pop.keys():
+        sample = np.random.choice(inds_by_pop[x], size=N, replace=False)
+        sampled_inds.extend(sample)
+
+    nodes_to_keep = []
+    for ind in sampled_inds:
+        nodes_to_keep.extend(ind.nodes)
+
+    return ts.simplify(nodes_to_keep)
