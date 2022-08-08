@@ -1,0 +1,109 @@
+description: The Latin American admixture model.
+time_units: years
+generation_time: 29
+doi: ['https://doi.org/10.1371/journal.pgen.1000695']
+demes:
+- name: ancestral
+  description: Equilibrium/root population
+  epochs:
+  - {end_time: 483457.24308765423, start_size: 13580.373657849503}
+- name: AMH
+  description: Anatomically modern humans
+  ancestors: [ancestral]
+  epochs:
+  - {end_time: 88347.64825867464, start_size: 27142.07281765073}
+- name: OOA
+  description: Bottleneck out-of-Africa population
+  ancestors: [AMH]
+  epochs:
+  - {end_time: 51166.128542006336, start_size: 1834.8116479610317}
+- name: YRI
+  description: Yoruba in Ibadan, Nigeria
+  ancestors: [AMH]
+  epochs:
+  - {end_time: 0, start_size: 27142.07281765073}
+- name: IBS
+  description: Iberian populations in Spain (IBS).
+  ancestors: [OOA]
+  epochs:
+  - {end_time: 0, start_size: 2761.3347067250797, end_size: 26462.05884107293}
+- name: CHB
+  description: Han Chinese in Beijing, China
+  ancestors: [OOA]
+  epochs:
+  - {end_time: 0, start_size: 1954.52946761033, end_size: 15363.53634144032}
+- name: MXB
+  description: Native American,  Mexico.
+  start_time: 32555.12765744615
+  ancestors: [CHB]
+  epochs:
+  - {end_time: 0, start_size: 1312.8044812722449, end_size: 38461.62164227266}
+# Admixed populations
+# MXL
+- name: MXL
+  description: Admixed population in Mexico
+  ancestors: [MXB, IBS]
+  proportions: [0.2492, 0.7508]
+  start_time: 462
+  epochs:
+  - {end_time: 0, start_size: 20000}
+# CLM
+#- name: CLM
+#  description: Admixed population in Colombia
+#  ancestors: [IBS, MXB]
+#  proportions: [0.43658, 0.56342]
+#  start_time: 409
+#  epochs:
+#  - {end_time: 0, start_size: 20000}
+## PEL
+#- name: PEL
+#  description: Admixed population in Peru
+#  ancestors: [IBS, MXB]
+#  proportions: [0.893, 0.107]
+#  start_time: 423
+#  epochs:
+#  - {end_time: 0, start_size: 20000}
+# PUR
+- name: PUR
+  description: Admixed population in Puerto Rico
+  ancestors: [IBS, MXB, YRI]
+  proportions: [0.837,  0.151, 0.012]
+  start_time: 406
+  epochs:
+  - {end_time: 0, start_size: 20000}
+migrations:
+- demes: [YRI, IBS]
+  rate: 2.501606466512543e-05
+- demes: [YRI, CHB]
+  rate: 3.2948319408915263e-06
+- demes: [IBS, CHB]
+  rate: 6.62400743683469e-05
+- demes: [YRI, OOA]
+  rate: 0.00015859499514691533
+# MXL
+- {source: MXB, dest: MXL, rate: 0.0502, end_time: 58}
+- {source: IBS, dest: MXL, rate: 0.0573, end_time: 58}
+## CLM
+#- {source: IBS, dest: CLM, rate: 0.0617, end_time: 58}
+#- {source: MXB, dest: CLM, rate: 0.0120, end_time: 58}
+## PEL
+#- {source: MXB, dest: PEL, rate: 0.1236, end_time: 58}
+#- {source: IBS, dest: PEL, rate: 0.0122, end_time: 58}
+# PUR
+- {source: YRI, dest: PUR, rate: 0.0103, end_time: 58}
+pulses:
+  # MXL
+  - sources: [YRI, CHB]
+    dest: MXL
+    proportions: [0.11178, 0.007422]
+    time: 372
+#  # CLM
+#  - sources: [YRI]
+#    dest: CLM
+#    proportions: [0.1183447]
+#    time: 262
+#  # PEL
+#  - sources: [YRI]
+#    dest: PEL
+#    proportions: [0.0541]
+#    time: 223
