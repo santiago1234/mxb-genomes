@@ -1,5 +1,4 @@
-description: The Gutenkunst et al. (2009) three-population model of human history,
-  modified by replacing CEU with IBS.
+description: The Latin American admixture model.
 time_units: years
 generation_time: 29
 doi: ['https://doi.org/10.1371/journal.pgen.1000695']
