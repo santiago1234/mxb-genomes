@@ -5,6 +5,7 @@ import pybedtools
 import pandas as pd
 import numpy as np
 import msprime
+import moments
 import fwdpy11
 import tskit
 import demes
@@ -122,7 +123,7 @@ def simulate_neutral_variation(ts, simdat):
 
 
 # *************** ========== ***************
-# SIMULATION OUTPUT
+# SIMULATION OUTPUT PROCESSING
 # *************** ========== ***************
 
 def load_sim_as_ts(popbin, graph):
@@ -171,3 +172,73 @@ def subsample_individuals_pop(ts, N):
         nodes_to_keep.extend(ind.nodes)
 
     return ts.simplify(nodes_to_keep)
+
+# *************** ========== ***************
+# Compute Selected SFS
+# *************** ========== ***************
+
+
+mut_labels = {
+    'neutral': 0,
+    'missense': 1,
+    'synonymous': 2,
+    'LOF': 3,
+}
+
+
+def keep_selected_sites(ts, missense=True):
+    """
+    Keep only mutations that are missense or LOF
+    The output treen will only contain missense or lof.
+    """
+    mut_type = 'missense' if missense else 'LOF'
+    label = mut_labels[mut_type]
+    sites = []
+
+    for x in ts.mutations():
+        if x.metadata['label'] != label:
+            sites.append(x.site)
+
+    return ts.delete_sites(sites)
+
+
+def get_popname_to_popid_mapping(ts):
+    """
+    Returns a dict mapping population names
+    to populations id.
+    Args:
+        ts: tree sequence containing population metadata
+    Returns:
+        dict
+    """
+    return {x.metadata['name']: x.id for x in ts.populations()}
+
+
+def get_individuals_from_pops(ts, poplist):
+    """
+    Returns the list of nodes that belong to populations in poplist
+        ts: tree sequence containing population metadata
+        poplist: list of population names
+    """
+    pop_ids = get_popname_to_popid_mapping(ts)
+    # the deme is the id if the pops we want
+    demes = [pop_ids[x] for x in poplist]
+    nodes_from_pops = []
+
+    for ind in ts.individuals():
+        if ind.metadata['deme'] in demes:
+            nodes_from_pops.extend(ind.nodes)
+
+    return nodes_from_pops
+
+
+def get_single_pop_sfs(ts, pop):
+    """
+    Get the site frequency spectrum for the given pop
+    """
+    # subset ts to samples in pop
+    nodes_from_pop = get_individuals_from_pops(ts, [pop])
+    ts_pop = ts.simplify(nodes_from_pop)
+    afs = ts_pop.allele_frequency_spectrum(
+        polarised=True, span_normalise=False)
+    return moments.Spectrum(afs)
