@@ -23,7 +23,7 @@ sim_dat = utils.simuldata(path_to_samples='../../data/220404-SimulationData/data
                           sample_id=sim_id, path_to_genetic_maps='../../../resources/genetic-maps/')
 
 print('Starting simulation for:', file = sys.stderr)
-print(sim_dat)
+print(sim_dat, file = sys.stderr)
 
 random_seed = int(42)
 out_file = f'results/simulations/sim-{sim_id}-pop.bin'
@@ -76,7 +76,9 @@ for i in range(nrec):
 # Rates
 
 # The neutral mutation rate and selected mutation rate
-neutral_ml = sim_dat.ml_noncoding + sim_dat.ml_synonymous
+# we set the neutral mutation rate to 0
+# we add this muations later with msprime
+neutral_ml = 0
 selected_ml = sim_dat.ml_missense + sim_dat.ml_LOF
 
 rates = fwdpy11.MutationAndRecombinationRates(
@@ -122,7 +124,7 @@ rng = fwdpy11.GSLrng(random_seed)
 
 # run the simulation
 print('runnning simulation ...', file = sys.stderr)
-print(f'Simulation lenght: {demog.metadata["total_simulation_length"]}')
+print(f'Simulation lenght: {demog.metadata["total_simulation_length"]}', file=sys.stderr)
 
 time1 = time.time()
 fwdpy11.evolvets(
