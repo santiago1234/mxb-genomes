@@ -1,6 +1,7 @@
 import sys
 import fwdpy11
 import demes
+import numpy as np
 import time
 import gzip
 sys.path.append('../')
@@ -65,11 +66,18 @@ for _, exon in sim_dat.coding_intervals.iterrows():
 nrec = len(sim_dat.rmap) - 1
 recregions = []
 for i in range(nrec):
+
+    # Sometimes there is a nan (missing) value in the recombination map
+    # when this happens i set the mean to 0
+    mean = sim_dat.rmap.rate[i] * sim_dat.rmap.span[i]
+    if np.isnan(mean):
+        mean = 0
+        print(f'Recombination rate set 0 at position {sim_dat.rmap.left[i]} because of nan value')
     recregions.append(
         fwdpy11.PoissonInterval(
             beg=sim_dat.rmap.left[i],
             end=sim_dat.rmap.right[i],
-            mean=sim_dat.rmap.rate[i] * sim_dat.rmap.span[i]
+            mean=mean
         )
     )
 
