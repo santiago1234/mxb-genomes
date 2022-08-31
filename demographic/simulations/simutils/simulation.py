@@ -173,6 +173,47 @@ def subsample_individuals_pop(ts, N):
 
     return ts.simplify(nodes_to_keep)
 
+
+def filter_masked_sites(ts, simdat, gmask):
+    """
+    Args:
+        ts: tree sequence
+        simdat: simulation data object
+        gmask: Bedtool genome mask
+
+    Returns:
+        ts with masked sites deleted
+    """
+
+    positions = []
+    chromosome = f'chr{simdat.chromosome}'
+
+    # The position in the ts is relative to the start position
+    # we need to add this position back to get the genome position
+    for v in ts.variants():
+        genome_pos = v.site.position + simdat.start
+        positions.append((genome_pos, v.site.id))
+
+    # construct bedtool of mutatio position
+    # such that the position is the the center with a length of 3bp
+    def make_bed_string(p):
+        return f'{chromosome} {int(p)-1} {int(p)+1}'
+
+    mut_pos = '\n'.join(f'{make_bed_string(x)} {y}' for (x, y) in positions)
+
+    mut_pos = pybedtools.BedTool(mut_pos, from_string=True)
+
+    # get the intersection
+    intersection = mut_pos.intersect(gmask, wa=True)
+
+    all_ids = [int(x.fields[-1]) for x in mut_pos]
+    passed_ids = [int(x.fields[-1]) for x in intersection]
+    notpass_ids = list(set(all_ids) - set(passed_ids))
+
+    print(f'{len(notpass_ids)} sites removed because mask')
+    return ts.delete_sites(notpass_ids)
+
+
 # *************** ========== ***************
 # Compute Selected SFS
 # *************** ========== ***************
