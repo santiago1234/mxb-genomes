@@ -1,0 +1,135 @@
+CATEGORIES = {
+    'synonymous': 'synonymous_variant',
+    'missense': 'missense_variant',
+	'lof': 'stop_gained,stop_lost,start_lost',
+	'noncoding': 'intergenic_variant,intron_variant'
+}
+
+POPULATIONS = ['YRI', 'IBS', 'CHB', 'MXB', 'MXL']
+
+
+def vep_get_consequence_SO_term(wildcards):
+    """
+    The SO term is use to annotate the variant consequence.
+    See: https://m.ensembl.org/info/genome/variation/prediction/predicted_data.html
+    """
+    return CATEGORIES[wildcards.v_category]
+
+
+
+SIMULATED_IDS = list(range(1, 26))
+
+rule get_simulated_regions:
+    input:
+        expand('../../data/220404-SimulationData/data/samples/region_region_{simid}.bed', simid=SIMULATED_IDS)
+    output:
+        'data/simulated_regions.bed'
+    shell:
+        '''
+        cat {input} |\
+            sort -k 1,1n -k2,2n >{output}
+        '''
+
+rule get_vcf_region:
+    input:
+        vcf = '../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz',
+        sim_intervals = 'data/simulated_regions.bed'
+    output:
+        temp('data/vcfs/sim-vcf-{chrn}.vcf')
+    shell:
+        '''
+        bcftools view -R {input.sim_intervals} {input.vcf} -o {output}
+        '''
+
+
+rule simulated_vcf:
+    input:
+        expand('data/vcfs/sim-vcf-{chrn}.vcf', chrn=range(1, 23))
+    output:
+        temp('data/vcfs/simulated-regions.vcf')
+    shell:
+        '''
+        bcftools concat {input} -o {output}
+        '''
+
+rule remove_cpgs:
+    """
+    Remove the CpG sites
+    """
+    input:
+        vcf = 'data/vcfs/simulated-regions.vcf',
+        genome = '/data/users/smedina/data-resources/genomes/GRCh38.primary_assembly.genome-nochrprefix.fasta'
+    output:
+        'data/vcfs/simulated-regions-cpgsout.vcf',
+        'data/vcfs/simulated-regions-cpgsout_remove_sites.txt'
+    shell:
+        '''
+        python ../../../scripts/removeCpGsites.py \
+            {input.vcf} {input.genome} {output[0]} {output[1]}
+        '''
+
+
+rule get_var_cat_vcf:
+    input:
+        'data/vcfs/simulated-regions-cpgsout.vcf'
+    output:
+        'data/vcfs/simulated-regions-cpgsout-cat_{v_category}.vcf'
+    params:
+        v_category = vep_get_consequence_SO_term
+    shell:
+        '''
+        python ../../../scripts/subset-vcf-by-variant-category.py \
+            {input} {params.v_category} {output}
+        '''
+
+		
+# We sample 50 individuals from each population
+
+rule sample_individuals:    
+    output:
+        'data/popsinfo.csv'
+    shell:
+        '''
+        python scripts/define-pops.py
+        '''
+
+rule split_popinfo_by_sample:
+    """
+    We want the SFS to be one dimensional, here
+    I generate a file that contains the individuals from a single
+    population to pass to the script to get the sfs
+    """
+    input:
+        'data/popsinfo.csv'
+    output:
+        'data/pop-{population}.csv'
+    shell:
+        '''
+        head -n1 {input} >{output}
+        grep {wildcards.population} {input} >>{output}
+        '''
+
+rule sfs:
+    input:
+        vcf = 'data/vcfs/simulated-regions-cpgsout-cat_{v_category}.vcf',
+        popinfo = 'data/pop-{population}.csv'
+    output:
+        'data/sfs/sfs-cat_{v_category}-pop_{population}.pkl'
+    shell:
+        '''
+        python ../../../scripts/jsfs-nonPolarized.py {input.vcf} {input.popinfo} {output}
+        '''
+
+rule spectrums_in_table:
+    '''
+    Put the SFS in a table with metadata.
+    '''
+    input:
+        expand('data/sfs/sfs-cat_{v_category}-pop_{population}.pkl', v_category=CATEGORIES.keys(), population=POPULATIONS)
+
+# TODO
+# - Remove CpG sites
+# - Select 49 samples per pop
+# - Split vcf by category
+# - Compute pop SFS
+        
