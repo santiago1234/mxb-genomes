@@ -126,6 +126,12 @@ rule spectrums_in_table:
     '''
     input:
         expand('data/sfs/sfs-cat_{v_category}-pop_{population}.pkl', v_category=CATEGORIES.keys(), population=POPULATIONS)
+    output:
+        'results/sfs-data.csv'
+    shell:
+        '''
+        python scripts/collect-sfs.py {input} {output}
+        '''
 
 # TODO
 # - Remove CpG sites
