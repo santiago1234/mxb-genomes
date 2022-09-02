@@ -3,7 +3,8 @@ rule process_simulation:
         sim = 'results/sim-{simid}-pop.bin',
         path_to_samples = '../../../data/220404-SimulationData/data/samples/',
         path_to_genetic_maps = '../../../../resources/genetic-maps/',
-        demes_graph = '../../220422-fwdpy11-initial-test/ADMIXTURE-MXL.yml'
+        demes_graph = '../../220422-fwdpy11-initial-test/ADMIXTURE-MXL.yml',
+        gmask = '../../../../resources/genome-masks/20160622.allChr.mask.bed'
     output:
         'results/sfs/sf-{simid}-seed{random_seed}.csv'
     params:
@@ -12,6 +13,6 @@ rule process_simulation:
         '''
         python scripts/compute-sfs.py {input.sim} \
             {output} {input.path_to_samples} \
-            {input.path_to_genetic_maps} {input.demes_graph} {params.random_seed}
+            {input.path_to_genetic_maps} {input.demes_graph} {params.random_seed} {input.gmask}
         '''
 

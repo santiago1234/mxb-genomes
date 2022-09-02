@@ -11,6 +11,7 @@ import sys
 import tskit
 import os
 import fwdpy11
+import pybedtools
 import numpy as np
 import pandas as pd
 import itertools
@@ -18,7 +19,7 @@ import itertools
 sys.path.append('../../')
 from simutils import utils, simulation
 
-sim, out_file, path_to_samples, path_to_genetic_maps, graph, RANDOM_SEED = sys.argv[1:]
+sim, out_file, path_to_samples, path_to_genetic_maps, graph, RANDOM_SEED, gmask = sys.argv[1:]
 
 # Load data
 
@@ -35,11 +36,12 @@ sample_id = os.path.basename(sim).split('-')[1]
 simdat = utils.simuldata(path_to_samples, sample_id, path_to_genetic_maps)
 
 ts = simulation.load_sim_as_ts(sim, graph)
+gmask = pybedtools.BedTool(gmask)
 
 
 # first we take a subsample from the three
 
-N = 49
+N = 50
 ts_s = simulation.subsample_individuals_pop(ts, N)
 
 
@@ -51,6 +53,9 @@ ts_by_mut_type['missense'] = simulation.keep_selected_sites(
 # Add neutral mutations
 ts_by_mut_type['noncoding'], ts_by_mut_type['synonymous'] = simulation.simulate_neutral_variation(
     ts_s, simdat)
+
+# we need to remove regions that fall in the mask
+ts_by_mut_type = {x: simulation.filter_masked_sites(ts_by_mut_type[x], simdat, gmask) for x in ts_by_mut_type.keys()}
 
 
 def sfs(cat, pop):
