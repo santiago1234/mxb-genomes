@@ -34,7 +34,7 @@ def relpath_to_datafiles(path_to_root: str):
     }
 
     d_files = {
-        d_files[fname]: os.path.join(path_to_root, d_files[fname])
+        fname: os.path.join(path_to_root, d_files[fname])
         for fname in d_files
     }
 
