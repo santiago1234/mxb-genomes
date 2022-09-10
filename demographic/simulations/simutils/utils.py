@@ -7,39 +7,12 @@ the data needed to run one simulation.
 
 from collections import namedtuple
 import os
+
 import pandas as pd
 import numpy as np
 import msprime
 
-
-def relpath_to_datafiles(path_to_root: str):
-    """
-    This is a helper function to load
-    data files for simulation and simulation
-    output analysis
-    Args:
-        path_to_root: relative path to project root dir /mxb-genomes
-    """
-    d_files = {
-        'genetic_maps':
-        'resources/genetic-maps/',
-        'genome_masks':
-        ' resources/genome-masks/20160622.allChr.mask.bed',
-        'sim_chunks_data':
-        ' demographic/data/220404-SimulationData/data/samples/',
-        'sim_out':
-        'demographic/simulations/220728-Simulation-DFE-Demography/results/simulations/',
-        'demes_graph':
-        'demographic/simulations/220422-fwdpy11-initial-test/ADMIXTURE-MXL.yml',
-    }
-
-    d_files = {
-        fname: os.path.join(path_to_root, d_files[fname])
-        for fname in d_files
-    }
-
-    return d_files
-
+from .simulation import load_sim_as_ts
 
 # DFE
 # These DFEs were inferred by Aaron, in this paper:
@@ -241,3 +214,60 @@ def simuldata(path_to_samples, sample_id, path_to_genetic_maps):
                        ml_LOF=ml['LOF'])
 
     return sim_data
+
+
+def relpath_to_datafiles(path_to_root: str):
+    """
+    This is a helper function to load
+    data files for simulation and simulation
+    output analysis
+    Args:
+        path_to_root: relative path to project root dir /mxb-genomes
+    """
+    d_files = {
+        'genetic_maps':
+        'resources/genetic-maps/',
+        'genome_masks':
+        'resources/genome-masks/20160622.allChr.mask.bed',
+        'sim_chunks_data':
+        'demographic/data/220404-SimulationData/data/samples/',
+        'sim_out':
+        'demographic/simulations/220728-Simulation-DFE-Demography/results/simulations/',
+        'demes_graph':
+        'demographic/simulations/220422-fwdpy11-initial-test/ADMIXTURE-MXL.yml',
+    }
+
+    d_files = {
+        fname: os.path.join(path_to_root, d_files[fname])
+        for fname in d_files
+    }
+
+    return d_files
+
+
+def load_simulation_output(path_to_root: str, sim_id: int):
+    """
+    Helper function to load simulation data,
+        this function assumes that files for simulation
+        input and outout have already been generated.
+    Returns:
+        tuple: (simdat, sim_ts, d_files)
+            simdat: SimData object used to generate the current simulation
+            sim_ts: Resulting tree sequence from simulation
+            d_files: see relpath_to_datafiles function
+    """
+
+    d_files = relpath_to_datafiles(path_to_root)
+
+    for f_name, f_path in d_files.items():
+        assert os.path.exists(f_path), f'file/dir: {f_path} not found'
+
+    sim_file = f"{d_files['sim_out']}sim-{sim_id}-pop.bin"
+    print(f'loading data for simulation: {sim_id} ...')
+
+    sim_ts = load_sim_as_ts(sim_file, d_files['demes_graph'])
+
+    simdat = simuldata(d_files['sim_chunks_data'], sim_id,
+                       d_files['genetic_maps'])
+
+    return simdat, sim_ts, d_files
