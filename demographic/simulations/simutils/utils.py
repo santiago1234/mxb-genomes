@@ -12,10 +12,41 @@ import numpy as np
 import msprime
 
 
-#### DFE
-### These DFEs were inferred by Aaron, in this paper: https://academic.oup.com/genetics/advance-article/doi/10.1093/genetics/iyac097/6613932?login=true
+def relpath_to_datafiles(path_to_root: str):
+    """
+    This is a helper function to load
+    data files for simulation and simulation
+    output analysis
+    Args:
+        path_to_root: relative path to project root dir /mxb-genomes
+    """
+    d_files = {
+        'genetic_maps':
+        'resources/genetic-maps/',
+        'genome_masks':
+        ' resources/genome-masks/20160622.allChr.mask.bed',
+        'sim_chunks_data':
+        ' demographic/data/220404-SimulationData/data/samples/',
+        'sim_out':
+        'demographic/simulations/220728-Simulation-DFE-Demography/results/simulations/',
+        'demes_graph':
+        'demographic/simulations/220422-fwdpy11-initial-test/ADMIXTURE-MXL.yml',
+    }
+
+    d_files = {
+        d_files[fname]: os.path.join(path_to_root, d_files[fname])
+        for fname in d_files
+    }
+
+    return d_files
+
+
+# DFE
+# These DFEs were inferred by Aaron, in this paper:
+# https://academic.oup.com/genetics/advance-article/doi/10.1093/genetics/iyac097/6613932?login=true
 
 _DFE_base = namedtuple('DFE', 'varian_class, shape, scale, h, Ne')
+
 
 class DFE(_DFE_base):
     """
@@ -30,35 +61,34 @@ class DFE(_DFE_base):
         return (self.scale * self.shape) / (2 * self.Ne)
 
 
-DFE_missense = DFE(varian_class='missense', shape=0.147, scale=2117, h=0.5, Ne=12300)
+DFE_missense = DFE(varian_class='missense',
+                   shape=0.147,
+                   scale=2117,
+                   h=0.5,
+                   Ne=12300)
 DFE_lof = DFE(varian_class='LOF', shape=0.188, scale=121419, h=0.5, Ne=12300)
 
 # test_data
 
 _files = {
-    'region': '../220506-SetSimulationDesign/test-data/region_region_23.bed',
-    'coding_region': '../220506-SetSimulationDesign/test-data/region_exons_23.bed',
-    'noncoding_region': '../220506-SetSimulationDesign/test-data/region_intronANDinterg_23.bed',
-    'ml_coding': '../220506-SetSimulationDesign/test-data/region_mlcoding_23.csv',
-    'ml_noncoding': '../220506-SetSimulationDesign/test-data/region_mlnoncoding_23.txt'
+    'region':
+    '../220506-SetSimulationDesign/test-data/region_region_23.bed',
+    'coding_region':
+    '../220506-SetSimulationDesign/test-data/region_exons_23.bed',
+    'noncoding_region':
+    '../220506-SetSimulationDesign/test-data/region_intronANDinterg_23.bed',
+    'ml_coding':
+    '../220506-SetSimulationDesign/test-data/region_mlcoding_23.csv',
+    'ml_noncoding':
+    '../220506-SetSimulationDesign/test-data/region_mlnoncoding_23.txt'
 }
 
-
 _fields = [
-    'chromosome',
-    'start',
-    'end',
-    'coding_intervals',
-    'noncoding_intervals',
-    'rmap',
-    'ml_noncoding',
-    'ml_synonymous',
-    'ml_missense',
-    'ml_LOF'
+    'chromosome', 'start', 'end', 'coding_intervals', 'noncoding_intervals',
+    'rmap', 'ml_noncoding', 'ml_synonymous', 'ml_missense', 'ml_LOF'
 ]
 
 BaseSimData = namedtuple("SimData", _fields)
-
 
 
 class SimData(BaseSimData):
@@ -86,9 +116,11 @@ class SimData(BaseSimData):
         either coding = True or non coding (coding=False) 
         """
         if coding:
-            return (self.coding_intervals.end - self.coding_intervals.start).sum()
+            return (self.coding_intervals.end -
+                    self.coding_intervals.start).sum()
         else:
-            return (self.noncoding_intervals.end - self.noncoding_intervals.start).sum()
+            return (self.noncoding_intervals.end -
+                    self.noncoding_intervals.start).sum()
 
     @property
     def m_noncoding(self):
@@ -114,8 +146,9 @@ def recombination_map(path_to_genetic_maps, chromosome, start, end):
     """
     map_file_name = f'chr{chromosome}.b38.gmap'
     map_file_name = os.path.join(path_to_genetic_maps, map_file_name)
-    rmap = msprime.RateMap.read_hapmap(
-        map_file_name, position_col=0, map_col=2)
+    rmap = msprime.RateMap.read_hapmap(map_file_name,
+                                       position_col=0,
+                                       map_col=2)
     # we can take a slice from the map to get the coordinates in the sampled region
     # with set trim=True
     rmap = rmap.slice(left=start, right=end, trim=True)
@@ -143,7 +176,10 @@ def load_sim_files(sample_id, path_to_samples):
         'ml_noncoding': f'region_mlnoncoding_{sample_id}.txt'
     }
 
-    return {x: os.path.join(path_to_samples, region_files[x]) for x in region_files}
+    return {
+        x: os.path.join(path_to_samples, region_files[x])
+        for x in region_files
+    }
 
 
 def simuldata(path_to_samples, sample_id, path_to_genetic_maps):
@@ -163,10 +199,12 @@ def simuldata(path_to_samples, sample_id, path_to_genetic_maps):
     chromosome, start, end = np.loadtxt(region_files['region'], dtype=np.int64)
 
     # Load intervals where we will put the mutations
-    coding_intervals = pd.read_csv(region_files['coding_region'], sep='\t', names=[
-                                   'chro', 'start', 'end'])
-    noncoding_intervals = pd.read_csv(
-        region_files['noncoding_region'], sep='\t', names=['chro', 'start', 'end'])
+    coding_intervals = pd.read_csv(region_files['coding_region'],
+                                   sep='\t',
+                                   names=['chro', 'start', 'end'])
+    noncoding_intervals = pd.read_csv(region_files['noncoding_region'],
+                                      sep='\t',
+                                      names=['chro', 'start', 'end'])
 
     # Position of the intervals is relative to the start genomic position
     coding_intervals['start'] -= start
@@ -176,8 +214,8 @@ def simuldata(path_to_samples, sample_id, path_to_genetic_maps):
 
     # Mls
     ml_coding = pd.read_csv(region_files['ml_coding'])
-    ml_non_coding = np.loadtxt(
-        region_files['ml_noncoding'], dtype=np.object0)[1]
+    ml_non_coding = np.loadtxt(region_files['ml_noncoding'],
+                               dtype=np.object0)[1]
     ml_non_coding = float(ml_non_coding)
 
     # Create a dict mapping class name to value
@@ -191,17 +229,15 @@ def simuldata(path_to_samples, sample_id, path_to_genetic_maps):
     # recombination map
     rmap = recombination_map(path_to_genetic_maps, chromosome, start, end)
 
-    sim_data = SimData(
-        chromosome=chromosome,
-        start=start,
-        end=end,
-        coding_intervals=coding_intervals,
-        noncoding_intervals=noncoding_intervals,
-        rmap=rmap,
-        ml_noncoding=ml['noncoding'],
-        ml_missense=ml['missense'],
-        ml_synonymous=ml['synonymous'],
-        ml_LOF=ml['LOF']
-    )
+    sim_data = SimData(chromosome=chromosome,
+                       start=start,
+                       end=end,
+                       coding_intervals=coding_intervals,
+                       noncoding_intervals=noncoding_intervals,
+                       rmap=rmap,
+                       ml_noncoding=ml['noncoding'],
+                       ml_missense=ml['missense'],
+                       ml_synonymous=ml['synonymous'],
+                       ml_LOF=ml['LOF'])
 
     return sim_data
