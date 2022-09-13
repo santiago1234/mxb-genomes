@@ -17,7 +17,7 @@ def vep_get_consequence_SO_term(wildcards):
 
 
 
-SIMULATED_IDS = list(range(1, 26))
+SIMULATED_IDS = list(range(1, 351))
 
 rule get_simulated_regions:
     input:
@@ -132,10 +132,3 @@ rule spectrums_in_table:
         '''
         python scripts/collect-sfs.py {input} {output}
         '''
-
-# TODO
-# - Remove CpG sites
-# - Select 49 samples per pop
-# - Split vcf by category
-# - Compute pop SFS
-        
