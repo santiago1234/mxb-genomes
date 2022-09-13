@@ -1,4 +1,14 @@
+"""
+Run forward in time genetic simulation
+"""
 configfile: "config.yaml"
+
+
+SIM_IDS = list(range(1, 351))
+
+# Get 20 replciates (e.g. samples from a tree)
+RANDOM_SEEDS = list(range(1, 21))
+
 
 rule forward_in_time_simulation:
     input:
@@ -12,3 +22,33 @@ rule forward_in_time_simulation:
         """
         python scripts/simulation.py {wildcards.simid} 2>{log}
         """
+
+
+rule compute_sfs:
+    input:
+        sim = 'results/simulations/sim-{simid}-pop.bin',
+        path_to_samples = '../../data/220404-SimulationData/data/samples/',
+        path_to_genetic_maps = '../../../resources/genetic-maps/',
+        demes_graph = '../220422-fwdpy11-initial-test/ADMIXTURE-MXL.yml',
+        gmask = '../../../resources/genome-masks/20160622.allChr.mask.bed'
+    output:
+        'results/sfs/sf-{simid}-seed{random_seed}.csv'
+    params:
+        random_seed = '{random_seed}'
+    shell:
+        '''
+        python scripts/compute-sfs.py {input.sim} \
+            {output} {input.path_to_samples} \
+            {input.path_to_genetic_maps} {input.demes_graph} {params.random_seed} {input.gmask}
+        '''
+
+
+rule aggregate_sfs:
+    input:
+       expand('results/sfs/sf-{simid}-seed{random_seed}.csv', simid = SIM_IDS, random_seed = RANDOM_SEEDS)
+    output:
+        'results/all-SFSs.csv'
+    shell:
+        '''
+        python scripts/combine_sfs.py {input} {output}
+        '''

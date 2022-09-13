@@ -1,12 +1,21 @@
 # Forward in time genetic simulation under inferred demography
 
-## Demographic model
 
-We use the combined inference model
+## Protocol
+
+1. Run the simulations
+
+Running this step with the 30 cores took ~1 month.
 
 ```bash
- cp ../../inference/220225-Combine-Inferences/ADMIXTURE.yml .
+conda activate fwdpy11_18
+snakemake -j30  results/simulations/sim-{1..350}-pop.bin
 ```
 
-Then I removed PEL and CLM from the model, this to increase
-the compuation speed.
+NOTE: Follow the order I am indicating.
+
+2. Process the simulations
+
+```
+snakemake -j30 results/all-SFSs.csv
+```

@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 import itertools
 
-sys.path.append('../../')
+sys.path.append('../')
 from simutils import utils, simulation
 
 sim, out_file, path_to_samples, path_to_genetic_maps, graph, RANDOM_SEED, gmask = sys.argv[
