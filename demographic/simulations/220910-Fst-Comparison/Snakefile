@@ -1,0 +1,121 @@
+## Pairwise f-st genome
+from itertools import combinations
+
+
+CATEGORIES = {
+    'synonymous': 'synonymous_variant',
+    'missense': 'missense_variant',
+	'lof': 'stop_gained,stop_lost,start_lost',
+	'noncoding': 'intergenic_variant,intron_variant'
+}
+
+def vep_get_consequence_SO_term(wildcards):
+    """
+    The SO term is use to annotate the variant consequence.
+    See: https://m.ensembl.org/info/genome/variation/prediction/predicted_data.html
+    """
+    return CATEGORIES[wildcards.v_category]
+
+
+POPS = ['MXL', 'YRI', 'IBS', 'CHB', 'MXB']
+POP_PAIRS = sorted(combinations(POPS, 2))
+POP_PAIRS = [f'{p1}x{p2}' for p1, p2 in POP_PAIRS]
+SIM_IDs = list(range(1, 6))
+
+def determine_file(wildcars):
+    """
+    In which chromosome is the give region?
+    Returns the vcf file corresponding to
+    the give region
+    """
+    print(wildcars)
+    simid = wildcars.simid
+    bed_file = f'../../data/220404-SimulationData/data/samples/region_region_{simid}.bed'
+    region = [line.strip() for line in open(bed_file, 'r')]
+    # this file has only one line
+    region = region[0]
+    chrom = region.split('\t')[0]
+    vcf_file = f'../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrom}-snps-vep-mask-HW-GRCh38.vcf.gz'
+    return vcf_file
+    
+
+rule pairwise_poplist:
+    output:
+       expand('data/poppairs/pair-{pair}.csv', pair=POP_PAIRS) 
+    shell:
+        '''
+        python scripts/pairwise_poplist.py data/poppairs/
+        '''
+
+
+rule region_vcf:
+    input:
+        region = '../../data/220404-SimulationData/data/samples/region_region_{simid}.bed',
+        vcf = determine_file
+    output:
+        temp('tmp/vcf-region-{simid}.vcf.gz')
+    shell:
+        '''
+        bcftools view -R {input.region} {input.vcf} -Oz -o {output}
+        '''
+
+
+rule filter_by_functional_category:
+    input:
+        'tmp/vcf-region-{simid}.vcf.gz'
+    output:
+        temp('tmp/vcf-cat-{v_category}-sim-{simid}.vcf.gz')
+    params:
+        v_category = vep_get_consequence_SO_term
+    shell:
+        '''
+        python ../../../scripts/subset-vcf-by-variant-category.py \
+            {input} {params.v_category} {output}
+        '''
+
+
+rule remove_cpgs:
+    input:
+        vcf = 'tmp/vcf-cat-{v_category}-sim-{simid}.vcf.gz',
+        genome = '/data/users/smedina/data-resources/genomes/GRCh38.primary_assembly.genome-nochrprefix.fasta'
+    output:
+        temp('tmp/cat-{v_category}-sim-{simid}-CpGsout.vcf.gz'),
+        temp('tmp/cat-{v_category}-sim-{simid}-CpGsout-removesites.txt'),
+    shell:
+        '''
+        python ../../../scripts/removeCpGsites.py \
+            {input.vcf} {input.genome} {output[0]} {output[1]}
+        '''
+
+        
+rule compute_joint_sfs:
+    input:
+       poplist = 'data/poppairs/pair-{pair}.csv',
+        vcf = 'tmp/cat-{v_category}-sim-{simid}-CpGsout.vcf.gz'
+    output:
+        temp('data/joint-sfs-cat-{v_category}-sim-{simid}-pair-{pair}.pkl')
+    shell:
+        '''
+        python ../../../scripts/jsfs-nonPolarized.py \
+            {input.vcf} {input.poplist} {output}
+        '''
+
+rule data_fst:
+    input:
+        expand('data/joint-sfs-cat-{v_category}-sim-{simid}-pair-{pair}.pkl',
+            v_category=CATEGORIES.keys(),
+            simid=SIM_IDs,
+            pair=POP_PAIRS)
+    output:
+        'results/data-fst.csv'
+    shell:
+        '''
+        python scripts/fst_data.py {input} {output}
+        '''
+        
+        
+
+
+
+# NOTE: I have to project to a sample
+# Of size 50

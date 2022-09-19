@@ -14,14 +14,14 @@ from itertools import combinations
 
 import pandas as pd
 
-sys.path.append('../../../../')
+sys.path.append('../../../')
 from mxbgenomes.utils import load_populations_info
 
 OUTDIR = sys.argv[1]
 POPS = ['MXL', 'YRI', 'IBS', 'CHB', 'MXB']
 
-pop_pairs = combinations(POPS, 2)
-popinfo = load_populations_info('../../../../')
+pop_pairs = sorted(combinations(POPS, 2))
+popinfo = load_populations_info('../../../')
 
 
 def sample_per_pair(pop1: str, pop2: str) -> pd.DataFrame:
@@ -40,7 +40,7 @@ def sample_per_pair(pop1: str, pop2: str) -> pd.DataFrame:
         .loc[:, ['Samplename', 'Population']]
     )
 
-    out_name = f'{OUTDIR}/pair_pop1{pop1}-pop2{pop2}.csv'
+    out_name = f'{OUTDIR}/pair-{pop1}x{pop2}.csv'
 
     samples_pair.to_csv(out_name, index=False)
 
