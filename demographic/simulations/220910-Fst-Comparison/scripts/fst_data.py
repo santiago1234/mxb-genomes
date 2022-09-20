@@ -12,9 +12,6 @@ import moments
 import pandas as pd
 
 
-sfile = 'data/joint-sfs-cat-missense-sim-10-pair-MXLxMXB.pkl'
-
-
 def load_spectrum_file(sfile):
     """
     Load spectrum file

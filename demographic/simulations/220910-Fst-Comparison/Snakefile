@@ -4,8 +4,8 @@ from itertools import combinations
 
 CATEGORIES = {
     'synonymous': 'synonymous_variant',
-    'missense': 'missense_variant',
-	'lof': 'stop_gained,stop_lost,start_lost',
+    # lof + missense
+    'nonsynonymous': 'missense_variant,stop_gained,stop_lost,start_lost',
 	'noncoding': 'intergenic_variant,intron_variant'
 }
 
@@ -20,7 +20,7 @@ def vep_get_consequence_SO_term(wildcards):
 POPS = ['MXL', 'YRI', 'IBS', 'CHB', 'MXB']
 POP_PAIRS = sorted(combinations(POPS, 2))
 POP_PAIRS = [f'{p1}x{p2}' for p1, p2 in POP_PAIRS]
-SIM_IDs = list(range(1, 6))
+SIM_IDs = list(range(1, 11))
 
 def determine_file(wildcars):
     """
@@ -112,10 +112,24 @@ rule data_fst:
         '''
         python scripts/fst_data.py {input} {output}
         '''
+
+
+rule sim_fst:
+    """
+    Simulation Fst
+    """
+    input:
+        expand('../220728-Simulation-DFE-Demography/results/simulations/sim-{simid}-pop.bin', simid=SIM_IDs)
+    output:
+        'results/sim-fst/sim-fst-{simid}.csv'
+    shell:
+        '''
+        python scripts/fst_sim.py {wildcards.simid} ../../../ {output}
+        '''
+
+
+rule all:
+    input:
+        'results/data-fst.csv',
+        expand('results/sim-fst/sim-fst-{simid}.csv', simid=SIM_IDs)
         
-        
-
-
-
-# NOTE: I have to project to a sample
-# Of size 50
