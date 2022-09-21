@@ -263,6 +263,7 @@ def load_simulation_output(path_to_root: str, sim_id: int):
         assert os.path.exists(f_path), f'file/dir: {f_path} not found'
 
     sim_file = f"{d_files['sim_out']}sim-{sim_id}-pop.bin"
+    assert os.path.exists(sim_file), f'file not found: {sim_file}'
     print(f'loading data for simulation: {sim_id} ...')
 
     sim_ts = load_sim_as_ts(sim_file, d_files['demes_graph'])
