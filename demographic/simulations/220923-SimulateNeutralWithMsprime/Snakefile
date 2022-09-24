@@ -1,0 +1,10 @@
+rule msprim_sim:
+    input:
+        graph = '../220422-fwdpy11-initial-test/ADMIXTURE-MXL.yml'
+    output:
+        'data/simulations/msprime_sim_{simid}-cat_{vcat}.ts'
+    shell:
+        """
+        python scripts/neutralsimulator.py \
+            {wildcards.simid} {input.graph} data/simulations/
+        """
