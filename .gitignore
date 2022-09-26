@@ -15,6 +15,7 @@ analysis
 analysis-doc/*/data/*
 analysis-doc/*/results/*
 results
+data/
 results/*
 resources
 resources/*
