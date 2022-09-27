@@ -1,0 +1,6 @@
+rule joint_spectrum:
+    output:
+        'results/joint-spectrums.csv'
+    threads: 30
+    shell: 'python scripts/generate_spectrums.py {threads}'
+
