@@ -1,10 +1,25 @@
+SIMIDS = list(range(1, 51))
+
 rule msprim_sim:
     input:
-        graph = '../220422-fwdpy11-initial-test/ADMIXTURE-MXL.yml'
+        graph = '../../inference/220225-Combine-Inferences/ADMIXTURE.yml'
     output:
         'data/simulations/msprime_sim_{simid}-cat_{vcat}.ts'
     shell:
         """
         python scripts/neutralsimulator.py \
             {wildcards.simid} {input.graph} data/simulations/
+        """
+
+
+rule get_fsts:
+    input:
+        expand('data/simulations/msprime_sim_{simid}-cat_{vcat}.ts', simid=SIMIDS, vcat=['noncoding', 'synonymous'])
+    output:
+        'results/fst-msprime-sim.csv'
+    params:
+        cores = 30
+    shell:
+        """
+        python scripts/fst_msprimesimul.py {input} {params.cores} {output}
         """
