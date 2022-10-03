@@ -32,6 +32,9 @@ def map_pops_to_ids(tree):
     """
     n_pops = len(POPs)
     n_by_pop = tree.num_individuals // n_pops
+    # since we are working with diploid data, we multiply
+    # by a factor of 2
+    n_by_pop *= 2
     inds_by_pop = {
         POPs[i]: range(i * n_by_pop, (i + 1) * n_by_pop)
         for i in range(n_pops)
