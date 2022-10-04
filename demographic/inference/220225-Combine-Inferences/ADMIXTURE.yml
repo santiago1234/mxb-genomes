@@ -43,7 +43,7 @@ demes:
 - name: MXL
   description: Admixed population in Mexico
   ancestors: [MXB, IBS]
-  proportions: [0.2492, 0.7508]
+  proportions: [0.7508, 0.2492]
   start_time: 462
   epochs:
   - {end_time: 0, start_size: 20000}
