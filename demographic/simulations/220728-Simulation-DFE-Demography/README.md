@@ -3,6 +3,11 @@
 
 ## Protocol
 
+I am using the mode [ADMIXTURE-MXL.yml](./ADMIXTURE-MXL.yml),
+this model is in generation time see [model-in-generations.py](./model-in-generations.py).
+I also round up to integers the MXL start time (16 generations)
+and the YRI-AFR pulse in MXL (13 generations).
+
 1. Run the simulations
 
 Running this step with the 30 cores took ~1 month.

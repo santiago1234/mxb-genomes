@@ -12,7 +12,7 @@ from simutils.utils import DFE_missense, DFE_lof
 sim_id = sys.argv[1:][0]
 ## Demographic model
 
-graph = '../220422-fwdpy11-initial-test/ADMIXTURE-MXL.yml'
+graph = 'ADMIXTURE-MXL.yml'
 graph = demes.load(graph)
 demog = fwdpy11.discrete_demography.from_demes(graph)
 
