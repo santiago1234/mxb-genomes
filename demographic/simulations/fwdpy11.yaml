@@ -1,10 +1,12 @@
+# We want fwdpy11 >= 0.18.3
 name: fwdpy11_18
 channels:
   - bioconda
   - conda-forge
   - defaults
 dependencies:
-  - fwdpy11 =0.18.1
   - msprime
+  - moments
   - notebook
   - pandas
+  - pybedtools
