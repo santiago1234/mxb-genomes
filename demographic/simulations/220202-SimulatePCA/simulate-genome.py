@@ -1,7 +1,6 @@
 import pandas as pd
 import msprime
 import demes
-import demesdraw
 import tskit
 
 
