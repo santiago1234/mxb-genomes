@@ -1,0 +1,72 @@
+"""
+Mutation burden concordance analysis
+"""
+
+CHRN = list(range(1, 23))
+VarClass = ['SYNONYMOUS', 'MISSENSE', 'DELETERIOUS']
+REGIONS = ['GENOME', 'ARRAY']
+
+def variant_term(wildcards):
+
+    if wildcards.VarClass == 'SYNONYMOUS':
+        return 'synonymous_variant'
+
+    if wildcards.VarClass == 'MISSENSE':
+        return 'missense_variant'
+
+    if wildcards.VarClass == 'DELETERIOUS':
+        return 'splice_acceptor_variant,splice_donor_variant,stop_gained,stop_lost,start_lost,transcript_amplification'
+
+
+rule subset_variant_category:
+    input:
+        '../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz'
+    output:
+        'data/callset-chrn{chrn}-cat{VarClass}-regGENOME.vcf.gz',
+        'data/callset-chrn{chrn}-cat{VarClass}-regGENOME.vcf.gz.tbi'
+    params:
+        vterm = variant_term
+    shell:
+        '''
+        python ../../scripts/subset-vcf-by-variant-category.py {input} {params.vterm} {output[0]}
+        bcftools index --tbi {output}
+        '''
+
+rule subset_array_regions:
+    input:
+        'data/callset-chrn{chrn}-cat{VarClass}-regGENOME.vcf.gz',
+        'data/callset-chrn{chrn}-cat{VarClass}-regGENOME.vcf.gz.tbi',
+        '../210917-BiobankPaperRareAlleleCount/data/mega-array-regions/Multi-EthnicGlobal_D1-GRCh38-NOT-chr-prefix.bed'
+    output:
+        'data/callset-chrn{chrn}-cat{VarClass}-regARRAY.vcf.gz'
+    shell:
+        '''
+        bcftools view -R {input[2]} {input[0]} -Oz -o {output}
+        '''
+        
+rule count_derived:
+    input:
+        'data/callset-chrn{chrn}-cat{VarClass}-reg{reg}.vcf.gz'
+    output:
+        'data/counts/counts-chrn{chrn}-cat{VarClass}-reg{reg}.csv'
+    shell:
+        '''
+        python scripts/count_derived_per_sample.py {input} {output}
+        '''
+
+
+rule count_all:
+    input:
+        expand('data/counts/counts-chrn{chrn}-cat{VarClass}-reg{reg}.csv', chrn=CHRN, VarClass=VarClass, reg=REGIONS)
+    output:
+        'results/alt-counts.csv'
+    shell:
+        '''
+        python scripts/collapse.py
+        '''
+
+rule clear:
+    shell:
+        '''
+        rm -rf data/
+        '''
