@@ -18,9 +18,34 @@ def variant_term(wildcards):
         return 'splice_acceptor_variant,splice_donor_variant,stop_gained,stop_lost,start_lost,transcript_amplification'
 
 
-rule subset_variant_category:
+
+rule add_minor_allel_freq:
     input:
         '../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz'
+    output:
+        'data/vcfs-with-MAF/callsets-with-maf-chr{chrn}.vcf.gz'
+    shell:
+        '''
+        bcftools +fill-tags {input} -Oz -o {output} -- -t MAF
+        '''
+
+# We want to restrict this analysis to rare variants
+# MAF < 0.05
+
+rule filter_by_maf:
+    input:
+        'data/vcfs-with-MAF/callsets-with-maf-chr{chrn}.vcf.gz'
+    output:
+        'data/vcf-rare-variants/callset-rarevariants-chrn{chrn}.vcf.gz'
+    shell:
+        '''
+        bcftools view -i 'INFO/MAF < 0.05' {input} -Oz -o {output}
+        '''
+
+
+rule subset_variant_category:
+    input:
+        'data/vcf-rare-variants/callset-rarevariants-chrn{chrn}.vcf.gz'
     output:
         'data/callset-chrn{chrn}-cat{VarClass}-regGENOME.vcf.gz',
         'data/callset-chrn{chrn}-cat{VarClass}-regGENOME.vcf.gz.tbi'
@@ -43,6 +68,7 @@ rule subset_array_regions:
         '''
         bcftools view -R {input[2]} {input[0]} -Oz -o {output}
         '''
+
         
 rule count_derived:
     input:
