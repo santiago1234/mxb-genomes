@@ -1,0 +1,20 @@
+CATS = ['intergenic', 'intronic', 'synonymous']
+
+rule expected_observed_sfs:
+    input:
+        data = '../../data/220113-ConstructBoostrapedDatasets/data/whole-genome/spectrum-cat_{vcat}.pkl.gz',
+        mdl = '../220124-InfereModels/results/best-guest-NAT-EXPANSION-{vcat}.yml',
+    output:
+        'results/sfs-{vcat}.csv'
+    shell:
+        '''
+        python scripts/expected_vs_observed.py \
+            --data {input.data} \
+            --mdl {input.mdl} \
+            --output {output} \
+            --category {wildcards.vcat} \
+        '''
+
+rule all:
+    input:
+        expand('results/sfs-{vcat}.csv', vcat=CATS)
