@@ -1,0 +1,18 @@
+param_name,param_code,description
+Ne,$N_e$,Ancestral effective population size
+N_A,$N_A$,Expansion size in AMH and AFR
+NB,$N_B$,Bottleneck size for Eurasian populations
+NEu0,$N_{Eu0}$,Initial EUR size
+NEuF,$N_{EuF}$,Final EUR size
+NAs0,$N_{As0}$,Initial EUR size
+NAsF,$N_{AsF}$,Final EAS size
+NCmxI,$N_{Na0}$,Initial size in AME
+NCmxF,$N_{NaF}$,Final size in AME
+TA,$T_A$,Ancestral expansion time
+TB,$T_B$,AFR-OOA split time
+TF,$T_F$,EUR-EAS split time
+TN,$T_N$,AME branching from EAS time
+mAfB,$m_{Af-B}$,AFR and OOA-bottleneck 
+mAfEu,$m_{Af-E}$,AFR and EUR
+mAfAs,$m_{Af-As}$,AFR and EAS
+mEuAs,$m_{Eu-As}$,EAS

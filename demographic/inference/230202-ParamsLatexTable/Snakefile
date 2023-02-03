@@ -1,0 +1,24 @@
+SNPS_CATS = ['intronic', 'intergenic', 'synonymous']
+
+rule make_nice_param_table:
+    '''
+    Add some usefull information to the
+    params table.
+    '''
+    input:
+        ooa = '../220124-InfereModels/results/ConfidenceIntervals/OOA-{snpcat}.tsv',
+        nat = '../220124-InfereModels/results/ConfidenceIntervals/NAT-EXPANSION-{snpcat}.tsv'
+    output:
+        'data/para-table-{snpcat}.csv'
+    shell:
+        '''
+        python scripts/make-params-table.py \
+            --ooa_pars {input.ooa} \
+            --nat_pars {input.nat} \
+            --snpcat {wildcards.snpcat} \
+            --outfile {output}
+        '''
+
+rule all:
+    input:
+        expand('data/para-table-{snpcat}.csv', snpcat=SNPS_CATS)
