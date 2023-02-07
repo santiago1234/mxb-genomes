@@ -1,0 +1,28 @@
+rule all:
+    input:
+        'results/lai-ancestry-props.csv',
+        'results/ADMIXTURE-ancestry-props.csv'
+
+
+rule lai_ancestr_props:
+    '''
+    Compute local ancestry proportions from tracts
+    '''
+    output:
+        'results/lai-ancestry-props.csv'
+    shell:
+        '''
+        python scripts/eas_prop_lai.py
+        '''
+
+
+rule admixture_ancestr_props:
+    '''
+    Compute local ancestry proportions from tracts
+    '''
+    output:
+        'results/ADMIXTURE-ancestry-props.csv'
+    shell:
+        '''
+        Rscript scripts/eas_prop_ADMIXTURE.R
+        '''
