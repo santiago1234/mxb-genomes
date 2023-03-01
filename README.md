@@ -23,7 +23,7 @@ The code used to analyze the data and infer demographic models is provided in
 this repository. We used a combination of analyses of allele frequencies and
 ancestry tract length distributions to develop our models. The code is written
 in Python and makes use of several open-source libraries, including `demes`,
-`msprime`, `moments`, `tracrs`, and `scikit-allel`.
+`msprime`, `moments`, `tracs`, and `scikit-allel`.
 
 ## Demographic Models
 
@@ -38,7 +38,7 @@ We provide the inferred demographic models in the models directory, in the demes
 
 ## Usage
 
-To use this Models, you can install the demes library and load the models using the demes.load function.
+To use the Models, you can install the [demes](https://github.com/popsim-consortium/demes-python) library and load the models using the demes.load function.
 
 ```Python
 import demes
