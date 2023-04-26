@@ -1,0 +1,39 @@
+"""
+Pipeline to obtain B-values.
+The scores need to be converted to a bed file
+and then lifted over to GRCm38.
+"""
+
+CHROMS = list(range(1, 23))
+
+rule download_data:
+    output:
+        expand("data/Bmaps/CADD_bestfit/chr{chrn}.bmap.txt", chrn=CHROMS),
+        expand("data/Bmaps/phastCons_bestfit/chr{chrn}.bmap.txt", chrn=CHROMS),
+        "data/Bmaps/README.txt"
+    shell:
+        """
+        wget https://github.com/sellalab/HumanLinkedSelectionMaps/raw/master/Bmaps/CADD_bestfit.tar.gz
+        wget https://raw.githubusercontent.com/sellalab/HumanLinkedSelectionMaps/master/Bmaps/README.txt
+        wget https://github.com/sellalab/HumanLinkedSelectionMaps/raw/master/Bmaps/phastCons_bestfit.tar.gz
+
+        # uncompress and move them to the data folder
+        mkdir -p data/Bmaps
+        tar -xvzf CADD_bestfit.tar.gz -C data/Bmaps
+        tar -xvzf phastCons_bestfit.tar.gz -C data/Bmaps
+
+        mv README.txt data/Bmaps
+        """
+
+
+rule convert_to_bed:
+    input:
+        'data/Bmaps/CADD_bestfit/chr{chrn}.bmap.txt',
+    output:
+        'data/Bmaps/CADD_bestfit/chr{chrn}.bmap.bed'
+    shell:
+        '''
+        python scripts/bmaps-to-bed.py {input} {output}
+        '''
+
+        
