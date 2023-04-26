@@ -17,7 +17,7 @@ rule download_data:
         wget https://raw.githubusercontent.com/sellalab/HumanLinkedSelectionMaps/master/Bmaps/README.txt
         wget https://github.com/sellalab/HumanLinkedSelectionMaps/raw/master/Bmaps/phastCons_bestfit.tar.gz
 
-        # uncompress and move them to the data folder
+        # uncompress and move them to the data folder
         mkdir -p data/Bmaps
         tar -xvzf CADD_bestfit.tar.gz -C data/Bmaps
         tar -xvzf phastCons_bestfit.tar.gz -C data/Bmaps
@@ -36,4 +36,29 @@ rule convert_to_bed:
         python scripts/bmaps-to-bed.py {input} {output}
         '''
 
+rule download_ucsc_chain_hg19ToHg38:        
+   # http://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/
+    output:
+        temp("data/hg19ToHg38.over.chain.gz")
+    shell:
+        """
+        wget http://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/hg19ToHg38.over.chain.gz
+        mv hg19ToHg38.over.chain.gz  data
+        """
+
+
+rule lift_over_to_GRCh38:
+    input:
+        bed = 'data/Bmaps/CADD_bestfit/chr{chrn}.bmap.bed',
+        chain = "data/hg19ToHg38.over.chain.gz"
+    output:
+        'data/Bmaps/CADD_bestfit-GRCh38/chr{chrn}.bmap.bed'
+    shell:
+        '''
+        CrossMap.py bed {input.chain} {input.bed} {output}
+        '''
+
+rule all:
+    input:
+        expand('data/Bmaps/CADD_bestfit-GRCh38/chr{chrn}.bmap.bed', chrn=CHROMS)
         
