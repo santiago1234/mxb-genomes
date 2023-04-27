@@ -1,8 +1,40 @@
-CHROMOSOMES = list(range(1, 23))
+## -> -> -> -> -> -> -> -> -> -> -> ->
+## HELPER FUNCTIONS AND GLOBAL BARS
+## I copy the globlal variables next from: ../220113-ConstructBoostrapedDatasets/Snakefile
+## -> -> -> -> -> -> -> -> -> -> -> ->
+CHROM = list(range(1, 23))
+N_BOOSTRAPS = 288
+
+# These spectrums are empty for some categories (i.e. there are not variants there)
+# they will be excluded.
+BOOSTRAPs_TO_DROP = [
+    12,
+    13,
+    14,
+    56,
+    159,
+    160,
+    209,
+    217,
+    220,
+    221,
+    231,
+    270,
+    279,
+    284
+]
+BOOSTRAPS = list(range(1, N_BOOSTRAPS + 1))
+for x in BOOSTRAPs_TO_DROP: BOOSTRAPS.remove(x)
+
+
+CATEGORIES = {
+    'intergenic': 'intergenic_variant',
+    'intronic': 'intron_variant'
+}
 
 rule bmap:
     input:
-        expand('../230426-B-values/data/Bmaps/CADD_bestfit-GRCh38/chr{chrn}.bmap.bed', chrn=CHROMOSOMES)
+        expand('../230426-B-values/data/Bmaps/CADD_bestfit-GRCh38/chr{chrn}.bmap.bed', chrn=CHROM)
     output:
         'data/caad-bestfit-GRCh38.bmap.bed'
     shell:
@@ -20,7 +52,7 @@ rule bmap_in_chunk:
     meaning the overlapping
     """
     input:
-        chunk = 'chunk_{N}.bed',
+        chunk = '../220113-ConstructBoostrapedDatasets/data/chunks/chunk_{N}.bed',
         bmap = 'data/caad-bestfit-GRCh38.bmap.bed'
     output:
         'data/chunks-maps/chunk_{N}.bmap.bed'
@@ -28,5 +60,23 @@ rule bmap_in_chunk:
         '''
         bedtools intersect -a {input.bmap} -b {input.chunk} -wa > {output}
         '''
+
+rule bmap_score:
+    """
+    annotate the B-score for each chunk.
+    """
+    input:
+        expand('data/chunks-maps/chunk_{N}.bmap.bed', N=BOOSTRAPS)
+    output:
+        'results/bscores.txt'
+    shell:
+        '''
+        touch {output}
+        for chunk in {input}; do
+            echo $chunk
+            python scripts/weighted_mean.py $chunk >>{output}
+        done
+        '''
+    
 
 
