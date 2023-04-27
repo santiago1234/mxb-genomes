@@ -1,0 +1,32 @@
+CHROMOSOMES = list(range(1, 23))
+
+rule bmap:
+    input:
+        expand('../230426-B-values/data/Bmaps/CADD_bestfit-GRCh38/chr{chrn}.bmap.bed', chrn=CHROMOSOMES)
+    output:
+        'data/caad-bestfit-GRCh38.bmap.bed'
+    shell:
+        '''
+        cat {input} |\
+            awk '{{print $1"\t"$2"\t"$3"\t.\t"$4}}' |\
+            # remove chr prefix
+            sed 's/^chr//' > {output}
+        '''
+
+
+rule bmap_in_chunk:
+    """
+    We want to obtain the Bmap for the given chunk.
+    meaning the overlapping
+    """
+    input:
+        chunk = 'chunk_{N}.bed',
+        bmap = 'data/caad-bestfit-GRCh38.bmap.bed'
+    output:
+        'data/chunks-maps/chunk_{N}.bmap.bed'
+    shell:
+        '''
+        bedtools intersect -a {input.bmap} -b {input.chunk} -wa > {output}
+        '''
+
+
