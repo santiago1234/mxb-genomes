@@ -1,0 +1,15 @@
+name: revisions
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - numpy
+  - scipy
+  - matplotlib
+  - scikit-allel
+  - bedtools
+  - notebook
+  - moments
+  - demes
+  - snakemake
+  - pip
