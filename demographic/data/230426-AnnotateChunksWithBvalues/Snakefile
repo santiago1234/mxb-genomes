@@ -184,4 +184,30 @@ rule whole_genome_quartile:
         """
 
 
-     
+rule whole_genome_ml:
+    input:
+        ml = 'data/mL-noncoding/q{qrt}'
+    output:
+        intronic = 'data/whole-genome-quartile/q{qrt}/mL_introns.txt',
+        intergenic = 'data/whole-genome-quartile/q{qrt}/mL_intergenic.txt'
+    shell:
+      """
+      # list intronic ml files
+      ml_intronic=$(ls {input}/mL_introns_chunk*.txt)
+      cat $ml_intronic |\
+          cut -d' ' -f2 |\
+          awk '{{sum+=$1;}} END{{print sum;}}' >{output.intronic}
+
+      # now the intergenic
+      ml_intergenic=$(ls {input}/mL_intergenic_chunk*.txt)
+      cat $ml_intergenic |\
+          cut -d' ' -f2 |\
+          awk '{{sum+=$1;}} END{{print sum;}}' >{output.intergenic}
+      """
+
+rule all:
+    input:
+        expand('data/whole-genome-quartile/q{qrt}/spectrum-cat_intronic.pkl.gz', qrt=B_SCORES_QUANTILES),
+        expand('data/whole-genome-quartile/q{qrt}/spectrum-cat_intergenic.pkl.gz', qrt=B_SCORES_QUANTILES),
+        expand('data/whole-genome-quartile/q{qrt}/mL_introns.txt', qrt=B_SCORES_QUANTILES),
+        expand('data/whole-genome-quartile/q{qrt}/mL_intergenic.txt', qrt=B_SCORES_QUANTILES)
