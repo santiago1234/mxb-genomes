@@ -4,6 +4,7 @@
 ## -> -> -> -> -> -> -> -> -> -> -> ->
 CHROM = list(range(1, 23))
 N_BOOSTRAPS = 288
+B_SCORES_QUANTILES = [1, 2, 3, 4]
 
 # These spectrums are empty for some categories (i.e. there are not variants there)
 # they will be excluded.
@@ -77,6 +78,45 @@ rule bmap_score:
             python scripts/weighted_mean.py $chunk >>{output}
         done
         '''
-    
+
+rule categorize_chunks_by_bquartile:
+    """
+    Use quartiles to categorize the chunks by B-score.
+    """
+    input:
+        'results/bscores.txt'
+    output:
+        expand('data/chunks-by-bscores-q{qrt}.txt', qrt=B_SCORES_QUANTILES),
+    shell:
+        '''
+        python scripts/split-chunks-by-bscore.py
+        '''
 
 
+rule make_files:
+    """
+    Here, I creat links to the original files.
+    Just to have things more organized.
+
+    I use the following structure:
+
+      data:
+        chunks:
+          q1: files
+          q2
+          q3
+          q4
+        mLs:
+        spectrums:
+    """
+    input:
+        'data/chunks-by-bscores-q{qrt}.txt'
+    output:
+        directory('data/chunks/q{qrt}')
+    shell:
+        '''
+        for chunk in $(cat {input}); do
+            echo $chunk
+        done
+        mkdir -p {output}
+        '''
