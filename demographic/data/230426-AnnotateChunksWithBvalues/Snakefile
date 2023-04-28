@@ -112,7 +112,9 @@ rule make_files:
     input:
         'data/chunks-by-bscores-q{qrt}.txt'
     output:
-        chunks = directory('data/chunks/q{qrt}')
+        chunks = directory('data/chunks/q{qrt}'),
+        ml = directory('data/mL-noncoding/q{qrt}'),
+        sfs = directory('data/jSFS/spectrums/q{qrt}')
     params:
         chunks_path = '../../../../220113-ConstructBoostrapedDatasets/data/chunks',
         # File name format chunk_252.bed
@@ -134,7 +136,13 @@ rule make_files:
 
             ml_intergenic_f="mL_intergenic_${{chunk}}.txt"
             ml_introns_f="mL_introns_${{chunk}}.txt"
+            ln -s "{params.ml_path}/${{ml_intergenic_f}}" "{output.ml}/${{ml_intergenic_f}}",
+            ln -s "{params.ml_path}/${{ml_introns_f}}" "{output.ml}/${{ml_introns_f}}"
 
+            spectrum_intergenic_f="spectrum_${{chunk}}_cat_intergenic.pkl.gz"
+            spectrum_introns_f="spectrum_${{chunk}}_cat_intronic.pkl.gz"
+            ln -s "{params.sfs_path}/${{spectrum_intergenic_f}}" "{output.sfs}/${{spectrum_intergenic_f}}"
+            ln -s "{params.sfs_path}/${{spectrum_introns_f}}" "{output.sfs}/${{spectrum_introns_f}}"
 
         done
         '''
