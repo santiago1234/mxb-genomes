@@ -114,7 +114,7 @@ rule make_files:
     output:
         chunks = directory('data/chunks/q{qrt}'),
         ml = directory('data/mL-noncoding/q{qrt}'),
-        sfs = directory('data/jSFS/spectrums/q{qrt}')
+        sfs = directory('data/jSFS/q{qrt}')
     params:
         chunks_path = '../../../../220113-ConstructBoostrapedDatasets/data/chunks',
         # File name format chunk_252.bed
@@ -136,7 +136,7 @@ rule make_files:
 
             ml_intergenic_f="mL_intergenic_${{chunk}}.txt"
             ml_introns_f="mL_introns_${{chunk}}.txt"
-            ln -s "{params.ml_path}/${{ml_intergenic_f}}" "{output.ml}/${{ml_intergenic_f}}",
+            ln -s "{params.ml_path}/${{ml_intergenic_f}}" "{output.ml}/${{ml_intergenic_f}}"
             ln -s "{params.ml_path}/${{ml_introns_f}}" "{output.ml}/${{ml_introns_f}}"
 
             spectrum_intergenic_f="spectrum_${{chunk}}_cat_intergenic.pkl.gz"
@@ -146,3 +146,42 @@ rule make_files:
 
         done
         '''
+
+
+#######
+### Merge whole quartile, similar to whole genome:
+###     https://github.com/santiago1234/mxb-genomes/blob/main/demographic/data/220113-ConstructBoostrapedDatasets/rules/MergeDataWholeGenome.smk
+#######
+
+
+rule whole_genome_quartile:
+    input:
+        sfs = 'data/jSFS/q{qrt}'
+    output:
+        intronic = 'data/whole-genome-quartile/q{qrt}/spectrum-cat_intronic.pkl.gz',
+        intergenic = 'data/whole-genome-quartile/q{qrt}/spectrum-cat_intergenic.pkl.gz'
+    params:
+        intronic_pklfile = 'data/whole-genome-quartile/q{qrt}/spectrum-cat_intronic.pkl',
+        intergenic_pklfile = 'data/whole-genome-quartile/q{qrt}/spectrum-cat_intergenic.pkl',
+    shell:
+        """
+        spectrums_intronic=$(ls {input}/spectrum_chunk*intronic.pkl.gz)
+        echo $spectrums_intronic
+
+        python ../220113-ConstructBoostrapedDatasets/scripts/merge-spectrums.py \
+            {params.intronic_pklfile} $spectrums_intronic 
+
+        gzip {params.intronic_pklfile}
+
+
+        spectrums_intergenic=$(ls {input}/spectrum_chunk*intergenic.pkl.gz)
+        echo $spectrums_intergenic
+
+        python ../220113-ConstructBoostrapedDatasets/scripts/merge-spectrums.py \
+            {params.intergenic_pklfile} $spectrums_intergenic 
+
+        gzip {params.intergenic_pklfile}
+        """
+
+
+     
