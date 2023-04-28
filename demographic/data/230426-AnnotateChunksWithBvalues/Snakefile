@@ -112,11 +112,29 @@ rule make_files:
     input:
         'data/chunks-by-bscores-q{qrt}.txt'
     output:
-        directory('data/chunks/q{qrt}')
+        chunks = directory('data/chunks/q{qrt}')
+    params:
+        chunks_path = '../../../../220113-ConstructBoostrapedDatasets/data/chunks',
+        # File name format chunk_252.bed
+        ml_path = '../../../../220113-ConstructBoostrapedDatasets/data/mL-noncoding/mLs',
+        # File name format mL_intergenic_chunk_267.txt and mL_introns_chunk_94.txt
+        sfs_path = '../../../../220113-ConstructBoostrapedDatasets/data/jSFS/spectrums'
+        # File name format spectrum_chunk_232_cat_intergenic.pkl.gz
+        # and spectrum_chunk_229_cat_intronic.pkl.gz
     shell:
         '''
-        for chunk in $(cat {input}); do
-            echo $chunk
-        done
         mkdir -p {output}
+
+        for chunk in $(cat {input}); do
+            # chunk has name chunk_N
+            echo $chunk
+            # make the base filenames to link
+            interval_f="${{chunk}}.bed"
+            ln -s "{params.chunks_path}/${{interval_f}}" "{output.chunks}/${{interval_f}}"
+
+            ml_intergenic_f="mL_intergenic_${{chunk}}.txt"
+            ml_introns_f="mL_introns_${{chunk}}.txt"
+
+
+        done
         '''
