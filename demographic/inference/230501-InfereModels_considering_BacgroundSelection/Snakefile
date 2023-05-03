@@ -4,10 +4,10 @@ Pipeline to infere models
 
 def get_mL_file(wildcards):
     if wildcards.varcat == 'intronic':
-        return f'../../data/230426-AnnotateChunksWithBvalues/data/whole-genome/q{wildcards.q}/mL_introns.txt'
+        return f'../../data/230426-AnnotateChunksWithBvalues/data/whole-genome-quartile/q{wildcards.q}/mL_introns.txt'
     # intergenic case
     else:
-        return f'../../data/230426-AnnotateChunksWithBvalues/data/whole-genome/q{wildcards.q}/mL_intergenic.txt'
+        return f'../../data/230426-AnnotateChunksWithBvalues/data/whole-genome-quartile/q{wildcards.q}/mL_intergenic.txt'
 
 
 rule infer_OOA:
@@ -18,29 +18,31 @@ rule infer_OOA:
         model = '../220124-InfereModels/data/OOA-model.yml',
         parameters = '../220124-InfereModels/data/OOA-parameters.yml',
         mL = get_mL_file,
-        data = '../../data/230426-AnnotateChunksWithBvalues/data/whole-genome/q{q}/spectrum-cat_{varcat}.pkl.gz'
+        data = '../../data/230426-AnnotateChunksWithBvalues/data/whole-genome-quartile/q{q}/spectrum-cat_{varcat}.pkl.gz'
     output:
-        'results/q{q}-best-guest-OOA-{varcat}.yml',
-        'results/q{q}-best-best-guest-OOA-{varcat}-bestparameters.csv'
+        'results/q{q}-best-guest-OOA-v_{varcat}.yml',
+        'results/q{q}-best-guest-OOA-v_{varcat}-bestparameters.csv'
     params:
-        outprefix = 'results/q{q}-best-guest-OOA-{varcat}'
+        outprefix = 'results/q{q}-best-guest-OOA-v_{varcat}'
     shell:
         '''
         python ../220124-InfereModels/scripts/infere-ooa-model.py \
             {input.model} {input.parameters} \
             {input.mL} {input.data} \
             {params.outprefix}
+
+        touch {output}
         '''
 
 
 rule make_NAT_EXPANSION_FILES:
     input:
-        ooa_best = 'results/q{q}-best-guest-OOA-{varcat}.yml',
+        ooa_best = 'results/q{q}-best-guest-OOA-v_{varcat}.yml',
         nat_specific_mdl = '../220124-InfereModels/data/NAT-EXPANSION-files/NatExpansion-params.txt',
         nat_parameters = '../220124-InfereModels/data/NAT-EXPANSION-files/NatExpansion-options.yml'
     output:
-        model = 'data/NAT-EXPANSION-MODELS/q{q}-NAT-EXPANSION-model-{varcat}.yml',
-        parameters = 'data/NAT-EXPANSION-MODELS/q{q}-NAT-EXPANSION-parameters-{varcat}.yml'
+        model = 'data/NAT-EXPANSION-MODELS/q{q}-NAT-EXPANSION-model-v_{varcat}.yml',
+        parameters = 'data/NAT-EXPANSION-MODELS/q{q}-NAT-EXPANSION-parameters-v_{varcat}.yml'
     shell:
         '''
 		#Make model yml file
@@ -49,26 +51,28 @@ rule make_NAT_EXPANSION_FILES:
 		sed -n "36,44p" {input.ooa_best} >>{output.model}
 		#Make params file
 		sed -n "1,3p" {input.nat_parameters} >{output.parameters} 
-		python scripts/get-CHB-start-time.py {input.ooa_best} >>{output.parameters}
+        # TODO fix this line
+		python ../220124-InfereModels/scripts/get-CHB-start-time.py {input.ooa_best} >>{output.parameters}
 		sed -n "5,21p" {input.nat_parameters} >>{output.parameters}
         '''
 
 
 rule infer_NAT_EXPANSION:
     input:
-        model = 'data/NAT-EXPANSION-MODELS/q{q}-NAT-EXPANSION-model-{varcat}.yml',
-        parameters = 'data/NAT-EXPANSION-MODELS/q{q}-NAT-EXPANSION-parameters-{varcat}.yml',
+        model = 'data/NAT-EXPANSION-MODELS/q{q}-NAT-EXPANSION-model-v_{varcat}.yml',
+        parameters = 'data/NAT-EXPANSION-MODELS/q{q}-NAT-EXPANSION-parameters-v_{varcat}.yml',
         mL = get_mL_file,
-        data = '../../data/230426-AnnotateChunksWithBvalues/data/whole-genome/q{q}/spectrum-cat_{varcat}.pkl.gz'
+        data = '../../data/230426-AnnotateChunksWithBvalues/data/whole-genome-quartile/q{q}/spectrum-cat_{varcat}.pkl.gz'
     output:
-        'results/q{q}-best-guest-NAT-EXPANSION-{varcat}.yml',
-        'results/q{q}-best-guest-NAT-EXPANSION-{varcat}-bestparameters.csv'
+        'results/q{q}-best-guest-NAT-EXPANSION-v_{varcat}.yml',
+        'results/q{q}-best-guest-NAT-EXPANSION-v_{varcat}-bestparameters.csv'
     params:
-        outprefix = 'results/q{q}-best-guest-NAT-EXPANSION-{varcat}'
+        outprefix = 'results/q{q}-best-guest-NAT-EXPANSION-v_{varcat}'
     shell:
         '''
         python ../220124-InfereModels/scripts/infere-NAT-EXPANSION-model.py \
             {input.model} {input.parameters} \
             {input.mL} {input.data} \
             {params.outprefix}
+        touch {output}
         '''
