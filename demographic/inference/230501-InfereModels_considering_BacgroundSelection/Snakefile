@@ -76,3 +76,83 @@ rule infer_NAT_EXPANSION:
             {params.outprefix}
         touch {output}
         '''
+
+
+### *************************************************** ####
+### ************* MODEL UNCERTAINTY ******************* ####
+### *************************************************** ####
+
+
+rule put_genome_chunks_in_file:
+    # I have a file for each genome chunk
+    # here i put them together in a python list object
+    input:
+        sfs_path = '../../data/230426-AnnotateChunksWithBvalues/data/jSFS/q{q}/',
+        mL_path = '../../data/230426-AnnotateChunksWithBvalues/data/mL-noncoding/q{q}/'
+
+    output:
+        'data/boostrap-replicates/q{q}-v_{varcat}-GENOME-CHUNKS.pkl.gz'
+    log: 'logs/q{q}-{varcat}-GENOME-CHUNKS.log'
+    threads: 7
+    shell:
+        """
+        python ../220124-InfereModels/scripts/put-genome-chunks-in-list.py \
+            {input.sfs_path} {input.mL_path} \
+            {wildcards.varcat} {threads} {output} 2>{log}
+        """
+
+
+rule get_bootstrap_replicates:
+    input:
+        'data/boostrap-replicates/q{q}-v_{varcat}-GENOME-CHUNKS.pkl.gz'
+    output:
+        'data/boostrap-replicates/q{q}-v_{varcat}-BOOTSTRAPS.pkl.gz'
+    log: 'logs/q{q}-v_{varcat}-BOOTSTRAPS.log'
+    threads: 20
+    shell:
+        """
+        python ../220124-InfereModels/scripts/get-bootstrap-replicates.py \
+            {input} {output} {threads} 2>{log}
+        """
+
+
+### helper function to define input files
+
+
+def get_option_for_mdl(wildcards):
+    if wildcards.mdl == 'OOA':
+        return '../220124-InfereModels/data/OOA-parameters.yml'
+    else:
+        # NAT expansion mdl
+        return 'data/NAT-EXPANSION-MODELS/q{q}-NAT-EXPANSION-model-v_{varcat}.yml'
+
+
+def marginalize_nat(wildcards):
+    if wildcards.mdl == 'OOA':
+        return 'yes'
+    else:
+        return 'no'
+
+
+rule estimate_cofidence:
+    input:
+        data = '../../data/230426-AnnotateChunksWithBvalues/data/whole-genome-quartile/q{q}/spectrum-cat_{varcat}.pkl.gz',
+        mL = get_mL_file,
+        bootstraps = 'data/boostrap-replicates/q{q}-v_{varcat}-BOOTSTRAPS.pkl.gz',
+        optimized_model = 'results/q{q}-best-guest-{mdl}-v_{varcat}.yml',
+        parameters = get_option_for_mdl
+    output:
+        'results/ConfidenceIntervals/q{q}-{mdl}-v_{varcat}.tsv'
+    params:
+        marginalize = marginalize_nat,
+        project_size = 30
+    shell:
+        '''
+        python ../220124-InfereModels/scripts/Estimate-CI.py \
+            {input.data} {input.mL} \
+            {input.bootstraps} \
+            {params.project_size} {params.marginalize} \
+            {input.optimized_model} {input.parameters} \
+            {output}
+        '''
+
