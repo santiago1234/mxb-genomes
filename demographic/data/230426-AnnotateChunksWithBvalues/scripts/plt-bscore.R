@@ -24,4 +24,4 @@ bscores %>%
   labs(
     subtitle = 'Histogram of B-scores'
   )
-ggsave('plots/bscores-hist.pdf', height = 2, width = 4)
+ggsave('plots/bscores-hist.pdf', height = 2, width = 6)
