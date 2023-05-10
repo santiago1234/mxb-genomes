@@ -78,7 +78,7 @@ my_labs_for_times <- label_number(accuracy = 1, scale = 1/1e3,
                                   big.mark = ",", decimal.mark = ".")
 
 
-
+y_labs <- paste0('q', 1:4)
 
 position_quartile <- function(q, category) {
   # a function to position better the quartiles
@@ -97,16 +97,16 @@ dpars <- dpars %>%
 dpars %>% 
   filter(Type == 'Time years ago') %>% 
   ggplot(aes(x = opt_value, y = quartile_position, color = Category)) +
-  geom_point(shape = 19, size = 0.5) +
+  geom_point(shape = 19) +
   geom_errorbarh(
     aes(xmax = opt_value + 2*std_err, xmin = opt_value - 2*std_err),
     height = 0
   ) +
   facet_grid(Param~.) +
   scale_x_log10(labels = my_labs_for_times) +
+  scale_y_continuous(breaks = 1:4, labels = y_labs) +
   theme(
     panel.spacing = unit(0.2, "lines"),
-    panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank(),
     panel.grid.major.y = element_blank(),
     axis.ticks.y = element_blank()
@@ -116,7 +116,7 @@ dpars %>%
   ) +
   scale_color_manual(values = c('#1b9e77', '#e7298a'))
 
-ggsave('plots/PARS-time.pdf', height = 2, width = 4)
+ggsave('plots/PARS-time.pdf', height = 4.25, width = 5)
 
 ## => => => => => => => => => => <= <= <= <= <= <= <= <= <= <= <= <= 
 ## Effective size
@@ -135,16 +135,16 @@ dpars %>%
     ci_l = if_else(ci_l < 0, 700, ci_l)
   ) %>% 
   ggplot(aes(x = opt_value, y = quartile_position, color = Category)) +
-  geom_point(shape = 19, size = 0.5) +
+  geom_point(shape = 19) +
   geom_errorbarh(
     aes(xmax = ci_l, xmin = ci_h),
     height = 0
   ) +
   facet_grid(Param~.) +
   scale_x_log10(labels = my_labs_for_times) +
+  scale_y_continuous(breaks = 1:4, labels = y_labs) +
   theme(
     panel.spacing = unit(0.2, "lines"),
-    panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank(),
     panel.grid.major.y = element_blank(),
     axis.ticks.y = element_blank()
@@ -154,7 +154,7 @@ dpars %>%
   ) +
   scale_color_manual(values = c('#1b9e77', '#e7298a'))
 
-ggsave('plots/PARS-size.pdf', height = 4.5, width = 4)
+ggsave('plots/PARS-size.pdf', height = 9, width = 5)
 
 
 ## => => => => => => => => => => <= <= <= <= <= <= <= <= <= <= <= <= 
@@ -177,7 +177,7 @@ dpars %>%
     ci_l = if_else(ci_l < 0, 10**(-6), ci_l)
   ) %>% 
   ggplot(aes(x = opt_value, y = quartile_position, color = Category)) +
-  geom_point(shape = 19, size = 0.5) +
+  geom_point(shape = 19) +
   geom_errorbarh(
     aes(xmax = ci_l, xmin = ci_h),
     height = 0
@@ -185,9 +185,9 @@ dpars %>%
   facet_grid(Param~.) +
   scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
                 labels = trans_format("log10", math_format(10^.x))) +
+  scale_y_continuous(breaks = 1:4, labels = y_labs) +
   theme(
     panel.spacing = unit(0.2, "lines"),
-    panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank(),
     panel.grid.major.y = element_blank(),
     axis.ticks.y = element_blank()
@@ -197,4 +197,5 @@ dpars %>%
     xlim = c(10**(-5.9), 10**(-3.7))
   )
 
-ggsave('plots/PARS-mig.pdf', , height = 2, width = 4)
+ggsave('plots/PARS-mig.pdf', height = 4.25, width = 5)
+
