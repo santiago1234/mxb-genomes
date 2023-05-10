@@ -51,7 +51,14 @@ model = demes.load("models/m1-out-of-africa.yml")
 If you use any part of this code or the inferred models in your work, please cite our paper:
 
 ```
-[Add citation here]
+@article{medina2023demographic,
+  title={Demographic Modeling of Admixed Latin American Populations from Whole Genomes},
+  author={Medina-Munoz, Santiago G and Ortega-Del Vecchyo, Diego and Cruz-Hervert, Luis Pablo and Ferreyra-Reyes, Leticia and Garcia-Garcia, Lourdes and Moreno-Estrada, Andres and Ragsdale, Aaron},
+  journal={bioRxiv},
+  pages={2023--03},
+  year={2023},
+  publisher={Cold Spring Harbor Laboratory}
+}
 ```
 
 Please let us know if you have any questions or issues with the code or data provided in this repository.
