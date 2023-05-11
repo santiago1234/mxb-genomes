@@ -1,0 +1,34 @@
+"""
+Pipeline to plot LD decay for each population
+and compare to model
+"""
+POPS = ['YRI', 'IBS', 'CHB', 'MXB', 'MXL']
+
+rule pop_file:
+    output:
+        expand('data/{POP}_samples.txt', POP=POPS)
+    shell:
+        """
+        python scripts/popsamples.py
+        """
+
+
+rule vcf_pop:
+    input:
+        vcf = '../../../results/data/210713-HardyW-filters/1TGP_and_50MXB-chr{chrn}-snps-vep-mask-HW-GRCh38.vcf.gz',
+        samples = 'data/{POP}_samples.txt'
+    output:
+        'data/vcfs/{POP}-chr{chrn}-snps.vcf.gz'
+    shell:
+        """
+        bcftools view -S {input.samples} {input.vcf} |\
+            bcftools view -c1 -Oz -o {output}
+        """
+
+
+rule g_map:
+    input:
+        ''
+
+
+
