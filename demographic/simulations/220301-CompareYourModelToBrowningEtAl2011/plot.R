@@ -47,7 +47,7 @@ d_amix <- filter(d, Subpopulation == 'MXL')
 d %>% 
   filter(Subpopulation != 'MXL') %>% 
   ggplot(aes(x = PC_1, y = PC_2)) +
-  geom_point(aes(fill = Subpopulation), shape = 21) +
+  geom_point(aes(fill = Subpopulation), shape = 21, size = 2) +
   geom_point(
     data = d_amix, shape = 4, color = '#440154'
   ) +
@@ -57,12 +57,12 @@ d %>%
   theme(
     panel.grid = element_blank(),legend.position = 'bottom'
   )
-ggsave('plots/compare-pc1-pc2.pdf', height = 3, width = 7)
+ggsave('plots/compare-pc1-pc2.pdf', height = 2.5, width = 5)
 
 d %>% 
   filter(Subpopulation != 'MXL') %>% 
   ggplot(aes(x = PC_2, y = PC_3)) +
-  geom_point(aes(fill = Subpopulation), shape = 21) +
+  geom_point(aes(fill = Subpopulation), shape = 21, size = 2) +
   geom_point(
     data = d_amix, shape = 4, color = '#440154'
   ) +
@@ -73,4 +73,4 @@ d %>%
     panel.grid = element_blank(),
     legend.position = 'bottom'
   )
-ggsave('plots/compare-pc2-pc3.pdf', height = 3, width = 7)
+ggsave('plots/compare-pc2-pc3.pdf', height = 2.5, width = 5)
