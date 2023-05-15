@@ -49,10 +49,10 @@ def main(sim_id):
             f.write(vcf_string)
 
     # Save the recombination map
-    cM = simdata.rmap.rate
-    pos = simdata.rmap.position[1:]
+    pos = simdata.rmap.position
 
-    recomb_map = pd.DataFrame({'cM': cM,'pos': pos})
+    recomb_map = pd.DataFrame({'pos': pos})
+    recomb_map['cM'] = recomb_map.pos.apply(lambda x: simdata.rmap.get_cumulative_mass(x))
     recomb_map['chr'] = 1
     recomb_map[['pos', 'chr', 'cM']].to_csv(f'data/recomb_map/sim_{sim_id}.tsv', sep='\t', index=False)
 
@@ -64,6 +64,7 @@ def main(sim_id):
 
 
 if __name__ == "__main__":
+
     sim_id = sys.argv[1]
     main(sim_id)
 
