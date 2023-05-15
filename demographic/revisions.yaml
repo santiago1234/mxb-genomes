@@ -10,6 +10,8 @@ dependencies:
   - bedtools
   - notebook
   - moments
+  - fwdpy11
+  - tskit
   - demes
   - snakemake
   - pip
