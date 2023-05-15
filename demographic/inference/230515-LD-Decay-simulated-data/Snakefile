@@ -1,0 +1,20 @@
+"""
+Compute LD statistcs for simulated data
+"""
+
+POPS = ['YRI', 'IBS', 'CHB', 'MXB', 'MXL']
+
+
+rule vcf_simulation:
+    """
+    The vcf for the neutral mutations.
+    See the python script for details on input files.
+    """
+    output:
+        expand('data/vcfs/sim{{sim_id}}_{pop}.vcf', pop=POPS),
+        'data/recomb_map/sim_{sim_id}.tsv',
+        'data/intervals/sim_{sim_id}.tsv'
+    shell:
+        """
+        python scripts/simulate_vcf.py {wildcards.sim_id}
+        """
