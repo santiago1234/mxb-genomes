@@ -16,5 +16,5 @@ rule vcf_simulation:
         'data/intervals/sim_{sim_id}.tsv'
     shell:
         """
-        python scripts/simulate_vcf.py {wildcards.sim_id}
+        python scripts/get_vcfs_from_simulation.py {wildcards.sim_id}
         """

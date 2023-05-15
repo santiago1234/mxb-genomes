@@ -17,7 +17,8 @@ from simutils import utils, simulation
 
 def main(sim_id):
     # Path to simulation results
-    sim = f'sim-{sim_id}-pop.bin'
+    sim = f'../../simulations/220728-Simulation-DFE-Demography/results/simulations/sim-{sim_id}-pop.bin'
+
     graph = '../../simulations/220728-Simulation-DFE-Demography/ADMIXTURE-MXL.yml'
 
     ts = simulation.load_sim_as_ts(sim, graph)
