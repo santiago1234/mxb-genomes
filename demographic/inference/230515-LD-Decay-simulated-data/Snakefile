@@ -12,11 +12,19 @@ rule vcf_simulation:
     """
     output:
         expand('data/vcfs/sim{{sim_id}}_{pop}.vcf', pop=POPS),
-        'data/recomb_map/sim_{sim_id}.tsv',
         'data/intervals/sim_{sim_id}.tsv'
     shell:
         """
         python scripts/get_vcfs_from_simulation.py {wildcards.sim_id}
+        """
+
+
+rule recomb_map:
+    output:
+        'data/recomb_map/sim_{sim_id}-rmap.tsv'
+    shell:
+        """
+        python scripts/get_recmap.py {wildcards.sim_id}
         """
 
 
@@ -26,7 +34,7 @@ rule get_ld_stats:
     """
     input:
         vcf='data/vcfs/sim{sim_id}_{pop}.vcf',
-        recomb_map='data/recomb_map/sim_{sim_id}.tsv',
+        recomb_map='data/recomb_map/sim_{sim_id}-rmap.tsv',
         intervals='data/intervals/sim_{sim_id}.tsv'
     output:
         f"results/ld_stats/{pop}-region{sim_id}-ld_stats.pkl"

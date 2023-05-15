@@ -48,14 +48,6 @@ def main(sim_id):
         with open(out_vcf, 'w') as f:
             f.write(vcf_string)
 
-    # Save the recombination map
-    pos = simdata.rmap.position
-
-    recomb_map = pd.DataFrame({'pos': pos})
-    recomb_map['cM'] = recomb_map.pos.apply(lambda x: simdata.rmap.get_cumulative_mass(x))
-    recomb_map['chr'] = 1
-    recomb_map[['pos', 'chr', 'cM']].to_csv(f'data/recomb_map/sim_{sim_id}.tsv', sep='\t', index=False)
-
     # save intervals
     intervals = simdata.noncoding_intervals
     # we set the chromosome to 1

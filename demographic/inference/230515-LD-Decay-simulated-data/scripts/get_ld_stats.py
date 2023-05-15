@@ -20,7 +20,7 @@ with open(bed_file) as f:
     chrom = f.readline().split()[0]
 
 vcf_file = f"data/vcfs/sim{region}_{pop}.vcf" # format vcf, with chrom and pop
-rec_map = f"data/recomb_map/sim_{region}.tsv" # format chromosome
+rec_map = f"data/recomb_map/sim_{region}-rmap.tsv" # format chromosome
 
 out_file = f"results/ld_stats/{pop}-region{region}-ld_stats.pkl"
 
