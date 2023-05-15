@@ -83,7 +83,7 @@ def get_slice(rmap, start, end):
 
 if __name__ == '__main__':
     region_id = sys.argv[1]
-    region_path = f'../../simulations/220728-Simulation-DFE-Demography/results/simulations/sim-{region_id}-pop.bin'
+    region_path = f'../../data/220404-SimulationData/data/samples/region_region_{region_id}.bed'
     with open(region_path) as f:
         region = f.readline()
 
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     rmap = pd.read_csv(rmap_path, sep='\t')
 
     rslice = get_slice(rmap, start, end)
-    outfile = 'data/recomb_map/sim_{region_id}-rmap.tsv'
-    rslice = rslice[['pos', 'cM', 'chr']
+    outfile = f'data/recomb_map/sim_{region_id}-rmap.tsv'
+    rslice = rslice[['pos', 'cM', 'chr']]
     rslice.to_csv(outfile, sep='\t', index=False)
 

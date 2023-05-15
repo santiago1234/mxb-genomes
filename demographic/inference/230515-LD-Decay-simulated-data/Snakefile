@@ -11,7 +11,7 @@ rule vcf_simulation:
     See the python script for details on input files.
     """
     output:
-        expand('data/vcfs/sim{{sim_id}}_{pop}.vcf', pop=POPS),
+        expand('data/vcfs/sim{{sim_id}}_{population}.vcf', population=POPS),
         'data/intervals/sim_{sim_id}.tsv'
     shell:
         """
@@ -33,12 +33,12 @@ rule get_ld_stats:
     Compute LD statistics for each population
     """
     input:
-        vcf='data/vcfs/sim{sim_id}_{pop}.vcf',
+        vcf='data/vcfs/sim{sim_id}_{population}.vcf',
         recomb_map='data/recomb_map/sim_{sim_id}-rmap.tsv',
         intervals='data/intervals/sim_{sim_id}.tsv'
     output:
-        f"results/ld_stats/{pop}-region{sim_id}-ld_stats.pkl"
+        "results/ld_stats/{population}-region{sim_id}-ld_stats.pkl"
     shell:
         """
-        python scripts/get_ld_stats.py {wildcards.region} {wildcards.sim_id}
+        python scripts/get_ld_stats.py {wildcards.sim_id} {wildcards.population}
         """
