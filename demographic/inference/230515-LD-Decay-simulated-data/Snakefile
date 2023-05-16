@@ -38,7 +38,9 @@ rule get_ld_stats:
         intervals='data/intervals/sim_{sim_id}.tsv'
     output:
         "results/ld_stats/{population}-region{sim_id}-ld_stats.pkl"
+    log:
+        "logs/get_ld_stats/{population}-region{sim_id}.log"
     shell:
         """
-        python scripts/get_ld_stats.py {wildcards.sim_id} {wildcards.population}
+        python scripts/get_ld_stats.py {wildcards.sim_id} {wildcards.population} > {log} 2>&1
         """

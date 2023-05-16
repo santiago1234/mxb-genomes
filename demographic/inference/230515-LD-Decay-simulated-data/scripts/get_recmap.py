@@ -31,20 +31,23 @@ def linear_interpolation(x1, y1, x2, y2, x):
 
 def value_interpolation(rmap, position):
     """
-    Get the interpolated cM value for a given position
+    Get the interpolated cM value for a given position.
+    Returns zero in case of an error.
     """
+    try:
+        int_l = rmap[rmap['pos'] < position].tail(1)
+        int_r = rmap[rmap['pos'] > position].head(1)
 
-    int_l = rmap[rmap['pos'] < position].tail(1)
-    int_r = rmap[rmap['pos'] > position].head(1)
-
-    # Interpolate the cM value
-    cM = linear_interpolation(
-        int_l['pos'].to_list()[0],
-        int_l['cM'].to_list()[0],
-        int_r['pos'].to_list()[0],
-        int_r['cM'].to_list()[0],
-        position)
-    return cM
+        # Interpolate the cM value
+        cM = linear_interpolation(
+            int_l['pos'].to_list()[0],
+            int_l['cM'].to_list()[0],
+            int_r['pos'].to_list()[0],
+            int_r['cM'].to_list()[0],
+            position)
+        return cM
+    except Exception:
+        return 0
 
 
 def get_slice(rmap, start, end):
