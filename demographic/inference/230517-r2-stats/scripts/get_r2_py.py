@@ -80,7 +80,5 @@ data = {
     "tots": totals
 }
 
-
-reg_stats[int(region)] = data
 with open(output_file, "wb+") as fout:
     pickle.dump(data, fout)

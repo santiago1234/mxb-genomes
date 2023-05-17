@@ -4,20 +4,61 @@ Compute r2 stats in real an simulated data
 
 # functions to get correct input files
 
+
+def chromosome_data_region(reg):
+    """
+    returns the chromosome for a region in the real data
+    """
+
+    reg_file = f'../../data/220404-SimulationData/data/samples/region_intronANDinterg_{reg}.bed'
+
+    with open(reg_file, 'r') as f:
+        chrom = f.readline().split()[0]
+
+    return chrom, reg_file
+
+
 def get_vcf(wildcards):
     if wildcards.data == 'real':
-        return f''
+        # What is the chromosome?
+        chrom, _ = chromosome_data_region(wildcards.reg)
+        # Now construct the vcf file path
+        vcf = f'../230511-LD-decay-curves/data/vcfs/{wildcards.popul}-chr{chrom}-snps.vcf.gz'
+        return vcf
     else:
-        return 'data/simulated-data/chr22.vcf.gz'
+        vcf = f'../230515-LD-Decay-simulated-data/data/vcfs/sim{wildcards.reg}_{wildcards.popul}.vcf'
+        return vcf
+
+
+def get_region(wildcards):
+    if wildcards.data == 'real':
+        # What is the chromosome?
+        chrom, region = chromosome_data_region(wildcards.reg)
+        return region
+    else:
+        region = f'../230515-LD-Decay-simulated-data/data/intervals/sim_{wildcards.reg}.tsv'
+        return region
+
+
+def get_gmap(wildcards):
+    if wildcards.data == 'real':
+        # What is the chromosome?
+        chrom, region = chromosome_data_region(wildcards.reg)
+        gmap = f'../230511-LD-decay-curves/data/genetic-maps/chr{chrom}.b38.gmap'
+        return gmap
+    else:
+        gmap = f'../230515-LD-Decay-simulated-data/data/recomb_map/sim_{wildcards.reg}-rmap.tsv'
+        return gmap
+        
 
 rule r2_stas:
     input:
-        vcf = get_vcf
-        #region = get_region,
-        #gmap = get_gmap
+        vcf = get_vcf,
+        region = get_region,
+        gmap = get_gmap
     output:
-        'data/r2-stats/data{data}-popul{popul}-reg{reg}.pkl'
+        'data/r2-stats/data_{data}-popul_{popul}-reg_{reg}.pkl'
     shell:
         """
-        echo {input.vcf} >{output}
+        python scripts/get_r2_py.py {input.vcf} {input.region} {input.gmap} {output}
         """
