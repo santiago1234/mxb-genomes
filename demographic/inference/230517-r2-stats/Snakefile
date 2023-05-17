@@ -1,0 +1,23 @@
+"""
+Compute r2 stats in real an simulated data
+"""
+
+# functions to get correct input files
+
+def get_vcf(wildcards):
+    if wildcards.data == 'real':
+        return f''
+    else:
+        return 'data/simulated-data/chr22.vcf.gz'
+
+rule r2_stas:
+    input:
+        vcf = get_vcf
+        #region = get_region,
+        #gmap = get_gmap
+    output:
+        'data/r2-stats/data{data}-popul{popul}-reg{reg}.pkl'
+    shell:
+        """
+        echo {input.vcf} >{output}
+        """
