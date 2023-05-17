@@ -3,6 +3,8 @@ Pipeline to plot LD decay for each population
 and compare to model
 """
 POPS = ['YRI', 'IBS', 'CHB', 'MXB', 'MXL']
+CHROMS = list(range(1, 23))
+REGS = list(range(1, 351))
 
 rule pop_file:
     output:
@@ -22,13 +24,31 @@ rule vcf_pop:
     shell:
         """
         bcftools view -S {input.samples} {input.vcf} |\
+            bcftools annotate -x INFO,^FORMAT/GT |\
             bcftools view -c1 -Oz -o {output}
         """
 
 
 rule g_map:
     input:
-        ''
+        '../../../resources/genetic-maps/chr{chrn}.b38.gmap'
+    output:
+        'data/genetic-maps/chr{chrn}.b38.gmap'
+    shell:
+        '''
+        cp {input} {output}
+        '''
 
 
-
+rule intervals:
+    input:
+        chroms = expand('../../../resources/genetic-maps/chr{chrn}.b38.gmap', chrn=CHROMS),
+        vcfs = expand('data/vcfs/{{POP}}-chr{chrn}-snps.vcf.gz', chrn=CHROMS),
+        regions = expand('../../data/220404-SimulationData/data/samples/region_intronANDinterg_{REG}.bed', REG=REGS),
+        maps = expand('data/genetic-maps/chr{chrn}.b38.gmap', chrn=CHROMS)
+    output:
+        "results/ld_stats/{POP}-region{REG}-ld_stats.txt"
+    shell:
+        """
+        python scripts/ld_stats_region.py {wildcards.REG} {wildcards.POP}
+        """
