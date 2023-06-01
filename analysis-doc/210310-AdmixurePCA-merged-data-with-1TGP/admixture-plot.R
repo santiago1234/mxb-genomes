@@ -114,3 +114,38 @@ admixture %>%
 
 ggsave("plots/admixture.pdf", height = 2.5, width = 6)
 ggsave("plots/admixture.png", height = 2.5, width = 6)
+
+
+
+# add plot for paper fig1B ------------------------------------------------
+
+my_pops <- c('YRI', 'IBS', 'CHB', 'MXB', 'CLM', 'MXL', 'PEL', 'PUR')
+
+admixture2 <- 
+  admixture %>% 
+  filter(K == 'K = 4') %>% 
+  filter(Population %in% my_pops)
+
+admixture2$Population <- factor(admixture2$Population, levels = my_pops)
+
+admixture2 %>% 
+  filter(p > 0.0001) %>% 
+  ggplot(aes(x = Sample, y = p, color = cluster_grp)) +
+  geom_col(width = 1) +
+  facet_grid(.~Population, space = "free_x", scales = "free_x") +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_continuous(breaks = c(0, .25,.5, .75)) +
+  scale_color_manual(
+    values = c('#800080', '#fde725', '#3b528b', '#5ec962')
+  ) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.spacing.x = unit(0.05, "lines"),
+    legend.position = 'none'
+  ) +
+  labs(
+    x = NULL
+  )
+
+ggsave("plots/admixtureK4.pdf", height = 1.2, width = 6)
