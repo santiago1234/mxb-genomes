@@ -1,3 +1,30 @@
-# get list of intervals falling within a single chromosome
+"""
+Get LD decay for regions 10Mb
+"""
+
+N_intervals = list(range(1, 101))
+
+rule intervals:
+    """
+    This combines intronic and intergenic regions
+    in a single bed file
+    """
+    output:
+        expand('data/intervals/noncoding_intervals_{interval}.bed', interval=N_intervals)
+    shell:
+        """
+        python scripts/intervals.py
+        """
+
+
+rule ld_stats:
+    input:
+        expand('data/intervals/noncoding_intervals_{interval}.bed', interval=N_intervals)
+    output:
+        "results/ld_stats/{POP}-region{interval}-ld_stats.pkl"
+    shell:
+        """
+        python scripts/ld_stats_region.py {wildcards.interval} {wildcards.POP}
+        """
 
 
