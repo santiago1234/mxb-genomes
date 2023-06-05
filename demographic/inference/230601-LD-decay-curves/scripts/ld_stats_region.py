@@ -19,7 +19,7 @@ print(f'running region {region} for population {pop}')
 with open(bed_file) as f:
     chrom = f.readline().split()[0]
 
-vcf_file = f"../230511-LD-decay-curves/data/vcfs/{pop}-chr{chrom}.vcf.gz"
+vcf_file = f"../230511-LD-decay-curves/data/vcfs/{pop}-chr{chrom}-snps.vcf.gz"
 rec_map = f"../230511-LD-decay-curves/data/genetic-maps/chr{chrom}.b38.gmap" # format chromosome
 
 out_file = f"results/ld_stats/{pop}-region{region}-ld_stats.pkl"
