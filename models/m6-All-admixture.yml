@@ -50,8 +50,8 @@ demes:
 - name: CLM
   description: Colombians in Medellin. Representative of the Colombian population.
   ancestors: [IBS, MXB]
-  proportions: [0.43658, 0.56342]
-  start_time: 409
+  proportions: [0.4387, 0.5613]
+  start_time: 390
   epochs:
   - {end_time: 0, start_size: 20000}
 # PEL
@@ -83,8 +83,8 @@ migrations:
 - {source: MXB, dest: MXL, rate: 0.0502, end_time: 58}
 - {source: IBS, dest: MXL, rate: 0.0573, end_time: 58}
 # CLM
-- {source: IBS, dest: CLM, rate: 0.0617, end_time: 58}
-- {source: MXB, dest: CLM, rate: 0.0120, end_time: 58}
+- {source: IBS, dest: CLM, rate: 0.0618, end_time: 58}
+- {source: MXB, dest: CLM, rate: 0.0084, end_time: 58}
 # PEL
 - {source: MXB, dest: PEL, rate: 0.1246, end_time: 58}
 - {source: IBS, dest: PEL, rate: 0.0103, end_time: 58}
@@ -99,8 +99,8 @@ pulses:
   # CLM
   - sources: [YRI]
     dest: CLM
-    proportions: [0.1183447]
-    time: 262
+    proportions: [0.1194]
+    time: 275
   # PEL
   - sources: [YRI]
     dest: PEL
