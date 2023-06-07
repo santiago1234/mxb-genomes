@@ -42,8 +42,8 @@ demes:
 - name: MXL
   description: Mexicans in Los Angeles. Representative of the Mexican population.
   ancestors: [MXB, IBS]
-  proportions: [0.7508, 0.2492]
-  start_time: 462
+  proportions: [0.7545, 0.2455]
+  start_time: 466
   epochs:
   - {end_time: 0, start_size: 20000}
 # CLM
@@ -80,8 +80,8 @@ migrations:
 - demes: [YRI, OOA]
   rate: 0.00015859499514691533
 # MXL
-- {source: MXB, dest: MXL, rate: 0.0502, end_time: 58}
-- {source: IBS, dest: MXL, rate: 0.0573, end_time: 58}
+- {source: MXB, dest: MXL, rate: 0.0503, end_time: 58}
+- {source: IBS, dest: MXL, rate: 0.0576, end_time: 58}
 # CLM
 - {source: IBS, dest: CLM, rate: 0.0618, end_time: 58}
 - {source: MXB, dest: CLM, rate: 0.0084, end_time: 58}
@@ -94,8 +94,8 @@ pulses:
   # MXL
   - sources: [YRI, CHB]
     dest: MXL
-    proportions: [0.11178, 0.007422]
-    time: 372
+    proportions: [0.1175, 0.0067]
+    time: 380
   # CLM
   - sources: [YRI]
     dest: CLM
