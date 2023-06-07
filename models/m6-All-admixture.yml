@@ -66,8 +66,8 @@ demes:
 - name: PUR
   description: Puerto Ricans in Puerto Rico. Representative of the Puerto Rican population.
   ancestors: [IBS, MXB, YRI]
-  proportions: [0.837,  0.151, 0.012]
-  start_time: 406
+  proportions: [0.8484,  0.141, 0.0105]
+  start_time: 407
   epochs:
   - {end_time: 0, start_size: 20000}
 migrations:
@@ -89,7 +89,7 @@ migrations:
 - {source: MXB, dest: PEL, rate: 0.1246, end_time: 58}
 - {source: IBS, dest: PEL, rate: 0.0103, end_time: 58}
 # PUR
-- {source: YRI, dest: PUR, rate: 0.0103, end_time: 58}
+- {source: YRI, dest: PUR, rate: 0.0105, end_time: 58}
 pulses:
   # MXL
   - sources: [YRI, CHB]
