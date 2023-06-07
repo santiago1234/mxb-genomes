@@ -58,8 +58,8 @@ demes:
 - name: PEL
   description: Peruvians in Lima. Representative of the Peruvian population.
   ancestors: [IBS, MXB]
-  proportions: [0.893, 0.107]
-  start_time: 423
+  proportions: [0.909, 0.0908]
+  start_time: 412
   epochs:
   - {end_time: 0, start_size: 20000}
 # PUR
@@ -86,8 +86,8 @@ migrations:
 - {source: IBS, dest: CLM, rate: 0.0617, end_time: 58}
 - {source: MXB, dest: CLM, rate: 0.0120, end_time: 58}
 # PEL
-- {source: MXB, dest: PEL, rate: 0.1236, end_time: 58}
-- {source: IBS, dest: PEL, rate: 0.0122, end_time: 58}
+- {source: MXB, dest: PEL, rate: 0.1246, end_time: 58}
+- {source: IBS, dest: PEL, rate: 0.0103, end_time: 58}
 # PUR
 - {source: YRI, dest: PUR, rate: 0.0103, end_time: 58}
 pulses:
@@ -104,5 +104,9 @@ pulses:
   # PEL
   - sources: [YRI]
     dest: PEL
-    proportions: [0.0541]
-    time: 223
+    proportions: [0.0542]
+    time: 225
+  - sources: [EAS]
+    dest: PEL
+    proportions: [0.0105]
+    time: 141
