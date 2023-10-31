@@ -58,7 +58,7 @@ demes:
 - name: PEL
   description: Peruvians in Lima. Representative of the Peruvian population.
   ancestors: [IBS, MXB]
-  proportions: [0.909, 0.0908]
+  proportions: [0.909, 0.091]
   start_time: 412
   epochs:
   - {end_time: 0, start_size: 20000}
@@ -66,7 +66,7 @@ demes:
 - name: PUR
   description: Puerto Ricans in Puerto Rico. Representative of the Puerto Rican population.
   ancestors: [IBS, MXB, YRI]
-  proportions: [0.8484,  0.141, 0.0105]
+  proportions: [0.8484,  0.141, 0.0106]
   start_time: 407
   epochs:
   - {end_time: 0, start_size: 20000}
@@ -96,17 +96,17 @@ pulses:
     dest: MXL
     proportions: [0.1175, 0.0067]
     time: 380
-  # CLM
+  # CLM
   - sources: [YRI]
     dest: CLM
     proportions: [0.1194]
     time: 275
-  # PEL
+  # PEL
   - sources: [YRI]
     dest: PEL
     proportions: [0.0542]
     time: 225
-  - sources: [EAS]
+  - sources: [CHB]
     dest: PEL
     proportions: [0.0105]
     time: 141
