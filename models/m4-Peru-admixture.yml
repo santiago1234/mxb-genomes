@@ -64,7 +64,7 @@ pulses:
     dest: PEL
     proportions: [0.0542]
     time: 225
-  - sources: [EAS]
+  - sources: [CHB]
     dest: PEL
     proportions: [0.0105]
     time: 141
