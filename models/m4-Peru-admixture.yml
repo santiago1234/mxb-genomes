@@ -42,7 +42,7 @@ demes:
 - name: PEL
   description: Peruvians in Lima. Representative of the Peruvian population.
   ancestors: [IBS, MXB]
-  proportions: [0.909, 0.0908]
+  proportions: [0.909, 0.091]
   start_time: 412
   epochs:
   - {end_time: 0, start_size: 20000}
