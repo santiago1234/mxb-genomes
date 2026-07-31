@@ -52,12 +52,14 @@ If you use any part of this code or the inferred models in your work, please cit
 
 ```
 @article{medina2023demographic,
-  title={Demographic Modeling of Admixed Latin American Populations from Whole Genomes},
-  author={Medina-Munoz, Santiago G and Ortega-Del Vecchyo, Diego and Cruz-Hervert, Luis Pablo and Ferreyra-Reyes, Leticia and Garcia-Garcia, Lourdes and Moreno-Estrada, Andres and Ragsdale, Aaron},
-  journal={bioRxiv},
-  pages={2023--03},
+  title={Demographic modeling of admixed Latin American populations from whole genomes},
+  author={Medina-Mu{\~n}oz, Santiago G and Ortega-Del Vecchyo, Diego and Cruz-Hervert, Luis Pablo and Ferreyra-Reyes, Leticia and Garc{\'\i}a-Garc{\'\i}a, Lourdes and Moreno-Estrada, Andr{\'e}s and Ragsdale, Aaron P},
+  journal={The American Journal of Human Genetics},
+  volume={110},
+  number={10},
+  pages={1804--1816},
   year={2023},
-  publisher={Cold Spring Harbor Laboratory}
+  publisher={Elsevier}
 }
 ```
 
