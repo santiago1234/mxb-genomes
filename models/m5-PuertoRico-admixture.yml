@@ -42,7 +42,7 @@ demes:
 - name: PUR
   description: Puerto Ricans in Puerto Rico. Representative of the Puerto Rican population.
   ancestors: [IBS, MXB, YRI]
-  proportions: [0.8484,  0.141, 0.0105]
+  proportions: [0.8484,  0.141, 0.0106]
   start_time: 407
   epochs:
   - {end_time: 0, start_size: 20000}
